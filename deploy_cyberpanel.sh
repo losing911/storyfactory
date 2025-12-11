@@ -102,11 +102,26 @@ php artisan migrate --force
 # 7. Storage Link
 php artisan storage:link
 
-# 8. Fix Public Folder Redirect (CyberPanel 404 Fix)
-echo "🔧 Setting up Root .htaccess..."
+# 8. Create Admin User (Security)
+echo "👤 Ensuring Admin User Exists..."
+php artisan tinker --execute="
+\$u = App\Models\User::firstOrNew(['email' => 'admin@anxipunk.icu']);
+\$u->name = 'AnxiPunk Prime';
+\$u->password = Hash::make('CyberPunk2077!');
+\$u->save();
+"
+
+# 9. Fix Public Folder Redirect & Force HTTPS (CyberPanel Fix)
+echo "🔧 Setting up Root .htaccess with HTTPS..."
 cat > $APP_DIR/.htaccess <<EOF
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    
+    # Force HTTPS
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}/\$1 [R=301,L]
+
+    # Redirect to Public
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/\$1 [L,QSA]
 </IfModule>
