@@ -111,11 +111,23 @@ php artisan tinker --execute="
 \$u->save();
 "
 
-# 9. Fix Public Folder Redirect & Force HTTPS (CyberPanel Fix)
-echo "🔧 Setting up Root .htaccess with HTTPS..."
+# 9. Fix Public Folder Redirect & Force HTTPS & Timeouts
+echo "🔧 Setting up Root .htaccess & Timeouts..."
+
+# Create .user.ini for LiteSpeed/PHP adjustments
+echo "max_execution_time = 300" > $APP_DIR/.user.ini
+echo "upload_max_filesize = 16M" >> $APP_DIR/.user.ini
+echo "post_max_size = 16M" >> $APP_DIR/.user.ini
+echo "memory_limit = 256M" >> $APP_DIR/.user.ini
+
 cat > $APP_DIR/.htaccess <<EOF
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    
+    # Increase Timeout
+    <IfModule mod_php.c>
+        php_value max_execution_time 300
+    </IfModule>
     
     # Force HTTPS
     RewriteCond %{HTTPS} !=on
