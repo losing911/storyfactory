@@ -54,10 +54,10 @@ class AIService
             // Priority 1: Google Gemini
             return $this->generateWithGemini($prompt);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning("Gemini Failed: " . $e->getMessage() . ". Trying OpenRouter (GPT-OSS-20B)...");
+            \Illuminate\Support\Facades\Log::warning("Gemini Failed: " . $e->getMessage() . ". Trying OpenRouter (Mistral)...");
             
-            // Priority 2: OpenRouter (GPT-OSS-20B)
-            return $this->generateWithOpenRouter($prompt, 'openai/gpt-oss-20b');
+            // Priority 2: OpenRouter (Mistral Free)
+            return $this->generateWithOpenRouter($prompt, 'mistralai/mistral-7b-instruct:free');
         }
     }
 
@@ -110,10 +110,20 @@ class AIService
     protected function cleanAndDecodeJson($text)
     {
         $text = str_replace(['```json', '```'], '', $text);
+        // Remove any text before the first '{' and after the last '}'
+        if (preg_match('/\{.*\}/s', $text, $matches)) {
+            $text = $matches[0];
+        }
+        
         $data = json_decode($text, true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception('Invalid JSON received.');
+            throw new \Exception('Invalid JSON syntax.');
+        }
+
+        // Critical Check: Ensure 'scenes' exists, otherwise trigger fallback
+        if (!isset($data['scenes']) || !is_array($data['scenes'])) {
+            throw new \Exception('JSON missing "scenes" key. Structure invalid.');
         }
         
         return $data;
