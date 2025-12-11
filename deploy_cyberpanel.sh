@@ -67,4 +67,14 @@ php artisan migrate --force
 # 7. Storage Link
 php artisan storage:link
 
+# 8. Fix Public Folder Redirect (CyberPanel 404 Fix)
+echo "🔧 Setting up Root .htaccess..."
+cat > $APP_DIR/.htaccess <<EOF
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/\$1 [L,QSA]
+</IfModule>
+EOF
+
 echo "✅ CyberPanel Deployment Complete!"
