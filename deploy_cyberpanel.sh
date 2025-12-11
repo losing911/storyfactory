@@ -50,9 +50,21 @@ sed -i "s|^DB_DATABASE=.*|DB_DATABASE=anxi_story|g" .env
 sed -i "s|^DB_USERNAME=.*|DB_USERNAME=anxi_admin|g" .env
 sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD='J8@^JCFca5pntgmX'|g" .env
 
-# Append Keys if not present (since they are missing in .env.example)
-if ! grep -q "GEMINI_API_KEY=" .env; then
-    echo "GEMINI_API_KEY='AIzaSyBUejVaKsi-maMsykNBIv_XapJNrxpWpHY'" >> .env
+# Prompt for API Key (Secure Way)
+echo "----------------------------------------------------------------"
+echo "⚠️ GÜVENLİK UYARISI: Önceki API Anahtarınız sızdırıldığı için iptal edildi."
+echo "Lütfen https://aistudio.google.com/app/apikey adresinden YENİ bir anahtar alın."
+echo "----------------------------------------------------------------"
+read -p "Lütfen YENİ Gemini API Anahtarınızı yapıştırın ve Enter'a basın: " USER_GEMINI_KEY
+
+if [ -n "$USER_GEMINI_KEY" ]; then
+    # Update or Append Key
+    if grep -q "GEMINI_API_KEY=" .env; then
+        sed -i "s|^GEMINI_API_KEY=.*|GEMINI_API_KEY='$USER_GEMINI_KEY'|g" .env
+    else
+        echo "GEMINI_API_KEY='$USER_GEMINI_KEY'" >> .env
+    fi
+    echo "✅ Yeni API Anahtarı Kaydedildi."
 fi
 
 if ! grep -q "DISCORD_WEBHOOK_URL=" .env; then
