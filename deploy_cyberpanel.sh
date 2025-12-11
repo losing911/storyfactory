@@ -49,6 +49,7 @@ sed -i "s|^DB_PORT=.*|DB_PORT=3306|g" .env
 sed -i "s|^DB_DATABASE=.*|DB_DATABASE=anxi_story|g" .env
 sed -i "s|^DB_USERNAME=.*|DB_USERNAME=anxi_admin|g" .env
 sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD='J8@^JCFca5pntgmX'|g" .env
+sed -i "s|^GEMINI_API_KEY=.*|GEMINI_API_KEY='AIzaSyBUejVaKsi-maMsykNBIv_XapJNrxpWpHY'|g" .env
 
 # 4. Permissions (Critical for CyberPanel)
 echo "🔒 Fixing Permissions..."
