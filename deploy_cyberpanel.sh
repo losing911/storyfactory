@@ -81,7 +81,7 @@ if ! grep -q "APP_KEY=base64" .env; then
     php artisan key:generate --force
 fi
 
-php artisan config:cache
+php artisan config:clear
 
 # 7. Database Migration
 echo "🗄️ Migrating Database..."
