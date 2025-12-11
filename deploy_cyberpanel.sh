@@ -37,16 +37,18 @@ fi
 # 3. Environment Setup
 echo "⚙️ Configuring .env..."
 if [ ! -f .env ]; then
-    cp .env.example .env
-    # Database (CyberPanel DB info required here)
-    # We use sed to replace placeholders. Ideally user edits this manually or we prompt.
-    sed -i "s|APP_URL=http://localhost|APP_URL=http://anxipunk.icu|g" .env
-    sed -i "s|DB_DATABASE=laravel|DB_DATABASE=anxy_story|g" .env
-    sed -i "s|DB_USERNAME=root|DB_USERNAME=anxi_admin|g" .env
-    sed -i "s|DB_PASSWORD=|DB_PASSWORD=dElfin2015d|g" .env # Password provided by user
-    
     php artisan key:generate
 fi
+
+# Force Update Environment Variables (Ensure MySQL is used)
+echo "🔧 Enforcing DB/App Configuration..."
+sed -i "s|^APP_URL=.*|APP_URL=http://anxipunk.icu|g" .env
+sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=mysql|g" .env
+sed -i "s|^DB_HOST=.*|DB_HOST=127.0.0.1|g" .env
+sed -i "s|^DB_PORT=.*|DB_PORT=3306|g" .env
+sed -i "s|^DB_DATABASE=.*|DB_DATABASE=anxy_story|g" .env
+sed -i "s|^DB_USERNAME=.*|DB_USERNAME=anxi_admin|g" .env
+sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=dElfin2015d|g" .env
 
 # 4. Permissions (Critical for CyberPanel)
 echo "🔒 Fixing Permissions..."

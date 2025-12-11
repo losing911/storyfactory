@@ -79,7 +79,7 @@ class AdminController extends Controller
             'total_stories' => Story::count(),
             'published_stories' => Story::where('durum', 'published')->count(),
             'last_story' => Story::latest()->first(),
-            'total_images' => \Illuminate\Support\Facades\File::allFiles(storage_path('app/public/stories')) 
+            'total_images' => \Illuminate\Support\Facades\File::exists(storage_path('app/public/stories')) 
                 ? count(\Illuminate\Support\Facades\File::allFiles(storage_path('app/public/stories'))) 
                 : 0
         ];
