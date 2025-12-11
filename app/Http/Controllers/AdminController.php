@@ -170,6 +170,8 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'AI Hatası: ' . $e->getMessage()]);
         }
+    }
+
     // --- Chunked Generation Methods ---
 
     public function generateStoryStep(Request $request)
