@@ -22,10 +22,11 @@ class AIService
 
     public function generateFullStory(string $topic = null): array
     {
-        $prompt = "Aşağıdaki özelliklere sahip bir Cyberpunk ÇİZGİ ROMAN (Comic Book) hikayesi oluştur. Çıktı SADECE JSON formatında olmalı:\n\n";
+        $prompt = "Aşağıdaki özelliklere sahip bir Cyberpunk ÇİZGİ ROMAN (Comic Book) hikayesi oluştur. Çıktı SADECE JSON formatında olmalı ve dil KESİNLİKLE TÜRKÇE olmalı:\n\n";
         $prompt .= "Konu: " . ($topic ?? 'Rastgele bir Cyberpunk teması') . "\n";
         $prompt .= "Stil: Frank Miller / Moebius tarzı, karanlık, yağmurlu, distopik, ciddi ve ağır atmosfer.\n";
-        $prompt .= "ÖNEMLİ KURAL: Başlıkta ve hikayede 'Neon' kelimesini ÇOK AZ kullan veya HİÇ KULLANMA. Teknoloji ve çürümüşlüğü vurgula, ışıkları değil.\n";
+        $prompt .= "ÖNEMLİ KURAL 1: Hikaye dili %100 TÜRKÇE olmalı.\n";
+        $prompt .= "ÖNEMLİ KURAL 2: Başlıkta ve hikayede 'Neon' kelimesini ÇOK AZ kullan veya HİÇ KULLANMA. Teknoloji ve çürümüşlüğü vurgula, ışıkları değil.\n";
         $prompt .= "Yapı Gereksinimleri (ÇOK ÖNEMLİ):\n";
         $prompt .= "1. 'scenes' dizisi içinde EN AZ 6, EN FAZLA 10 sahne oluştur. Hikaye UZUN ve DETAYLI olmalı.\n";
         $prompt .= "2. Hikaye tam bir sonuca ulaşmalı (Giriş, Gelişme, Sonuç). Asla yarım kalmamalı.\n";
@@ -41,7 +42,7 @@ class AIService
         $prompt .= "{\n";
         $prompt .= "  \"baslik\": \"...\",\n";
         $prompt .= "  \"scenes\": [\n";
-        $prompt .= "    { \"text\": \"Sahne 1 metni...\", \"img_prompt\": \"Visual prompt...\" }\n";
+        $prompt .= "    { \"text\": \"Sahne 1 metni (TÜRKÇE)...\", \"img_prompt\": \"Visual prompt (ENGLISH)...\" }\n";
         $prompt .= "  ],\n";
         $prompt .= "  \"karakter\": \"...\",\n";
         $prompt .= "  \"meta_baslik\": \"...\",\n";
@@ -54,10 +55,10 @@ class AIService
             // Priority 1: Google Gemini
             return $this->generateWithGemini($prompt);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning("Gemini Failed: " . $e->getMessage() . ". Trying OpenRouter (Mistral)...");
+            \Illuminate\Support\Facades\Log::warning("Gemini Failed: " . $e->getMessage() . ". Trying OpenRouter (DeepSeek)...");
             
-            // Priority 2: OpenRouter (Mistral Free)
-            return $this->generateWithOpenRouter($prompt, 'mistralai/mistral-7b-instruct:free');
+            // Priority 2: OpenRouter (DeepSeek Free)
+            return $this->generateWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
         }
     }
 
@@ -93,7 +94,7 @@ class AIService
         ])->post('https://openrouter.ai/api/v1/chat/completions', [
             'model' => $model,
             'messages' => [
-                ['role' => 'system', 'content' => 'You are a creative JSON generator. Output ONLY valid JSON.'],
+                ['role' => 'system', 'content' => 'You are a creative JSON generator. You MUST output JSON only. You MUST write all story text in TURKISH language.'],
                 ['role' => 'user', 'content' => $prompt]
             ],
             'response_format' => ['type' => 'json_object'] // Force JSON if supported
