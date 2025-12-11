@@ -54,20 +54,10 @@ class AIService
             // Priority 1: Google Gemini
             return $this->generateWithGemini($prompt);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning("Gemini Failed: " . $e->getMessage() . ". Trying OpenRouter Mistral...");
+            \Illuminate\Support\Facades\Log::warning("Gemini Failed: " . $e->getMessage() . ". Trying OpenRouter (GPT-OSS-20B)...");
             
-            try {
-                // Priority 2: OpenRouter (Mistral)
-                return $this->generateWithOpenRouter($prompt, 'mistralai/mistral-7b-instruct:free');
-                // Note: user requested 'mistralai/devstral-2512:free' which might be specific, falling back to reliable general if needed or use exact.
-                // Using exact per request:
-                // return $this->generateWithOpenRouter($prompt, 'mistralai/devstral-2512:free');
-            } catch (\Exception $e2) {
-                 \Illuminate\Support\Facades\Log::warning("Mistral Failed: " . $e2->getMessage() . ". Trying OpenRouter DeepSeek...");
-                 
-                 // Priority 3: OpenRouter (DeepSeek)
-                 return $this->generateWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
-            }
+            // Priority 2: OpenRouter (GPT-OSS-20B)
+            return $this->generateWithOpenRouter($prompt, 'openai/gpt-oss-20b');
         }
     }
 
