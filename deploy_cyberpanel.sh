@@ -57,10 +57,19 @@ chmod -R 775 $APP_DIR/storage $APP_DIR/bootstrap/cache
 
 # 5. Install Dependencies
 echo "📥 Installing Composer Packages..."
-# CyberPanel PHP path might vary, usually /usr/local/lsws/lsphp82/bin/php or just php
 composer install --optimize-autoloader --no-dev
 
-# 6. Database Migration
+# 6. Ensure App Key Exists (Fix for MissingAppKeyException)
+if ! grep -q "APP_KEY=base64" .env; then
+    echo "🔑 Generating Application Key..."
+    php artisan key:generate --force
+fi
+
+# Clear Cache to ensure .env is read
+php artisan config:clear
+php artisan cache:clear
+
+# 7. Database Migration
 echo "🗄️ Migrating Database..."
 php artisan migrate --force
 
