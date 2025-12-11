@@ -44,32 +44,111 @@
 </div>
 
 <script>
-    document.querySelector('form').addEventListener('submit', function(e) {
-        // Show Overlay
-        document.getElementById('loadingOverlay').classList.remove('hidden');
-        document.getElementById('loadingOverlay').classList.add('flex');
+    document.querySelector('form').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Stop normal submission
         
+        // UI Elements
+        const overlay = document.getElementById('loadingOverlay');
         const log = document.getElementById('terminalLog');
-        const messages = [
-            "Accessing Gemini Neural Core...",
-            "Synthesizing Narrative Structure...",
-            "Generating Character Profiles...",
-            "Rendering Scene 1 [Visual Processing]...",
-            "Rendering Scene 2 [Visual Processing]...",
-            "Compiling Story Assets...",
-            "Finalizing Output..."
-        ];
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
 
-        let i = 0;
-        setInterval(() => {
-            if(i < messages.length) {
-                const div = document.createElement('div');
-                div.textContent = "> " + messages[i];
-                log.appendChild(div);
-                log.scrollTop = log.scrollHeight;
-                i++;
+        function appendLog(msg, color = 'text-green-500') {
+            const div = document.createElement('div');
+            div.className = color;
+            div.textContent = "> " + msg;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        try {
+            const formData = new FormData(this);
+            const csrfToken = document.querySelector('input[name="_token"]').value;
+            const headers = { 
+                'X-CSRF-TOKEN': csrfToken,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+
+            // STEP 1: Generate Story Text
+            appendLog("Phase 1: Neural Text Synthesis...", "text-neon-blue");
+            
+            const storyRes = await fetch("{{ route('admin.ai.step.story') }}", {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ topic: formData.get('topic') })
+            });
+            
+            const storyJson = await storyRes.json();
+            if(storyJson.status !== 'success') throw new Error(storyJson.message);
+            
+            const storyData = storyJson.data;
+            const slug = storyJson.slug;
+            const dateFolder = storyJson.dateFolder;
+            
+            appendLog("Text Structure Generated for: " + storyData.baslik);
+            appendLog("Scenes Identified: " + storyData.scenes.length);
+
+            // STEP 2: Generate Images Chunk-by-Chunk
+            appendLog("Phase 2: Visual Rendering (Seq by Seq)...", "text-neon-pink");
+            
+            const images = {}; // Store local URLs
+
+            for (let i = 0; i < storyData.scenes.length; i++) {
+                const scene = storyData.scenes[i];
+                appendLog(`Rendering Scene ${i+1}/${storyData.scenes.length}...`);
+                
+                const imgRes = await fetch("{{ route('admin.ai.step.image') }}", {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        prompt: scene.img_prompt,
+                        slug: slug,
+                        index: i,
+                        dateFolder: dateFolder
+                    })
+                });
+                
+                const imgJson = await imgRes.json();
+                if(imgJson.status === 'success') {
+                    images[i] = imgJson.localUrl;
+                    appendLog(`Scene ${i+1} [OK]`, "text-green-400");
+                } else {
+                    appendLog(`Scene ${i+1} [FAIL] - Using Placeholder`, "text-red-500");
+                    images[i] = imgJson.localUrl; // Fallback
+                }
             }
-        }, 3000); // New message every 3 seconds
+
+            // STEP 3: Store Final Story
+            appendLog("Phase 3: Archiving to Core Memory...", "text-purple-500");
+            
+            const finalPayload = {
+                ...storyData,
+                slug: slug,
+                images: images
+            };
+
+            const storeRes = await fetch("{{ route('admin.ai.step.store') }}", {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(finalPayload)
+            });
+
+            const storeJson = await storeRes.json();
+            
+            if(storeJson.status === 'success') {
+                appendLog("Complete! Redirecting...", "text-white");
+                setTimeout(() => {
+                    window.location.href = storeJson.redirect;
+                }, 1000);
+            } else {
+                throw new Error(storeJson.message);
+            }
+
+        } catch (error) {
+            appendLog("CRITICAL ERROR: " + error.message, "text-red-600 font-bold");
+            // Do not hide overlay so user can read error
+        }
     });
 </script>
 @endsection

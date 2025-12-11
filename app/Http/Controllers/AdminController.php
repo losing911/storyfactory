@@ -170,5 +170,118 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'AI Hatası: ' . $e->getMessage()]);
         }
+    // --- Chunked Generation Methods ---
+
+    public function generateStoryStep(Request $request)
+    {
+        set_time_limit(120); 
+        $topic = $request->input('topic');
+        
+        try {
+            $data = $this->aiService->generateFullStory($topic);
+            
+            if (!isset($data['scenes']) || !is_array($data['scenes'])) {
+                throw new \Exception("AI structure invalid.");
+            }
+
+            // Prepare basic data
+            $slug = \Illuminate\Support\Str::slug($data['baslik'] ?? 'story-' . rand(1000,9999));
+            $dateFolder = now()->format('Y-m-d');
+            
+            return response()->json([
+                'status' => 'success',
+                'data' => $data,
+                'slug' => $slug,
+                'dateFolder' => $dateFolder
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function generateImageStep(Request $request)
+    {
+        set_time_limit(120);
+        $prompt = $request->input('prompt');
+        $slug = $request->input('slug');
+        $index = $request->input('index');
+        $dateFolder = $request->input('dateFolder');
+
+        try {
+            $remoteUrl = $this->aiService->generateImage($prompt);
+            $localPath = "stories/$dateFolder/{$slug}_{$index}.jpg";
+            $localUrl = $this->aiService->downloadImage($remoteUrl, $localPath);
+
+            return response()->json([
+                'status' => 'success',
+                'localUrl' => $localUrl,
+                'index' => $index
+            ]);
+
+        } catch (\Exception $e) {
+             // Fallback image
+             $fallback = "https://placehold.co/1280x720/050505/00ff00?text=Image+Error+Scene+$index";
+             return response()->json([
+                'status' => 'success', // Return success so chain doesn't break
+                'localUrl' => $fallback, 
+                'index' => $index,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function storeStoryStep(Request $request)
+    {
+        try {
+            $data = $request->all();
+            
+            // Reconstruct HTML from arrays
+            $storyHtml = "";
+            $scenes = $data['scenes'] ?? [];
+            $images = $data['images'] ?? []; // Array of URLs keyed by index
+            $coverImageUrl = $images[0] ?? null;
+
+            foreach ($scenes as $index => $scene) {
+                $imageUrl = $images[$index] ?? "https://placehold.co/1280x720/050505/00ff00?text=Missing+Image";
+                $text = $scene['text'];
+                
+                $storyHtml .= "<div class='scene-container mb-12 p-4 bg-gray-900/50 rounded-lg border border-gray-800'>";
+                $storyHtml .= "  <div class='mb-4'><img src='$imageUrl' alt='Scene $index' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500'></div>";
+                $storyHtml .= "  <div class='prose prose-invert prose-lg text-gray-300 font-sans leading-relaxed'><p>" . nl2br(e($text)) . "</p></div>";
+                $storyHtml .= "</div>";
+            }
+
+            $storyData = [
+                'baslik' => $data['baslik'],
+                'slug' => $data['slug'],
+                'metin' => $storyHtml,
+                'gorsel_url' => $coverImageUrl,
+                'yayin_tarihi' => now(),
+                'durum' => 'published',
+                'konu' => $data['konu'] ?? 'AI Generated',
+                'meta' => ($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''),
+                'etiketler' => $data['etiketler'] ?? [],
+                'sosyal_ozet' => $data['sosyal_ozet'] ?? '',
+                'gorsel_prompt' => json_encode(array_column($scenes, 'img_prompt')),
+            ];
+
+            $story = Story::create($storyData);
+            
+            // Async Social Posting (Optional, could be queued)
+            try {
+                $this->socialPoster->postToSocialMedia($story);
+            } catch (\Exception $e) {
+                // Ignore social errors
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'redirect' => route('admin.stories.index')
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
     }
 }
