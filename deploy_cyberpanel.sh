@@ -46,7 +46,7 @@ sed -i "s|^APP_URL=.*|APP_URL=http://anxipunk.icu|g" .env
 sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=mysql|g" .env
 sed -i "s|^DB_HOST=.*|DB_HOST=127.0.0.1|g" .env
 sed -i "s|^DB_PORT=.*|DB_PORT=3306|g" .env
-sed -i "s|^DB_DATABASE=.*|DB_DATABASE=anxy_story|g" .env
+sed -i "s|^DB_DATABASE=.*|DB_DATABASE=anxi_story|g" .env
 sed -i "s|^DB_USERNAME=.*|DB_USERNAME=anxi_admin|g" .env
 sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD='J8@^JCFca5pntgmX'|g" .env
 
