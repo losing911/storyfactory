@@ -68,7 +68,8 @@ class AIService
             throw new \Exception('GEMINI_API_KEY is missing.');
         }
 
-        $response = Http::timeout(60)->post($this->baseUrl . '?key=' . $this->apiKey, [
+        // Increased to 120s for Gemini
+        $response = Http::timeout(120)->post($this->baseUrl . '?key=' . $this->apiKey, [
             'contents' => [['parts' => [['text' => $prompt]]]]
         ]);
 
@@ -87,12 +88,13 @@ class AIService
             throw new \Exception('OPENROUTER_API_KEY is missing.');
         }
 
-        $response = Http::timeout(120)->withHeaders([
+        // Increased to 300s (5 mins) for DeepSeek/OpenRouter
+        $response = Http::timeout(300)->withHeaders([
             'Authorization' => 'Bearer ' . $openRouterKey,
             'HTTP-Referer' => config('app.url'),
             'X-Title' => config('app.name'),
         ])->post('https://openrouter.ai/api/v1/chat/completions', [
-            'model' => $model,
+             'model' => $model,
             'messages' => [
                 ['role' => 'system', 'content' => 'You are a creative JSON generator. You MUST output JSON only. You MUST write all story text in TURKISH language.'],
                 ['role' => 'user', 'content' => $prompt]
