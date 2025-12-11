@@ -87,6 +87,27 @@ if ! grep -q "DISCORD_WEBHOOK_URL=" .env; then
     echo "DISCORD_WEBHOOK_URL=''" >> .env
 fi
 
+echo "----------------------------------------------------------------"
+echo "📸 Instagram Entegrasyonu"
+echo "Eğer kullanacaksanız bilgileri girin, yoksa Enter ile geçin."
+echo "----------------------------------------------------------------"
+read -p "Instagram Access Token: " USER_INSTA_TOKEN
+read -p "Instagram Business Account ID: " USER_INSTA_ID
+
+if [ -n "$USER_INSTA_TOKEN" ]; then
+    if grep -q "INSTAGRAM_ACCESS_TOKEN=" .env; then
+        sed -i "s|^INSTAGRAM_ACCESS_TOKEN=.*|INSTAGRAM_ACCESS_TOKEN='$USER_INSTA_TOKEN'|g" .env
+    else
+        echo "INSTAGRAM_ACCESS_TOKEN='$USER_INSTA_TOKEN'" >> .env
+    fi
+     if grep -q "INSTAGRAM_BUSINESS_ACCOUNT_ID=" .env; then
+        sed -i "s|^INSTAGRAM_BUSINESS_ACCOUNT_ID=.*|INSTAGRAM_BUSINESS_ACCOUNT_ID='$USER_INSTA_ID'|g" .env
+    else
+        echo "INSTAGRAM_BUSINESS_ACCOUNT_ID='$USER_INSTA_ID'" >> .env
+    fi
+    echo "✅ Instagram Bilgileri Kaydedildi."
+fi
+
 # 4. Permissions (Critical for CyberPanel)
 echo "🔒 Fixing Permissions..."
 # Try to detect owner of public_html

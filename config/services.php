@@ -43,4 +43,9 @@ return [
         'key' => env('OPENROUTER_API_KEY'),
     ],
 
+    'instagram' => [
+        'token' => env('INSTAGRAM_ACCESS_TOKEN'),
+        'account_id' => env('INSTAGRAM_BUSINESS_ACCOUNT_ID'),
+    ],
+
 ];

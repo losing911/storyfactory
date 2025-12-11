@@ -36,7 +36,7 @@ class SocialPosterService
         }
 
         // 3. Instagram - Requires Business Account & Graph API
-        if (env('INSTAGRAM_ACCESS_TOKEN') && env('INSTAGRAM_USER_ID')) {
+        if (config('services.instagram.token') && config('services.instagram.account_id')) {
              try {
                 $this->postToInstagram($story);
                 $log[] = "Posted to Instagram";
@@ -82,8 +82,8 @@ class SocialPosterService
 
     protected function postToInstagram(Story $story)
     {
-        $token = env('INSTAGRAM_ACCESS_TOKEN');
-        $userId = env('INSTAGRAM_USER_ID');
+        $token = config('services.instagram.token');
+        $userId = config('services.instagram.account_id');
         $version = 'v18.0';
 
         // Critical Check: Instagram requires a PUBLIC URL for the image.
