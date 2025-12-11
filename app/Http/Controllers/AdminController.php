@@ -262,9 +262,9 @@ class AdminController extends Controller
                 'yayin_tarihi' => now(),
                 'durum' => 'published',
                 'konu' => $data['konu'] ?? 'AI Generated',
-                'meta' => ($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''),
+                'meta' => \Illuminate\Support\Str::limit(($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''), 250),
                 'etiketler' => $data['etiketler'] ?? [],
-                'sosyal_ozet' => $data['sosyal_ozet'] ?? '',
+                'sosyal_ozet' => \Illuminate\Support\Str::limit($data['sosyal_ozet'] ?? '', 250),
                 'gorsel_prompt' => json_encode(array_column($scenes, 'img_prompt')),
             ];
 
