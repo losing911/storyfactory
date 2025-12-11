@@ -49,7 +49,15 @@ sed -i "s|^DB_PORT=.*|DB_PORT=3306|g" .env
 sed -i "s|^DB_DATABASE=.*|DB_DATABASE=anxi_story|g" .env
 sed -i "s|^DB_USERNAME=.*|DB_USERNAME=anxi_admin|g" .env
 sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD='J8@^JCFca5pntgmX'|g" .env
-sed -i "s|^GEMINI_API_KEY=.*|GEMINI_API_KEY='AIzaSyBUejVaKsi-maMsykNBIv_XapJNrxpWpHY'|g" .env
+
+# Append Keys if not present (since they are missing in .env.example)
+if ! grep -q "GEMINI_API_KEY=" .env; then
+    echo "GEMINI_API_KEY='AIzaSyBUejVaKsi-maMsykNBIv_XapJNrxpWpHY'" >> .env
+fi
+
+if ! grep -q "DISCORD_WEBHOOK_URL=" .env; then
+    echo "DISCORD_WEBHOOK_URL=''" >> .env
+fi
 
 # 4. Permissions (Critical for CyberPanel)
 echo "🔒 Fixing Permissions..."
