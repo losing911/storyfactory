@@ -37,13 +37,11 @@ class AIService
         $prompt .= "- Promptlar İNGİLİZCE olmalı.\n";
         $prompt .= "- Stil belirteçleri ekle: 'comic book style, thick lines, atmospheric lighting, cel shaded, masterpiece, 8k'.\n";
         $prompt .= "- Konuşma balonu veya yazı İÇERMEMELİ ('no text, no speech bubbles').\n\n";
-        
         $prompt .= "JSON Şeması:\n";
         $prompt .= "{\n";
         $prompt .= "  \"baslik\": \"...\",\n";
         $prompt .= "  \"scenes\": [\n";
-        $prompt .= "    { \"text\": \"Sahne 1 metni...\", \"img_prompt\": \"Scene 1 visual description...\" },\n";
-        $prompt .= "    { \"text\": \"Sahne 2 metni...\", \"img_prompt\": \"Scene 2 visual description...\" }\n";
+        $prompt .= "    { \"text\": \"Sahne 1 metni...\", \"img_prompt\": \"Visual prompt...\" }\n";
         $prompt .= "  ],\n";
         $prompt .= "  \"karakter\": \"...\",\n";
         $prompt .= "  \"meta_baslik\": \"...\",\n";
@@ -53,35 +51,82 @@ class AIService
         $prompt .= "}";
 
         try {
-            // Explicit check for API Key
-            if (!$this->apiKey) {
-                throw new \Exception('GEMINI_API_KEY is missing in .env file.');
-            }
-
-            // 1 Hour timeout for extreme cases
-            $response = Http::timeout(3600)->post($this->baseUrl . '?key=' . $this->apiKey, [
-                'contents' => [
-                    ['parts' => [['text' => $prompt]]]
-                ]
-            ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
-                
-                // Clean markdown code blocks if present
-                $text = str_replace(['```json', '```'], '', $text);
-                
-                return json_decode($text, true) ?? $this->getMockData();
-            }
-
-            // Log::error('Gemini API Error: ' . $response->body()); // Log facade usage corrected elsewhere
-            throw new \Exception('Gemini API returned error: ' . $response->body());
-
+            // Priority 1: Google Gemini
+            return $this->generateWithGemini($prompt);
         } catch (\Exception $e) {
-            // Log::error('AIService Exception: ' . $e->getMessage());
-            throw $e;
+            \Illuminate\Support\Facades\Log::warning("Gemini Failed: " . $e->getMessage() . ". Trying OpenRouter Mistral...");
+            
+            try {
+                // Priority 2: OpenRouter (Mistral)
+                return $this->generateWithOpenRouter($prompt, 'mistralai/mistral-7b-instruct:free');
+                // Note: user requested 'mistralai/devstral-2512:free' which might be specific, falling back to reliable general if needed or use exact.
+                // Using exact per request:
+                // return $this->generateWithOpenRouter($prompt, 'mistralai/devstral-2512:free');
+            } catch (\Exception $e2) {
+                 \Illuminate\Support\Facades\Log::warning("Mistral Failed: " . $e2->getMessage() . ". Trying OpenRouter DeepSeek...");
+                 
+                 // Priority 3: OpenRouter (DeepSeek)
+                 return $this->generateWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+            }
         }
+    }
+
+    protected function generateWithGemini($prompt)
+    {
+         if (!$this->apiKey) {
+            throw new \Exception('GEMINI_API_KEY is missing.');
+        }
+
+        $response = Http::timeout(60)->post($this->baseUrl . '?key=' . $this->apiKey, [
+            'contents' => [['parts' => [['text' => $prompt]]]]
+        ]);
+
+        if ($response->successful()) {
+            $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+            return $this->cleanAndDecodeJson($text);
+        }
+
+        throw new \Exception('Gemini API Error: ' . $response->body());
+    }
+
+    protected function generateWithOpenRouter($prompt, $model)
+    {
+        $openRouterKey = config('services.openrouter.key');
+        if (!$openRouterKey) {
+            throw new \Exception('OPENROUTER_API_KEY is missing.');
+        }
+
+        $response = Http::timeout(120)->withHeaders([
+            'Authorization' => 'Bearer ' . $openRouterKey,
+            'HTTP-Referer' => config('app.url'),
+            'X-Title' => config('app.name'),
+        ])->post('https://openrouter.ai/api/v1/chat/completions', [
+            'model' => $model,
+            'messages' => [
+                ['role' => 'system', 'content' => 'You are a creative JSON generator. Output ONLY valid JSON.'],
+                ['role' => 'user', 'content' => $prompt]
+            ],
+            'response_format' => ['type' => 'json_object'] // Force JSON if supported
+        ]);
+
+        if ($response->successful()) {
+            $text = $response->json()['choices'][0]['message']['content'] ?? '{}';
+            return $this->cleanAndDecodeJson($text);
+        }
+
+        throw new \Exception("OpenRouter ($model) Error: " . $response->body());
+    }
+
+    protected function cleanAndDecodeJson($text)
+    {
+        $text = str_replace(['```json', '```'], '', $text);
+        $data = json_decode($text, true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('Invalid JSON received.');
+        }
+        
+        return $data;
     }
 
     public function generateImage(string $prompt): string

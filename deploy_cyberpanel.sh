@@ -67,6 +67,22 @@ if [ -n "$USER_GEMINI_KEY" ]; then
     echo "✅ Yeni API Anahtarı Kaydedildi."
 fi
 
+echo "----------------------------------------------------------------"
+echo "🌐 OpenRouter API (Yedek Zeka)"
+echo "Gemini kotası dolarsa Mistral/DeepSeek kullanmak için gereklidir."
+echo "Anahtar Alın: https://openrouter.ai/keys"
+echo "----------------------------------------------------------------"
+read -p "OpenRouter API Anahtarınızı yapıştırın (Varsa): " USER_OPENROUTER_KEY
+
+if [ -n "$USER_OPENROUTER_KEY" ]; then
+    if grep -q "OPENROUTER_API_KEY=" .env; then
+        sed -i "s|^OPENROUTER_API_KEY=.*|OPENROUTER_API_KEY='$USER_OPENROUTER_KEY'|g" .env
+    else
+        echo "OPENROUTER_API_KEY='$USER_OPENROUTER_KEY'" >> .env
+    fi
+    echo "✅ OpenRouter Anahtarı Kaydedildi."
+fi
+
 if ! grep -q "DISCORD_WEBHOOK_URL=" .env; then
     echo "DISCORD_WEBHOOK_URL=''" >> .env
 fi
