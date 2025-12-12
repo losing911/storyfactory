@@ -21,8 +21,6 @@ Route::get('/story/{story}', function (App\Models\Story $story) {
 
 Route::get('/about', function () {
     return view('about');
-Route::get('/about', function () {
-    return view('about');
 })->name('about');
 
 // Voting System
