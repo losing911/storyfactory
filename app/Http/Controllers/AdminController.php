@@ -81,8 +81,16 @@ class AdminController extends Controller
             'last_story' => Story::latest()->first(),
             'total_images' => \Illuminate\Support\Facades\File::exists(storage_path('app/public/stories')) 
                 ? count(\Illuminate\Support\Facades\File::allFiles(storage_path('app/public/stories'))) 
-                : 0
+                : 0,
+            'total_comments' => \App\Models\Comment::count(),
+            'active_votes' => 0
         ];
+
+        // Calculate votes for active poll
+        $activePoll = \App\Models\TopicPoll::whereDate('target_date', \Illuminate\Support\Carbon::tomorrow())->first();
+        if ($activePoll && is_array($activePoll->options)) {
+            $stats['active_votes'] = array_sum(array_column($activePoll->options, 'votes'));
+        }
 
         return view('admin.dashboard', compact('stats'));
     }
@@ -117,10 +125,13 @@ class AdminController extends Controller
                 $text = $scene['text'];
                 
                 $localUrl = "https://placehold.co/1280x720/050505/00ff00?text=Image+Error"; // Default fallback
+                
+                // Get Visual Constraints from Data if available
+                $visualConstraints = $data['meta_visual_prompts'] ?? null;
 
                 try {
                     // Generate Image URL
-                    $remoteUrl = $this->aiService->generateImage($prompt);
+                    $remoteUrl = $this->aiService->generateImage($prompt, $visualConstraints);
                     
                     // Download Image Locally
                     $localPath = "stories/$dateFolder/{$slug}_{$index}.jpg";
@@ -210,9 +221,10 @@ class AdminController extends Controller
         $slug = $request->input('slug');
         $index = $request->input('index');
         $dateFolder = $request->input('dateFolder');
+        $visualConstraints = $request->input('visual_constraints'); // New Input
 
         try {
-            $remoteUrl = $this->aiService->generateImage($prompt);
+            $remoteUrl = $this->aiService->generateImage($prompt, $visualConstraints);
             $localPath = "stories/$dateFolder/{$slug}_{$index}.jpg";
             $localUrl = $this->aiService->downloadImage($remoteUrl, $localPath);
 

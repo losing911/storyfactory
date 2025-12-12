@@ -85,9 +85,11 @@
             const storyData = storyJson.data;
             const slug = storyJson.slug;
             const dateFolder = storyJson.dateFolder;
+            const visual_constraints = storyData.meta_visual_prompts; // Capture constraints
             
             appendLog("Text Structure Generated for: " + storyData.baslik);
             appendLog("Scenes Identified: " + storyData.scenes.length);
+            if(visual_constraints) appendLog("Visual Constraints Active: " + visual_constraints.substring(0, 30) + "...", "text-neon-green");
 
             // STEP 2: Generate Images Chunk-by-Chunk
             appendLog("Phase 2: Visual Rendering (Seq by Seq)...", "text-neon-pink");
@@ -105,7 +107,8 @@
                         prompt: scene.img_prompt,
                         slug: slug,
                         index: i,
-                        dateFolder: dateFolder
+                        dateFolder: dateFolder,
+                        visual_constraints: visual_constraints // Pass to image gen
                     })
                 });
                 

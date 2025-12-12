@@ -54,9 +54,14 @@ class GenerateDailyStory extends Command
                 $prompt = $scene['img_prompt'];
                 $text = $scene['text'];
                 
+                $text = $scene['text'];
+                
+                // Get Visual Constraints
+                $visualConstraints = $data['meta_visual_prompts'] ?? null;
+
                 try {
                     // Generate Image URL
-                    $remoteUrl = $aiService->generateImage($prompt);
+                    $remoteUrl = $aiService->generateImage($prompt, $visualConstraints);
                     
                     // Download Image Locally
                     $localPath = "stories/$dateFolder/{$slug}_{$index}.jpg";

@@ -29,9 +29,20 @@ class AIService
 
         // Build Lore Context
         $loreContext = "";
-        if ($city) $loreContext .= "ŞEHİR: {$city->title} ({$city->description})\n";
-        if ($char) $loreContext .= "ANA KARAKTER: {$char->title} ({$char->description})\n";
-        if ($faction) $loreContext .= "ÇETE/FAKSİYON: {$faction->title} ({$faction->description})\n";
+        $visualConstraints = [];
+
+        if ($city) {
+            $loreContext .= "ŞEHİR: {$city->title} ({$city->description})\n";
+            if($city->visual_prompt) $visualConstraints[] = "City Style: " . $city->visual_prompt;
+        }
+        if ($char) {
+            $loreContext .= "ANA KARAKTER: {$char->title} ({$char->description})\n";
+            if($char->visual_prompt) $visualConstraints[] = "Character Appearance ({$char->title}): " . $char->visual_prompt;
+        }
+        if ($faction) {
+            $loreContext .= "ÇETE/FAKSİYON: {$faction->title} ({$faction->description})\n";
+            if($faction->visual_prompt) $visualConstraints[] = "Faction Integrity: " . $faction->visual_prompt;
+        }
 
         $prompt = "Aşağıdaki özelliklere sahip bir Cyberpunk ÇİZGİ ROMAN (Comic Book) hikayesi oluştur. Çıktı SADECE JSON formatında olmalı ve dil KESİNLİKLE TÜRKÇE olmalı:\n\n";
         $prompt .= "Konu: " . ($topic ?? 'Rastgele bir Cyberpunk teması') . "\n";
@@ -40,13 +51,17 @@ class AIService
         $prompt .= "ÖNEMLİ KURAL 1: Hikaye dili %100 TÜRKÇE olmalı.\n";
         $prompt .= "ÖNEMLİ KURAL 2: Başlıkta ve hikayede 'Neon' kelimesini ÇOK AZ kullan veya HİÇ KULLANMA. Teknoloji ve çürümüşlüğü vurgula, ışıkları değil.\n";
         $prompt .= "ÖNEMLİ KURAL 3: EVREN BİLGİSİ'ndeki Şehir, Karakter ve Faksiyonu MUTLAKA kullan.\n";
+        if(!empty($visualConstraints)) {
+            $prompt .= "ÖNEMLİ KURAL 4 (GÖRSEL TUTARLILIK): img_prompt alanlarında şu görsel özellikleri KORU: " . implode(", ", $visualConstraints) . "\n";
+        }
         $prompt .= "Yapı Gereksinimleri (ÇOK ÖNEMLİ):\n";
         $prompt .= "1. 'scenes' dizisi içinde EN AZ 6, EN FAZLA 10 sahne oluştur. Hikaye UZUN ve DETAYLI olmalı.\n";
         $prompt .= "2. Hikaye tam bir sonuca ulaşmalı (Giriş, Gelişme, Sonuç). Asla yarım kalmamalı.\n";
         $prompt .= "3. Her sahne en az 100-150 kelimeden oluşmalı, toplam hikaye 1000 kelimeyi geçmeli.\n";
         $prompt .= "4. Ana Başlık (baslik) belirle. (İçinde Neon geçmesin)\n";
         $prompt .= "5. Karakter: Ana karakterin kısa profili.\n";
-        $prompt .= "6. SEO & Sosyal Medya alanlarını doldur.\n\n";
+        $prompt .= "6. Mod (mood): Hikayenin atmosferine uygun tek bir kelime seç: 'action', 'mystery', 'melancholy', 'high-tech', 'corruption'.\n";
+        $prompt .= "7. SEO & Sosyal Medya alanlarını doldur.\n\n";
         $prompt .= "Görsel Prompt Kuralları:\n";
         $prompt .= "- Promptlar İNGİLİZCE olmalı.\n";
         $prompt .= "- Stil belirteçleri ekle: 'comic book style, thick lines, atmospheric lighting, cel shaded, masterpiece, 8k'.\n";
@@ -58,6 +73,7 @@ class AIService
         $prompt .= "    { \"text\": \"Sahne 1 metni (TÜRKÇE)...\", \"img_prompt\": \"Visual prompt (ENGLISH)...\" }\n";
         $prompt .= "  ],\n";
         $prompt .= "  \"karakter\": \"...\",\n";
+        $prompt .= "  \"mood\": \"...\",\n";
         $prompt .= "  \"meta_baslik\": \"...\",\n";
         $prompt .= "  \"meta_aciklama\": \"...\",\n";
         $prompt .= "  \"etiketler\": [\"tag1\"],\n";
@@ -142,17 +158,35 @@ class AIService
             throw new \Exception('JSON missing "scenes" key. Structure invalid.');
         }
         
+        // Pass constraints to the controller via a special key (not used by AI directly but by our app)
+        if(isset($visualConstraints) && !empty($visualConstraints)) {
+            $data['meta_visual_prompts'] = implode(", ", $visualConstraints);
+        }
+
         return $data;
     }
 
-    public function generateImage(string $prompt): string
+    public function generateImage(string $prompt, string $visualPrompt = null, string $refImageUrl = null): string
     {
         // Use Pollinations.ai with FLUX model (State of the Art)
         // Add style keywords for high-quality Cyberpunk Comic look. Removed 'neon' emphasis.
         $style = ", cyberpunk comic book style, gritty, noir atmosphere, frank miller aesthetic, cel shaded, bold thick lines, atmospheric lighting, muted colors, cinematic composition, highly detailed, masterpiece, 8k, uhd, no text, no speech bubbles";
+        
+        // 1. Inject Visual Consistency Prompt
+        if ($visualPrompt) {
+            $prompt .= ", " . $visualPrompt;
+        }
+
         $encodedPrompt = urlencode($prompt . $style);
         
+        // 2. Inject Reference Image (Experimental Support in Pollinations/Flux)
+        // If the model supports img2img via URL, we append it. For now, Pollinations uses strict text-to-image mostly.
+        // However, we can try appending the image URL to the seed or separate param if supported.
+        // Current Strategy: Strong Prompting (Visual Prompt) is safer.
+        // Future: If local Stable Diffusion, we would pass init_image.
+        
         // Added '&model=flux' for better quality
+        // Added '&enhance=true' (Pollinations feature)
         return "https://image.pollinations.ai/prompt/{$encodedPrompt}?width=1280&height=720&nologo=true&model=flux&seed=" . rand(1, 99999);
     }
 

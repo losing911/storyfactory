@@ -8,5 +8,5 @@ class LoreEntry extends Model
 {
     use \Illuminate\Database\Eloquent\Factories\HasFactory;
     
-    protected $fillable = ['title', 'slug', 'type', 'description', 'image_url', 'is_active'];
+    protected $fillable = ['title', 'slug', 'type', 'description', 'visual_prompt', 'image_url', 'is_active'];
 }

@@ -22,10 +22,14 @@
 
     <!-- Stat Card 4 -->
     <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-        <h3 class="text-neon-purple font-mono text-sm uppercase tracking-widest mb-2">System Status</h3>
-        <p class="text-lg font-display text-white flex items-center gap-2">
-            <span class="w-3 h-3 bg-neon-green rounded-full animate-pulse"></span> ONLINE
-        </p>
+        <h3 class="text-neon-purple font-mono text-sm uppercase tracking-widest mb-2">Total Comments</h3>
+        <p class="text-4xl font-display text-white">{{ $stats['total_comments'] }}</p>
+    </div>
+
+    <!-- Stat Card 5 -->
+    <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
+        <h3 class="text-yellow-400 font-mono text-sm uppercase tracking-widest mb-2">Active Votes</h3>
+        <p class="text-4xl font-display text-white">{{ $stats['active_votes'] }}</p>
     </div>
 </div>
 
