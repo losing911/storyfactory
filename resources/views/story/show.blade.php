@@ -80,6 +80,43 @@
             </div>
         </div>
     </div>
+    <!-- Hacker Chat (Terminal Style) -->
+    <div class="mt-20 border-t-2 border-dashed border-gray-800 pt-12 pb-24">
+        <div class="max-w-2xl mx-auto bg-black border border-gray-800 p-6 font-mono text-sm shadow-[0_0_20px_rgba(0,0,0,0.8)]">
+            <h3 class="text-neon-green mb-4 border-b border-gray-800 pb-2">/// NETRUNNER_COMM_CHANNEL</h3>
+            
+            <div id="commentList" class="space-y-4 mb-8 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                @foreach($story->comments as $comment)
+                    <div class="group">
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span class="text-neon-pink">user_root: {{ $comment->nickname ?? 'anonymous' }}</span>
+                            <span>{{ $comment->created_at->diffForHumans() }}</span>
+                        </div>
+                        <div class="text-gray-300 pl-4 border-l border-gray-800 group-hover:border-neon-green group-hover:text-neon-green transition-colors">
+                            {{ $comment->message }}
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Input Form -->
+            <div class="border-t border-gray-800 pt-4">
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-neon-blue">root@anxipunk:~$</span>
+                        <input type="text" id="nickInput" placeholder="Enter Nickname (Optional)" class="bg-transparent border-b border-gray-800 focus:border-neon-green text-gray-300 focus:outline-none w-full py-1 text-xs">
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-neon-blue">root@anxipunk:~$</span>
+                        <textarea id="msgInput" rows="2" placeholder="Inject Message..." class="bg-transparent border-0 focus:ring-0 text-gray-300 focus:outline-none w-full py-1 resize-none"></textarea>
+                    </div>
+                    <button id="submitComment" class="self-end border border-gray-800 hover:border-neon-green text-gray-500 hover:text-neon-green px-4 py-1 text-xs uppercase transition tracking-widest mt-2">
+                        [EXECUTE_SEND]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </article>
 
 <script>
@@ -133,6 +170,7 @@
     } else {
         ttsBtn.style.display = 'none'; // Not supported
     }
+
     // 3. Parallax Hero Effect
     const heroParallax = document.getElementById('heroParallax');
     if (heroParallax) {
@@ -141,5 +179,52 @@
             heroParallax.style.transform = `translateY(${scrolly * 0.5}px)`;
         });
     }
+
+    // 4. Hacker Chat Logic
+    const submitBtn = document.getElementById('submitComment');
+    const msgInput = document.getElementById('msgInput');
+    const nickInput = document.getElementById('nickInput');
+    const commentList = document.getElementById('commentList');
+
+    submitBtn.addEventListener('click', () => {
+        const msg = msgInput.value.trim();
+        const nick = nickInput.value.trim();
+        if(!msg) return;
+
+        submitBtn.innerText = '[TRANSMITTING...]';
+        
+        fetch('{{ route('comment.store', $story) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ message: msg, nickname: nick })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.id) {
+                // Add to list
+                const html = `
+                    <div class="group animate-pulse">
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span class="text-neon-pink">user_root: ${data.nickname}</span>
+                            <span>Just now</span>
+                        </div>
+                        <div class="text-gray-300 pl-4 border-l border-gray-800 group-hover:border-neon-green group-hover:text-neon-green transition-colors">
+                            ${data.message}
+                        </div>
+                    </div>
+                `;
+                commentList.insertAdjacentHTML('afterbegin', html);
+                msgInput.value = '';
+                submitBtn.innerText = '[EXECUTE_SEND]';
+            }
+        })
+        .catch(err => {
+            alert('TRANSMISSION FAILED');
+            submitBtn.innerText = '[ERROR]';
+        });
+    });
 </script>
 @endsection

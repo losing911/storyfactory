@@ -27,6 +27,9 @@ Route::get('/about', function () {
 Route::get('/poll/active', [App\Http\Controllers\PollController::class, 'getActivePoll']);
 Route::post('/poll/vote', [App\Http\Controllers\PollController::class, 'vote']);
 
+// Comment System
+Route::post('/comment/store/{story}', [App\Http\Controllers\CommentController::class, 'store'])->name('comment.store');
+
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::resource('stories', AdminController::class);
