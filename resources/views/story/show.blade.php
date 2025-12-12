@@ -180,7 +180,53 @@
         });
     }
 
-    // 4. Hacker Chat Logic
+    // 4. Dynamic Soundtrack (Mood Based) -- NEURAL_LINK
+    const storyMood = "{{ $story->mood ?? 'mystery' }}";
+    const audioTracks = {
+        'action': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', // Placeholder (High Energy)
+        'mystery': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3', // Placeholder (Dark)
+        'melancholy': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', // Placeholder (Sad)
+        'high-tech': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', // Placeholder (Clean)
+        'corruption': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3' // Placeholder (Distorted)
+    };
+    
+    // Create Audio Elements
+    let bgAudio = new Audio(audioTracks[storyMood] || audioTracks['mystery']);
+    bgAudio.loop = true;
+    bgAudio.volume = 0.3;
+
+    // We reuse the existing "Ambient Toggle" logic or add a new one? 
+    // Let's hook into the existing "Audio Protocol" button or add a dedicated music toggle.
+    // For now, let's Auto-Play if user interacts (Browsers block auto-play).
+    
+    // Let's create a dedicated Music Control in the Floating Header if not exists, 
+    // OR just integrate it with the existing TTS button?
+    // Better: Add a "MUSIC: ON/OFF" text near the date.
+    
+    const metaContainer = document.querySelector('.max-w-4xl.mx-auto.text-center.mb-12');
+    const musicControl = document.createElement('div');
+    musicControl.className = 'mt-4 inline-block bg-gray-900 border border-gray-700 px-3 py-1 rounded cursor-pointer hover:border-neon-purple text-xs font-mono text-gray-400';
+    musicControl.innerHTML = `<span>♫ NEURAL_OST [${storyMood.toUpperCase()}]</span>`;
+    
+    // Only append if container exists
+    if(metaContainer) metaContainer.appendChild(musicControl);
+
+    let isMusicPlaying = false;
+    musicControl.addEventListener('click', () => {
+        if(isMusicPlaying) {
+            bgAudio.pause();
+            musicControl.classList.remove('text-neon-purple', 'border-neon-purple');
+            musicControl.classList.add('text-gray-400');
+            isMusicPlaying = false;
+        } else {
+            bgAudio.play().catch(e => console.log("Audio Play Blocked", e));
+            musicControl.classList.add('text-neon-purple', 'border-neon-purple');
+            musicControl.classList.remove('text-gray-400');
+            isMusicPlaying = true;
+        }
+    });
+
+    // 5. Hacker Chat Logic
     const submitBtn = document.getElementById('submitComment');
     const msgInput = document.getElementById('msgInput');
     const nickInput = document.getElementById('nickInput');

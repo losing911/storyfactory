@@ -17,6 +17,7 @@ class Story extends Model
         'yayin_tarihi',
         'durum',
         'konu',
+        'mood',
         'meta',
         'etiketler',
         'sosyal_ozet',

@@ -154,6 +154,7 @@ class AdminController extends Controller
                 'yayin_tarihi' => now(),
                 'durum' => 'published',
                 'konu' => $topic ?? 'AI Generated',
+                'mood' => $data['mood'] ?? null,
                 'meta' => ($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''),
                 'etiketler' => $data['etiketler'] ?? [],
                 'sosyal_ozet' => $data['sosyal_ozet'] ?? '',
@@ -262,6 +263,7 @@ class AdminController extends Controller
                 'yayin_tarihi' => now(),
                 'durum' => 'published',
                 'konu' => $data['konu'] ?? 'AI Generated',
+                'mood' => $data['mood'] ?? null,
                 'meta' => \Illuminate\Support\Str::limit(($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''), 250),
                 'etiketler' => $data['etiketler'] ?? [],
                 'sosyal_ozet' => \Illuminate\Support\Str::limit($data['sosyal_ozet'] ?? '', 250),
@@ -285,4 +287,32 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
+    }
+
+    // Profile Management
+    public function editProfile()
+    {
+        return view('admin.profile', ['user' => auth()->user()]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . auth()->id(),
+            'password' => 'nullable|min:8|confirmed',
+        ]);
+
+        $user = auth()->user();
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        if ($request->filled('password')) {
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return back()->with('success', 'Profile updated successfully.');
+    }
 }
