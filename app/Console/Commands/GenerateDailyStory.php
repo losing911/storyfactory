@@ -28,6 +28,9 @@ class GenerateDailyStory extends Command
      */
     public function handle(AIService $aiService, SocialPosterService $socialPoster)
     {
+        // Increase time limit to 10 minutes for slow AI/Backup operations
+        set_time_limit(600);
+        
         $this->info('Günlük Cyberpunk Çizgi Roman üretimi başlıyor...');
         \Illuminate\Support\Facades\Log::info('Daily Story Auto-Gen Started (Schedule/Command)');
 
