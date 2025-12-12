@@ -22,10 +22,10 @@
     <div class="fixed top-0 left-0 h-1 bg-neon-pink z-50 transition-all duration-300 shadow-[0_0_10px_rgba(255,0,255,0.7)]" id="readingBar" style="width: 0%"></div>
 
     <!-- Header -->
-    <header class="relative h-[70vh] flex items-end pb-20 bg-black">
-        <div class="absolute inset-0">
+    <header class="relative h-[70vh] flex items-end pb-20 bg-black overflow-hidden">
+        <div class="absolute inset-0" id="heroParallax">
              @if($story->gorsel_url)
-                <img src="{{ $story->gorsel_url }}" alt="{{ $story->baslik }}" class="w-full h-full object-cover opacity-50">
+                <img src="{{ $story->gorsel_url }}" alt="{{ $story->baslik }}" class="w-full h-full object-cover opacity-50 scale-110">
             @endif
              <div class="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent"></div>
         </div>
@@ -41,7 +41,9 @@
                 </button>
             </div>
 
-            <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-8 leading-tight text-glow filter drop-shadow-lg">{{ $story->baslik }}</h1>
+            <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-8 leading-tight text-glow filter drop-shadow-lg glitch-effect" data-text="{{ $story->baslik }}">
+                {{ $story->baslik }}
+            </h1>
             
             <div class="flex justify-center gap-4 text-sm font-mono text-gray-400">
                 @if($story->etiketler)
@@ -130,6 +132,14 @@
         });
     } else {
         ttsBtn.style.display = 'none'; // Not supported
+    }
+    // 3. Parallax Hero Effect
+    const heroParallax = document.getElementById('heroParallax');
+    if (heroParallax) {
+        window.addEventListener('scroll', () => {
+            const scrolly = window.scrollY;
+            heroParallax.style.transform = `translateY(${scrolly * 0.5}px)`;
+        });
     }
 </script>
 @endsection

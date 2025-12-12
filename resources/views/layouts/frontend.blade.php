@@ -94,12 +94,21 @@
             <a href="{{ route('home') }}" class="text-3xl font-display font-black tracking-widest text-neon-blue text-glow hover:text-white transition duration-300">
                 ANXIPUNK<span class="text-neon-pink text-sm ml-1">.ART</span>
             </a>
-            <nav class="hidden md:flex space-x-8">
-                <a href="{{ route('home') }}" class="font-display uppercase tracking-widest hover:text-neon-green transition">Stories</a>
-                <a href="{{ route('about') }}" class="font-display uppercase tracking-widest hover:text-neon-purple transition">About</a>
-                @auth
-                    <a href="{{ route('admin.stories.index') }}" class="font-display uppercase tracking-widest text-gray-500 hover:text-white">Admin</a>
-                @endauth
+            <nav class="flex items-center space-x-8">
+                <!-- Ambient Audio Toggle -->
+                <button id="toggleAmbient" class="text-gray-500 hover:text-neon-blue transition duration-300" title="Toggle City Ambience">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    </svg>
+                </button>
+
+                <div class="hidden md:flex space-x-8">
+                    <a href="{{ route('home') }}" class="font-display uppercase tracking-widest hover:text-neon-green transition">Stories</a>
+                    <a href="{{ route('about') }}" class="font-display uppercase tracking-widest hover:text-neon-purple transition">About</a>
+                    @auth
+                        <a href="{{ route('admin.stories.index') }}" class="font-display uppercase tracking-widest text-gray-500 hover:text-white">Admin</a>
+                    @endauth
+                </div>
             </nav>
         </div>
     </header>
@@ -113,5 +122,67 @@
             <p class="font-display text-gray-600 tracking-widest">© 2025 ANXIPUNK.ART // SYSTEM_ONLINE</p>
         </div>
     </footer>
+
+    <script>
+        // Ambient Audio Engine (Web Audio API)
+        const toggleBtn = document.getElementById('toggleAmbient');
+        let audioCtx;
+        let gainNode;
+        let isPlaying = false;
+
+        toggleBtn.addEventListener('click', () => {
+            if (!audioCtx) {
+                initAudio();
+            }
+
+            if (isPlaying) {
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+                toggleBtn.classList.remove('text-neon-blue', 'animate-pulse');
+                toggleBtn.classList.add('text-gray-500');
+                isPlaying = false;
+            } else {
+                audioCtx.resume();
+                gainNode.gain.exponentialRampToValueAtTime(0.15, audioCtx.currentTime + 1);
+                toggleBtn.classList.add('text-neon-blue', 'animate-pulse');
+                toggleBtn.classList.remove('text-gray-500');
+                isPlaying = true;
+            }
+        });
+
+        function initAudio() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+
+            // Pink Noise Generator (Rain-like)
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                output[i] = (lastOut + (0.02 * white)) / 1.02;
+                lastOut = output[i];
+                output[i] *= 3.5; 
+            }
+            let lastOut = 0;
+
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = noiseBuffer;
+            noise.loop = true;
+
+            // Lowpass Filter (Muffle it for background feel)
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 800;
+
+            // Gain (Volume)
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.001; // Start silent
+
+            noise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            noise.start();
+        }
+    </script>
 </body>
 </html>
