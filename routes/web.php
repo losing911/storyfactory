@@ -23,6 +23,10 @@ Route::get('/about', function () {
     return view('about');
 })->name('about');
 
+// Lore / Wiki System
+Route::get('/database', [App\Http\Controllers\LoreController::class, 'index'])->name('lore.index');
+Route::get('/database/{slug}', [App\Http\Controllers\LoreController::class, 'show'])->name('lore.show');
+
 // Voting System
 Route::get('/poll/active', [App\Http\Controllers\PollController::class, 'getActivePoll']);
 Route::post('/poll/vote', [App\Http\Controllers\PollController::class, 'vote']);
