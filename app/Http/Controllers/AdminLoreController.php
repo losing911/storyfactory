@@ -38,9 +38,48 @@ class AdminLoreController extends Controller
             $data['image_url'] = '/storage/' . $path;
         }
 
+        // Process Visual Variations
+        $data['visual_variations'] = [
+            'combat' => $request->input('variation_combat'),
+            'action' => $request->input('variation_action'),
+            'dramatic' => $request->input('variation_dramatic'),
+            'uniform' => $request->input('variation_uniform'),
+        ];
+
         LoreEntry::create($data);
 
         return redirect()->route('admin.lore.index')->with('success', 'Lore entry created successfully.');
+    }
+
+    public function update(Request $request, LoreEntry $loreEntry)
+    {
+         $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'type' => 'required|in:city,character,faction,location',
+            'description' => 'required|string',
+            'visual_prompt' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        $data = $request->all();
+        $data['slug'] = \Illuminate\Support\Str::slug($data['title']);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('lore', 'public');
+            $data['image_url'] = '/storage/' . $path;
+        }
+
+        // Process Visual Variations
+        $data['visual_variations'] = [
+            'combat' => $request->input('variation_combat'),
+            'action' => $request->input('variation_action'),
+            'dramatic' => $request->input('variation_dramatic'),
+            'uniform' => $request->input('variation_uniform'),
+        ];
+
+        $loreEntry->update($data);
+
+        return redirect()->route('admin.lore.index')->with('success', 'Lore entry updated successfully.');
     }
 
     public function edit(LoreEntry $lore)

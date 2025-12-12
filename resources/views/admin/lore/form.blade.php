@@ -36,11 +36,32 @@
         </div>
 
         <!-- Visual Prompt (AI) -->
-        <div class="bg-gray-800/50 p-4 border border-gray-700 rounded relative">
+        <div class="bg-gray-800/50 p-6 border border-gray-700 rounded relative">
             <span class="absolute top-0 right-0 bg-neon-purple text-black text-[10px] font-bold px-2 py-1">AI CONFIG</span>
-            <label class="block font-mono text-xs text-neon-green mb-2">VISUAL PROMPT (AI GENERATION)</label>
-            <p class="text-xs text-gray-500 mb-2">Describe the physical appearance rigidly. This will be used to keep the character consistent in stories.</p>
-            <textarea name="visual_prompt" rows="3" placeholder="e.g. A cyborg with a red mechanical eye, platinum blonde mohawk, wearing a leather trench coat with neon piping..." class="w-full bg-black border border-gray-700 text-neon-green px-4 py-2 focus:border-neon-green focus:outline-none font-mono text-sm">{{ old('visual_prompt', $entry->visual_prompt ?? '') }}</textarea>
+            <label class="block font-mono text-xs text-neon-green mb-2">MASTER VISUAL PROMPT (DEFAULT)</label>
+            <p class="text-xs text-gray-500 mb-2">Describe the physical appearance rigidly. This is the base look.</p>
+            <textarea name="visual_prompt" rows="3" placeholder="e.g. A cyborg with a red mechanical eye..." class="w-full bg-black border border-gray-700 text-neon-green px-4 py-2 focus:border-neon-green focus:outline-none font-mono text-sm mb-4">{{ old('visual_prompt', $entry->visual_prompt ?? '') }}</textarea>
+
+            <h3 class="text-neon-pink font-mono text-xs mb-4 pt-4 border-t border-gray-700">VISUAL VARIATIONS (SITUATIONAL)</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-mono text-[10px] text-gray-400 mb-1">COMBAT-READY VERSION</label>
+                    <input type="text" name="variation_combat" value="{{ $entry->visual_variations['combat'] ?? '' }}" placeholder="With drawn katana, fierce expression..." class="w-full bg-black/50 border border-gray-700 text-gray-300 text-sm px-3 py-2 focus:border-neon-pink focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-mono text-[10px] text-gray-400 mb-1">ACTION POSE (RUNNING/JUMPING)</label>
+                    <input type="text" name="variation_action" value="{{ $entry->visual_variations['action'] ?? '' }}" placeholder="Mid-air, dynamic motion blur..." class="w-full bg-black/50 border border-gray-700 text-gray-300 text-sm px-3 py-2 focus:border-neon-pink focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-mono text-[10px] text-gray-400 mb-1">DRAMATIC SCENE (EMOTIONAL/CINEMATIC)</label>
+                    <input type="text" name="variation_dramatic" value="{{ $entry->visual_variations['dramatic'] ?? '' }}" placeholder="Close up, teary eyes, dramatic lighting..." class="w-full bg-black/50 border border-gray-700 text-gray-300 text-sm px-3 py-2 focus:border-neon-pink focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-mono text-[10px] text-gray-400 mb-1">FORM: HÜCRE-34 UNIFORM</label>
+                    <input type="text" name="variation_uniform" value="{{ $entry->visual_variations['uniform'] ?? '' }}" placeholder="Wearing the black tactical vest with 34 logo..." class="w-full bg-black/50 border border-gray-700 text-gray-300 text-sm px-3 py-2 focus:border-neon-pink focus:outline-none">
+                </div>
+            </div>
         </div>
 
         <!-- Image Upload -->
