@@ -232,11 +232,17 @@ class AIService
      */
     public function translateContent(string $title, string $content, string $summary, string $targetLang = 'English'): array
     {
-        $prompt = "Aşağıdaki hikaye bileşenlerini {$targetLang} diline çevir. Çıktı SADECE JSON olmalı.\n";
-        $prompt .= "Format: { \"title\": \"...\", \"content\": \"...\", \"summary\": \"...\" }\n\n";
-        $prompt .= "Başlık: {$title}\n";
-        $prompt .= "Özet: {$summary}\n";
-        $prompt .= "İçerik (HTML Koru): {$content}\n";
+        $prompt = "You are a professional translator. Translate the following story components from Turkish to {$targetLang}.\n";
+        $prompt .= "RULES:\n";
+        $prompt .= "1. Output MUST be valid JSON.\n";
+        $prompt .= "2. Do NOT markdown the JSON (no ```json blocks).\n";
+        $prompt .= "3. Translate strictly to {$targetLang}.\n";
+        $prompt .= "4. Keep all HTML tags exactly as they are. Only translate the text content inside tags.\n";
+        $prompt .= "\nFormat: { \"title\": \"...\", \"content\": \"...\", \"summary\": \"...\" }\n\n";
+        $prompt .= "Input Data:\n";
+        $prompt .= "Title: {$title}\n";
+        $prompt .= "Summary: {$summary}\n";
+        $prompt .= "Content: {$content}\n";
 
         try {
             $response = $this->generateWithGemini($prompt);
