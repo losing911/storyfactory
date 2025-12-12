@@ -50,7 +50,9 @@ class TranslateExistingStories extends Command
                 }
                 
                 // Sleep to avoid Rate Limits (Gemini is 60 RPM but we play safe)
-                sleep(2);
+                // 3 calls per story -> 10s wait ensures ~18 calls/min which is safe
+                $this->info("Waiting 10s for API cooldown...");
+                sleep(10);
 
             } catch (\Exception $e) {
                 $this->error("Failed to translate Story ID {$story->id}: " . $e->getMessage());

@@ -299,16 +299,33 @@ class AIService
     {
          if (!$this->apiKey) throw new \Exception('GEMINI_API_KEY missing');
 
-        // Gemini Raw Call
-        $response = Http::timeout(60)->post($this->baseUrl . '?key=' . $this->apiKey, [
-            'contents' => [['parts' => [['text' => $prompt]]]]
-        ]);
+        $maxRetries = 3;
+        $attempt = 0;
 
-        if ($response->successful()) {
-            return $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
+        while ($attempt < $maxRetries) {
+            $attempt++;
+            
+            // Gemini Raw Call
+            $response = Http::timeout(60)->post($this->baseUrl . '?key=' . $this->apiKey, [
+                'contents' => [['parts' => [['text' => $prompt]]]]
+            ]);
+
+            if ($response->successful()) {
+                return $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            }
+            
+            // If Rate Limit (429), wait and retry
+            if ($response->status() == 429) {
+                Log::warning("Gemini Rate Limit (429). Retrying in " . ($attempt * 5) . " seconds...");
+                sleep($attempt * 5); // 5s, 10s, 15s
+                continue;
+            }
+
+            // Other errors, throw immediately
+            throw new \Exception('Gemini Raw Error: ' . $response->status() . " Body: " . substr($response->body(), 0, 100));
         }
         
-        throw new \Exception('Gemini Raw Error: ' . $response->status());
+        throw new \Exception('Gemini Failed after 3 retries (Rate Limit).');
     }
 
     protected function generateRawWithOpenRouter($prompt, $model) {
