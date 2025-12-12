@@ -47,5 +47,83 @@
     <div class="mt-12">
         {{ $stories->links() }}
     </div>
+
+    <!-- Community Voting Section -->
+    <div class="mt-24 border-t border-gray-800 py-16">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-display text-neon-purple mb-8 text-glow">/// TOMORROW'S CHRONICLE</h2>
+            <p class="text-gray-400 mb-8 font-mono text-sm">Decide the fate of the City. Vote for tomorrow's headline.</p>
+            
+            <div id="loadingPoll" class="text-neon-blue animate-pulse">CONNECTING TO NETWORK...</div>
+            
+            <div id="pollOptions" class="grid md:grid-cols-1 gap-4 max-w-2xl mx-auto hidden">
+                <!-- Options injected by JS -->
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const pollContainer = document.getElementById('pollOptions');
+        const loading = document.getElementById('loadingPoll');
+        let pollId = null;
+
+        // Fetch Active Poll
+        fetch('/poll/active')
+            .then(res => res.json())
+            .then(data => {
+                loading.classList.add('hidden');
+                pollContainer.classList.remove('hidden');
+                pollId = data.id;
+                renderOptions(data.options);
+            })
+            .catch(err => {
+                loading.innerText = 'CONNECTION ERROR: ' + err.message;
+                loading.classList.remove('animate-pulse');
+                loading.classList.add('text-red-500');
+            });
+
+        function renderOptions(options) {
+            pollContainer.innerHTML = '';
+            const totalVotes = options.reduce((sum, opt) => sum + parseInt(opt.votes), 0) || 1; // Avoid div by zero
+
+            options.forEach(opt => {
+                const percent = Math.round((opt.votes / totalVotes) * 100);
+                
+                const btn = document.createElement('div');
+                btn.className = 'bg-gray-900 border border-gray-700 p-4 rounded hover:border-neon-purple transition cursor-pointer relative overflow-hidden group';
+                btn.onclick = () => vote(opt.id);
+
+                btn.innerHTML = `
+                    <div class="absolute top-0 left-0 bottom-0 bg-neon-purple/10 transition-all duration-500" style="width: ${percent}%"></div>
+                    <div class="relative flex justify-between items-center z-10">
+                        <span class="font-mono text-gray-300 group-hover:text-white transition">${opt.text}</span>
+                        <span class="font-display text-neon-purple text-xl">${opt.votes}</span>
+                    </div>
+                `;
+                pollContainer.appendChild(btn);
+            });
+        }
+
+        function vote(optionId) {
+            fetch('/poll/vote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ poll_id: pollId, option_id: optionId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.error) {
+                    alert('ACCESS DENIED: ' + data.error);
+                } else {
+                    renderOptions(data.options);
+                }
+            });
+        }
+    });
+</script>
 @endsection

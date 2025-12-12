@@ -21,7 +21,13 @@ Route::get('/story/{story}', function (App\Models\Story $story) {
 
 Route::get('/about', function () {
     return view('about');
+Route::get('/about', function () {
+    return view('about');
 })->name('about');
+
+// Voting System
+Route::get('/poll/active', [App\Http\Controllers\PollController::class, 'getActivePoll']);
+Route::post('/poll/vote', [App\Http\Controllers\PollController::class, 'vote']);
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
