@@ -70,3 +70,17 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // Lore Management
     Route::resource('lore', App\Http\Controllers\AdminLoreController::class);
 });
+
+// DEBUG
+Route::get('/debug-locale', function() {
+    $story = App\Models\Story::first();
+    return [
+        'app_locale' => app()->getLocale(),
+        'session_locale' => session('locale'),
+        'story_id' => $story->id ?? null,
+        'translations_count' => $story->translations->count() ?? 0,
+        'translations' => $story->translations->toArray() ?? [],
+        'text_en' => $story->getText('en'),
+        'title_en' => $story->getTitle('en'),
+    ];
+});
