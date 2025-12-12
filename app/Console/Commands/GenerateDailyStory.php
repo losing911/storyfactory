@@ -29,6 +29,7 @@ class GenerateDailyStory extends Command
     public function handle(AIService $aiService, SocialPosterService $socialPoster)
     {
         $this->info('Günlük Cyberpunk Çizgi Roman üretimi başlıyor...');
+        \Illuminate\Support\Facades\Log::info('Daily Story Auto-Gen Started (Schedule/Command)');
 
         try {
             // 1. Generate Story Structure (JSON)
@@ -113,10 +114,12 @@ class GenerateDailyStory extends Command
             $socialPoster->postToSocialMedia($story);
 
             $this->info('Otomasyon Başarılı!');
+            \Illuminate\Support\Facades\Log::info("Daily Story Created Successfully: ID {$story->id}");
             return 0;
 
         } catch (\Exception $e) {
             $this->error('Otomasyon Hatası: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Daily Story Auto-Gen FAILED: ' . $e->getMessage());
             return 1;
         }
     }
