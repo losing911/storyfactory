@@ -22,11 +22,24 @@ class AIService
 
     public function generateFullStory(string $topic = null): array
     {
+        // Fetch Random Lore
+        $city = \App\Models\LoreEntry::where('type', 'city')->inRandomOrder()->first();
+        $char = \App\Models\LoreEntry::where('type', 'character')->inRandomOrder()->first();
+        $faction = \App\Models\LoreEntry::where('type', 'faction')->inRandomOrder()->first();
+
+        // Build Lore Context
+        $loreContext = "";
+        if ($city) $loreContext .= "ŞEHİR: {$city->title} ({$city->description})\n";
+        if ($char) $loreContext .= "ANA KARAKTER: {$char->title} ({$char->description})\n";
+        if ($faction) $loreContext .= "ÇETE/FAKSİYON: {$faction->title} ({$faction->description})\n";
+
         $prompt = "Aşağıdaki özelliklere sahip bir Cyberpunk ÇİZGİ ROMAN (Comic Book) hikayesi oluştur. Çıktı SADECE JSON formatında olmalı ve dil KESİNLİKLE TÜRKÇE olmalı:\n\n";
         $prompt .= "Konu: " . ($topic ?? 'Rastgele bir Cyberpunk teması') . "\n";
+        $prompt .= "--- EVREN BİLGİSİ (LORE) ---\n" . $loreContext . "----------------------------\n";
         $prompt .= "Stil: Frank Miller / Moebius tarzı, karanlık, yağmurlu, distopik, ciddi ve ağır atmosfer.\n";
         $prompt .= "ÖNEMLİ KURAL 1: Hikaye dili %100 TÜRKÇE olmalı.\n";
         $prompt .= "ÖNEMLİ KURAL 2: Başlıkta ve hikayede 'Neon' kelimesini ÇOK AZ kullan veya HİÇ KULLANMA. Teknoloji ve çürümüşlüğü vurgula, ışıkları değil.\n";
+        $prompt .= "ÖNEMLİ KURAL 3: EVREN BİLGİSİ'ndeki Şehir, Karakter ve Faksiyonu MUTLAKA kullan.\n";
         $prompt .= "Yapı Gereksinimleri (ÇOK ÖNEMLİ):\n";
         $prompt .= "1. 'scenes' dizisi içinde EN AZ 6, EN FAZLA 10 sahne oluştur. Hikaye UZUN ve DETAYLI olmalı.\n";
         $prompt .= "2. Hikaye tam bir sonuca ulaşmalı (Giriş, Gelişme, Sonuç). Asla yarım kalmamalı.\n";
