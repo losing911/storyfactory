@@ -56,7 +56,7 @@ class AIService
         $prompt .= "ÖNEMLİ KURAL 4 (GÖRSEL DİNAMİZM): Karakterleri asla 'sabit dururken' veya 'poz verirken' tarif etme. Sahneye göre şu varyasyonlardan birini MUTLAKA kullan:\n";
         $prompt .= "  - 'Action Pose': Karakter hareket halinde, koşuyor veya zıplıyor.\n";
         $prompt .= "  - 'Combat-Ready Version': Karakter dövüş pozisyonunda, silahı çekili, çatışmanın ortasında.\n";
-        $prompt .= "  - 'Stage Performance Version': Karakter sahnede, kalabalığa karşı, dramatik ışık altında.\n";
+        $prompt .= "  - 'Dramatic Scene Version': (Eski adı Stage) Karakter çok önemli, duygusal veya gergin bir anın içinde. Sinematik ışık, odaklanmış duruş. (Konser değil!)\n";
         $prompt .= "  - 'Hücre-34 Uniform Version': Eğer karakter Hücre-34 üyesiyse, bu formayı giydiğini belirt.\n";
 
         if(!empty($visualConstraints)) {
@@ -225,6 +225,30 @@ class AIService
         file_put_contents(storage_path('app/public/' . $path), $contents);
         
         return '/storage/' . $path;
+    }
+
+    /**
+     * Translate Story Content
+     */
+    public function translateContent(string $title, string $content, string $summary, string $targetLang = 'English'): array
+    {
+        $prompt = "Aşağıdaki hikaye bileşenlerini {$targetLang} diline çevir. Çıktı SADECE JSON olmalı.\n";
+        $prompt .= "Format: { \"title\": \"...\", \"content\": \"...\", \"summary\": \"...\" }\n\n";
+        $prompt .= "Başlık: {$title}\n";
+        $prompt .= "Özet: {$summary}\n";
+        $prompt .= "İçerik (HTML Koru): {$content}\n";
+
+        try {
+            $response = $this->generateWithGemini($prompt);
+            return $response; 
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Translation Failed: " . $e->getMessage());
+            return [
+                'title' => $title,
+                'content' => $content,
+                'summary' => $summary
+            ];
+        }
     }
 
     protected function getMockData(): array

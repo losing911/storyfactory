@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'system_alert' => 'SİSTEM UYARISI: NÖRAL BAĞLANTI KARARSIZ',
+    'weather_update' => 'HAVA DURUMU: ASİT YAĞMURU OLASILIĞI %98 (SEKTÖR 7)',
+    'latest_bounty' => 'SON ÖDÜL AV: "THE GLITCH" - ÖDÜL 5000 KREDİ',
+    'new_lore' => 'ARŞİVDE YENİ LORE GİRDİLERİ TESPİT EDİLDİ',
+    'daily_gen' => 'GÜNLÜK HİKAYE ÜRETİMİ BAŞARIYLA TAMAMLANDI',
+    'latest_transmission' => 'SON YAYIN',
+    'read_stream' => 'HİKAYEYİ OKU',
+    'stories_generated' => 'ÜRETİLEN HİKAYE',
+    'active_nodes' => 'AKTİF DÜĞÜMLER',
+    'glitches_purged' => 'TEMİZLENEN HATALAR',
+    'archive_feed' => 'ARŞİV AKIŞI',
+    'view_full_db' => 'TÜM VERİTABANINI GÖR >>',
+    'no_signal' => 'SİNYAL YOK',
+    'data' => 'VERİ',
+    'db_spotlight' => 'VERİTABANI VİTRİNİ',
+    'access_file' => 'TAM DOSYAYA ERİŞ',
+    'ads_space' => '[REKLAM ALANI]',
+    'contact_marketing' => 'Night City Pazarlama ile İletişime Geçin',
+    'tomorrows_chronicle' => 'YARININ KRONİĞİ',
+    'vote_desc' => 'Şehrin kaderine karar ver. Yarının manşetini oyla.',
+    'connecting' => 'AĞA BAĞLANILIYOR...',
+    'stories_nav' => 'HİKAYELER',
+    'database_nav' => 'VERİTABANI',
+    'about_nav' => 'HAKKINDA',
+];

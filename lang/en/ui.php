@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'system_alert' => 'SYSTEM ALERT: NEURAL LINK CONNECTION UNSTABLE',
+    'weather_update' => 'WEATHER UPDATE: ACID RAIN PROBABILITY 98% AT SECTOR 7',
+    'latest_bounty' => 'LATEST BOUNTY: "THE GLITCH" - REWARD 5000 CREDITS',
+    'new_lore' => 'NEW LORE ENTRIES DETECTED IN ARCHIVE',
+    'daily_gen' => 'DAILY STORY GENERATION COMPLETED SUCCESSFULLY',
+    'latest_transmission' => 'LATEST TRANSMISSION',
+    'read_stream' => 'READ STREAM',
+    'stories_generated' => 'STORIES GENERATED',
+    'active_nodes' => 'ACTIVE NODES',
+    'glitches_purged' => 'GLITCHES PURGED',
+    'archive_feed' => 'ARCHIVE FEED',
+    'view_full_db' => 'VIEW FULL DATABASE >>',
+    'no_signal' => 'NO SIGNAL',
+    'data' => 'DATA',
+    'db_spotlight' => 'DATABASE SPOTLIGHT',
+    'access_file' => 'ACCESS FULL FILE',
+    'ads_space' => '[ADS SPACE AVAILABLE]',
+    'contact_marketing' => 'Contact Night City Marketing',
+    'tomorrows_chronicle' => "TOMORROW'S CHRONICLE",
+    'vote_desc' => "Decide the fate of the City. Vote for tomorrow's headline.",
+    'connecting' => 'CONNECTING TO NETWORK...',
+    'stories_nav' => 'STORIES',
+    'database_nav' => 'DATABASE',
+    'about_nav' => 'ABOUT',
+];

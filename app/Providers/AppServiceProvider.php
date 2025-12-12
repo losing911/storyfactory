@@ -19,6 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // View Composer to share locale globally if needed, but app()->getLocale() is enough.
     }
 }

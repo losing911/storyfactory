@@ -102,7 +102,29 @@ class GenerateDailyStory extends Command
 
             $story = Story::create($storyData);
             
-            // 4. Process New Lore (Auto-Extraction)
+            // 4. Auto-Translate to English
+            try {
+                $this->info('İngiliz,ce Çeviri Başlatılıyor...');
+                // Strip HTML for translation context if needed, but we asked AI to keep HTML.
+                // Pass $storyHtml directly.
+                $translated = $aiService->translateContent($story->baslik, $storyHtml, $data['sosyal_ozet'] ?? '', 'English');
+                
+                if(!empty($translated['title'])) {
+                    $story->translations()->create([
+                        'locale' => 'en',
+                        'title' => $translated['title'],
+                        'metin' => $translated['content'],
+                        'social_ozet' => $translated['summary'] ?? ''
+                    ]);
+                    $this->info('İngilizce Çeviri Tamamlandı!');
+                    \Illuminate\Support\Facades\Log::info("Story Translated to EN: ID {$story->id}");
+                }
+            } catch (\Exception $e) {
+                $this->error('Çeviri Hatası: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error("Translation Failed: " . $e->getMessage());
+            }
+            
+            // 5. Process New Lore (Auto-Extraction)
             if (!empty($data['new_lore']) && is_array($data['new_lore'])) {
                 foreach ($data['new_lore'] as $loreItem) {
                     try {
@@ -125,7 +147,7 @@ class GenerateDailyStory extends Command
                 }
             }
 
-            // 5. Post to Social Media
+            // 6. Post to Social Media
             $socialPoster->postToSocialMedia($story);
 
             $this->info('Otomasyon Başarılı!');

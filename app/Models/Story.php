@@ -38,4 +38,24 @@ class Story extends Model
     {
         return $this->hasMany(Comment::class)->latest();
     }
+
+    public function translations()
+    {
+        return $this->hasMany(StoryTranslation::class);
+    }
+    
+    // Helper to get translated or default
+    public function getText($locale = 'tr')
+    {
+        if ($locale === 'tr') return $this->metin;
+        $trans = $this->translations->where('locale', $locale)->first();
+        return $trans ? $trans->metin : $this->metin;
+    }
+
+    public function getTitle($locale = 'tr')
+    {
+        if ($locale === 'tr') return $this->baslik;
+        $trans = $this->translations->where('locale', $locale)->first();
+        return $trans ? $trans->title : $this->baslik;
+    }
 }

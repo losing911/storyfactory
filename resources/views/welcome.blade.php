@@ -4,7 +4,7 @@
 <!-- News Ticker -->
 <div class="bg-neon-green text-black font-mono text-xs py-1 overflow-hidden border-b border-gray-800 relative z-50">
     <div class="whitespace-nowrap animate-marquee inline-block">
-        /// SYSTEM ALERT: NEURAL LINK CONNECTION UNSTABLE /// WEATHER UPDATE: ACID RAIN PROBABILITY 98% AT SECTOR 7 /// LATEST BOUNTY: "THE GLITCH" - REWARD 5000 CREDITS /// NEW LORE ENTRIES DETECTED IN ARCHIVE /// DAILY STORY GENERATION COMPLETED SUCCESSFULLY ///
+        /// {{ __('ui.system_alert') }} /// {{ __('ui.weather_update') }} /// {{ __('ui.latest_bounty') }} /// {{ __('ui.new_lore') }} /// {{ __('ui.daily_gen') }} ///
     </div>
 </div>
 <style>
@@ -18,11 +18,11 @@
     <div class="absolute inset-0 bg-cover bg-center transition duration-1000 transform group-hover:scale-105 opacity-60" style="background-image: url('{{ $latestStory->gorsel_url }}');"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-[#050505] via-black/50 to-transparent"></div>
     <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <span class="inline-block border border-neon-pink text-neon-pink px-2 py-1 text-xs font-mono mb-4 tracking-widest bg-black/50 backdrop-blur">LATEST_TRANSMISSION</span>
-        <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6 glitch-effect uppercase leading-tight" data-text="{{ $latestStory->baslik }}">{{ $latestStory->baslik }}</h1>
-        <p class="text-gray-300 text-lg md:text-xl font-light mb-8 line-clamp-2 max-w-2xl mx-auto">{{ Str::limit(strip_tags($latestStory->metin), 150) }}</p>
+        <span class="inline-block border border-neon-pink text-neon-pink px-2 py-1 text-xs font-mono mb-4 tracking-widest bg-black/50 backdrop-blur">{{ __('ui.latest_transmission') }}</span>
+        <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6 glitch-effect uppercase leading-tight" data-text="{{ $latestStory->getTitle(app()->getLocale()) }}">{{ $latestStory->getTitle(app()->getLocale()) }}</h1>
+        <p class="text-gray-300 text-lg md:text-xl font-light mb-8 line-clamp-2 max-w-2xl mx-auto">{{ Str::limit(strip_tags($latestStory->getText(app()->getLocale())), 150) }}</p>
         <a href="{{ route('story.show', $latestStory) }}" class="inline-block bg-neon-blue text-black font-display font-bold text-lg px-8 py-4 hover:bg-white hover:scale-105 transition duration-300 shadow-[0_0_20px_rgba(0,255,255,0.4)] clip-path-polygon">
-            READ STREAM
+            {{ __('ui.read_stream') }}
         </a>
     </div>
 </div>
@@ -33,15 +33,15 @@
     <div class="max-w-7xl mx-auto px-4 flex justify-between md:justify-around text-center font-mono text-xs md:text-sm text-gray-500">
         <div>
             <span class="block text-2xl text-neon-green font-display">{{ $stats['total_stories'] }}</span>
-            <span class="tracking-widest">STORIES GENERATED</span>
+            <span class="tracking-widest">{{ __('ui.stories_generated') }}</span>
         </div>
         <div>
             <span class="block text-2xl text-neon-purple font-display">{{ $stats['active_nodes'] }}</span>
-            <span class="tracking-widest">ACTIVE NODES</span>
+            <span class="tracking-widest">{{ __('ui.active_nodes') }}</span>
         </div>
         <div class="hidden md:block">
             <span class="block text-2xl text-red-500 font-display">{{ $stats['glitches_prevented'] }}</span>
-            <span class="tracking-widest">GLITCHES PURGED</span>
+            <span class="tracking-widest">{{ __('ui.glitches_purged') }}</span>
         </div>
     </div>
 </div>
@@ -51,8 +51,8 @@
     
     <!-- Section Title -->
     <div class="flex items-end justify-between mb-12 border-b border-gray-800 pb-4">
-        <h2 class="text-4xl font-display text-white">ARCHIVE_FEED</h2>
-        <a href="{{ route('lore.index') }}" class="text-xs font-mono text-gray-500 hover:text-neon-pink transition">VIEW_FULL_DATABASE >></a>
+        <h2 class="text-4xl font-display text-white">{{ __('ui.archive_feed') }}</h2>
+        <a href="{{ route('lore.index') }}" class="text-xs font-mono text-gray-500 hover:text-neon-pink transition">{{ __('ui.view_full_db') }}</a>
     </div>
 
     <!-- Layout: Grid + Sidebar -->
@@ -66,15 +66,15 @@
                     @if($story->gorsel_url)
                         <img src="{{ $story->gorsel_url }}" alt="{{ $story->baslik }}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700 opacity-80 group-hover:opacity-100">
                     @else
-                        <div class="w-full h-full flex items-center justify-center bg-gray-900 text-gray-700 font-display">NO SIGNAL</div>
+                        <div class="w-full h-full flex items-center justify-center bg-gray-900 text-gray-700 font-display">{{ __('ui.no_signal') }}</div>
                     @endif
                     <div class="absolute top-2 right-2 bg-black/80 text-neon-green text-[10px] font-mono px-2 py-1 border border-neon-green/30">
-                        {{ $story->mood ?? 'DATA' }}
+                        {{ $story->mood ?? __('ui.data') }}
                     </div>
                 </div>
                 <div class="p-6 flex-grow flex flex-col">
-                     <h3 class="text-xl font-display font-bold text-white mb-2 group-hover:text-neon-pink transition duration-300 leading-tight">{{ $story->baslik }}</h3>
-                     <p class="text-gray-500 text-sm line-clamp-3 mb-4 flex-grow">{{ Str::limit(strip_tags($story->metin), 100) }}</p>
+                     <h3 class="text-xl font-display font-bold text-white mb-2 group-hover:text-neon-pink transition duration-300 leading-tight">{{ $story->getTitle(app()->getLocale()) }}</h3>
+                     <p class="text-gray-500 text-sm line-clamp-3 mb-4 flex-grow">{{ Str::limit(strip_tags($story->getText(app()->getLocale())), 100) }}</p>
                      <div class="text-xs font-mono text-gray-600 pt-4 border-t border-gray-800 flex justify-between">
                         <span>// {{ $story->yayin_tarihi->format('Y.m.d') }}</span>
                         <span>ID: {{ $story->id }}</span>
@@ -89,11 +89,11 @@
             <!-- Lore Spotlight -->
             @if($spotlightLore)
             <div class="bg-gray-900 border border-gray-800 p-1 relative group">
-                <div class="absolute -top-3 -left-3 bg-neon-purple text-black font-bold font-mono text-xs px-2 py-1 transform -rotate-12 z-10 shadow-neon-purple">DATABASE_SPOTLIGHT</div>
+                <div class="absolute -top-3 -left-3 bg-neon-purple text-black font-bold font-mono text-xs px-2 py-1 transform -rotate-12 z-10 shadow-neon-purple">{{ __('ui.db_spotlight') }}</div>
                 @include('lore.card', ['entry' => $spotlightLore])
                 <div class="mt-2 text-center">
                     <a href="{{ route('lore.show', $spotlightLore->slug) }}" class="block w-full bg-gray-800 hover:bg-neon-purple hover:text-black text-gray-400 text-xs font-mono py-2 transition uppercase">
-                        Access Full File
+                        {{ __('ui.access_file') }}
                     </a>
                 </div>
             </div>
@@ -101,8 +101,8 @@
 
             <!-- Ad / Banner Placeholder -->
             <div class="border border-dashed border-gray-800 p-8 text-center text-gray-600 font-mono text-xs">
-                [ADS_SPACE_AVAILABLE]
-                <br>Contact Night City Marketing
+                {{ __('ui.ads_space') }}
+                <br>{{ __('ui.contact_marketing') }}
             </div>
         </div>
     </div>
@@ -115,10 +115,10 @@
     <!-- Community Voting Section -->
     <div class="mt-24 border-t border-gray-800 py-16 bg-gradient-to-b from-transparent to-gray-900/20">
         <div class="max-w-4xl mx-auto text-center">
-            <h2 class="text-3xl font-display text-neon-purple mb-8 text-glow">/// TOMORROW'S CHRONICLE</h2>
-            <p class="text-gray-400 mb-8 font-mono text-sm">Decide the fate of the City. Vote for tomorrow's headline.</p>
+            <h2 class="text-3xl font-display text-neon-purple mb-8 text-glow">/// {{ __('ui.tomorrows_chronicle') }}</h2>
+            <p class="text-gray-400 mb-8 font-mono text-sm">{{ __('ui.vote_desc') }}</p>
             
-            <div id="loadingPoll" class="text-neon-blue animate-pulse">CONNECTING TO NETWORK...</div>
+            <div id="loadingPoll" class="text-neon-blue animate-pulse">{{ __('ui.connecting') }}</div>
             
             <div id="pollOptions" class="grid md:grid-cols-1 gap-4 max-w-2xl mx-auto hidden">
                 <!-- Options injected by JS -->

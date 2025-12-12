@@ -107,6 +107,13 @@
                     </svg>
                 </button>
                 
+                <!-- Language Switcher -->
+                <div class="flex items-center space-x-2 font-mono text-xs">
+                    <a href="{{ route('lang.switch', 'tr') }}" class="{{ app()->getLocale() == 'tr' ? 'text-neon-pink font-bold' : 'text-gray-500 hover:text-white' }} transition">TR</a>
+                    <span class="text-gray-700">|</span>
+                    <a href="{{ route('lang.switch', 'en') }}" class="{{ app()->getLocale() == 'en' ? 'text-neon-pink font-bold' : 'text-gray-500 hover:text-white' }} transition">EN</a>
+                </div>
+
                 <!-- Ambient Audio Toggle -->
                 <button id="toggleAmbient" class="text-gray-500 hover:text-neon-blue transition duration-300" title="Toggle City Ambience">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
