@@ -52,8 +52,15 @@ class AIService
         $prompt .= "ÖNEMLİ KURAL 1: Hikaye dili %100 TÜRKÇE olmalı.\n";
         $prompt .= "ÖNEMLİ KURAL 2: Başlıkta ve hikayede 'Neon' kelimesini ÇOK AZ kullan veya HİÇ KULLANMA. Teknoloji ve çürümüşlüğü vurgula, ışıkları değil.\n";
         $prompt .= "ÖNEMLİ KURAL 3: EVREN BİLGİSİ'ndeki Şehir, Karakter ve Faksiyonu MUTLAKA kullan.\n";
+        
+        $prompt .= "ÖNEMLİ KURAL 4 (GÖRSEL DİNAMİZM): Karakterleri asla 'sabit dururken' veya 'poz verirken' tarif etme. Sahneye göre şu varyasyonlardan birini MUTLAKA kullan:\n";
+        $prompt .= "  - 'Action Pose': Karakter hareket halinde, koşuyor veya zıplıyor.\n";
+        $prompt .= "  - 'Combat-Ready Version': Karakter dövüş pozisyonunda, silahı çekili, çatışmanın ortasında.\n";
+        $prompt .= "  - 'Stage Performance Version': Karakter sahnede, kalabalığa karşı, dramatik ışık altında.\n";
+        $prompt .= "  - 'Hücre-34 Uniform Version': Eğer karakter Hücre-34 üyesiyse, bu formayı giydiğini belirt.\n";
+
         if(!empty($visualConstraints)) {
-            $prompt .= "ÖNEMLİ KURAL 4 (GÖRSEL TUTARLILIK): img_prompt alanlarında şu görsel özellikleri KORU: " . implode(", ", $visualConstraints) . "\n";
+            $prompt .= "ÖNEMLİ KURAL 5 (GÖRSEL TUTARLILIK): img_prompt alanlarında şu görsel özellikleri KORU: " . implode(", ", $visualConstraints) . "\n";
         }
         $prompt .= "Yapı Gereksinimleri (ÇOK ÖNEMLİ):\n";
         $prompt .= "1. 'scenes' dizisi içinde EN AZ 6, EN FAZLA 10 sahne oluştur. Hikaye UZUN ve DETAYLI olmalı.\n";
