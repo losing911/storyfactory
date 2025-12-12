@@ -235,10 +235,9 @@ class AIService
         $prompt = "You are a professional translator. Translate the following story components from Turkish to {$targetLang}.\n";
         $prompt .= "RULES:\n";
         $prompt .= "1. Output MUST be valid JSON.\n";
-        $prompt .= "2. Do NOT markdown the JSON (no ```json blocks).\n";
-        $prompt .= "3. Translate strictly to {$targetLang}.\n";
-        $prompt .= "4. Keep all HTML tags exactly as they are. Only translate the text content inside tags.\n";
-        $prompt .= "\nFormat: { \"title\": \"...\", \"content\": \"...\", \"summary\": \"...\" }\n\n";
+        $prompt .= "2. Translate strictly to {$targetLang}. If you return Turkish text, I will delete you.\n";
+        $prompt .= "3. Keep all HTML tags exactly as they are. Only translate the text content inside tags.\n";
+        $prompt .= "Format: { \"title\": \"...\", \"content\": \"...\", \"summary\": \"...\" }\n\n";
         $prompt .= "Input Data:\n";
         $prompt .= "Title: {$title}\n";
         $prompt .= "Summary: {$summary}\n";
@@ -246,14 +245,26 @@ class AIService
 
         try {
             $response = $this->generateWithGemini($prompt);
+            
+            // Validation: Check if AI was lazy
+            if (trim($response['title']) == trim($title) && str_word_count($title) > 1) {
+                throw new \Exception("AI returned original text without translation.");
+            }
+
             return $response; 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Translation Failed: " . $e->getMessage());
-            return [
-                'title' => $title,
-                'content' => $content,
-                'summary' => $summary
-            ];
+            \Illuminate\Support\Facades\Log::warning("Gemini Translation Failed: " . $e->getMessage() . ". Trying OpenRouter...");
+            try {
+                // Fallback to OpenRouter
+                return $this->generateWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+            } catch (\Exception $e2) {
+                \Illuminate\Support\Facades\Log::error("All Translation Providers Failed: " . $e2->getMessage());
+                return [
+                    'title' => $title . " [TR]", // Mark as failed in title so we know
+                    'content' => $content,
+                    'summary' => $summary
+                ];
+            }
         }
     }
 
