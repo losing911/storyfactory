@@ -173,6 +173,29 @@ class AdminController extends Controller
             ];
 
             $story = Story::create($storyData);
+
+            // Process New Lore (Auto-Extraction)
+            if (!empty($data['new_lore']) && is_array($data['new_lore'])) {
+                foreach ($data['new_lore'] as $loreItem) {
+                    try {
+                        if (empty($loreItem['title']) || empty($loreItem['type'])) continue;
+                        $loreSlug = \Illuminate\Support\Str::slug($loreItem['title']);
+                        
+                        if (!\App\Models\LoreEntry::where('slug', $loreSlug)->exists()) {
+                            \App\Models\LoreEntry::create([
+                                'title' => $loreItem['title'],
+                                'slug' => $loreSlug,
+                                'type' => strtolower($loreItem['type']) === 'location' ? 'city' : strtolower($loreItem['type']),
+                                'description' => $loreItem['description'] ?? 'AI tarafından keşfedildi.',
+                                'visual_prompt' => $loreItem['visual_prompt'] ?? null,
+                                'is_active' => true,
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                         // Ignore map errors
+                    }
+                }
+            }
             
             // Simulate Social Posting
             $this->socialPoster->postToSocialMedia($story);
@@ -283,6 +306,38 @@ class AdminController extends Controller
             ];
 
             $story = Story::create($storyData);
+
+             // Process New Lore (Auto-Extraction)
+             // Note: data['new_lore'] comes from frontend -> backend. 
+             // Since we didn't pass it openly in frontend JS yet, we might miss it in async mode unless we update frontend too.
+             // But 'data' here is request->all(), which comes from frontend. 
+             // We need to ensure 'new_lore' is passed from `generateStoryStep` -> frontend -> `storeStoryStep`.
+             
+             // Currently: `generateStoryStep` returns `data` (which includes `new_lore`).
+             // Frontend `create_ai.blade.php` stores `storyData` in JS.
+             // Frontend sends `finalPayload` in `storeStoryStep`.
+             // `finalPayload` includes `...storyData`.
+             // So `new_lore` IS passed automatically! Logic below is valid.
+
+            if (!empty($data['new_lore']) && is_array($data['new_lore'])) {
+                foreach ($data['new_lore'] as $loreItem) {
+                    try {
+                        if (empty($loreItem['title']) || empty($loreItem['type'])) continue;
+                        $loreSlug = \Illuminate\Support\Str::slug($loreItem['title']);
+                        
+                        if (!\App\Models\LoreEntry::where('slug', $loreSlug)->exists()) {
+                            \App\Models\LoreEntry::create([
+                                'title' => $loreItem['title'],
+                                'slug' => $loreSlug,
+                                'type' => strtolower($loreItem['type']) === 'location' ? 'city' : strtolower($loreItem['type']),
+                                'description' => $loreItem['description'] ?? 'AI tarafından keşfedildi.',
+                                'visual_prompt' => $loreItem['visual_prompt'] ?? null,
+                                'is_active' => true,
+                            ]);
+                        }
+                    } catch (\Exception $e) { }
+                }
+            }
             
             // Async Social Posting (Optional, could be queued)
             try {

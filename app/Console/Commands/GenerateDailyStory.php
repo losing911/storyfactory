@@ -99,7 +99,7 @@ class GenerateDailyStory extends Command
             $this->newLine();
 
             // 3. Save to DB
-            $story = Story::create([
+            $storyData = [
                 'baslik' => $data['baslik'],
                 'slug' => $slug,
                 'metin' => $storyHtml,

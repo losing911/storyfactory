@@ -78,8 +78,12 @@ class AIService
         $prompt .= "  \"meta_baslik\": \"...\",\n";
         $prompt .= "  \"meta_aciklama\": \"...\",\n";
         $prompt .= "  \"etiketler\": [\"tag1\"],\n";
-        $prompt .= "  \"sosyal_ozet\": \"...\"\n";
+        $prompt .= "  \"sosyal_ozet\": \"...\",\n";
+        $prompt .= "  \"new_lore\": [\n";
+        $prompt .= "     { \"title\": \"İsim\", \"type\": \"character|faction|location\", \"description\": \"Kısa açıklama\", \"visual_prompt\": \"Görsel tarifi (English)\", \"is_new_invention\": true }\n";
+        $prompt .= "  ]\n";
         $prompt .= "}";
+        $prompt .= "\nÖNEMLİ: Eğer hikayede YENİ ve ÖNEMLİ bir karakter, mekan veya çete uydurduysan, 'new_lore' listesine ekle. Yoksa boş dizi bırak.\n";
         
         try {
             // Priority 1: Google Gemini
