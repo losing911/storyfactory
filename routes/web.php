@@ -85,12 +85,3 @@ Route::get('/debug-locale', function() {
         'title_en' => $story->getTitle('en'),
     ];
 });
-        'app_locale' => app()->getLocale(),
-        'session_locale' => session('locale'),
-        'story_id' => $story->id ?? null,
-        'translations_count' => $story->translations->count() ?? 0,
-        'translations' => $story->translations->toArray() ?? [],
-        'text_en' => $story->getText('en'),
-        'title_en' => $story->getTitle('en'),
-    ];
-});
