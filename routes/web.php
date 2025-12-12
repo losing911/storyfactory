@@ -73,8 +73,18 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
 // DEBUG
 Route::get('/debug-locale', function() {
-    $story = App\Models\Story::first();
+    // Get the latest story that appears on homepage (ID 14 in screenshot)
+    $story = App\Models\Story::latest()->first(); 
     return [
+        'app_locale' => app()->getLocale(),
+        'session_locale' => session('locale'),
+        'story_id' => $story->id ?? null,
+        'translations_count' => $story->translations->count() ?? 0,
+        'translations' => $story->translations->toArray() ?? [],
+        'text_en' => $story->getText('en'),
+        'title_en' => $story->getTitle('en'),
+    ];
+});
         'app_locale' => app()->getLocale(),
         'session_locale' => session('locale'),
         'story_id' => $story->id ?? null,
