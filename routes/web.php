@@ -41,4 +41,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('ai/step/story', [AdminController::class, 'generateStoryStep'])->name('ai.step.story');
     Route::post('ai/step/image', [AdminController::class, 'generateImageStep'])->name('ai.step.image');
     Route::post('ai/step/store', [AdminController::class, 'storeStoryStep'])->name('ai.step.store');
+
+    // Profile Management
+    Route::get('/profile', [AdminController::class, 'editProfile'])->name('profile.edit');
+    Route::post('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
 });
