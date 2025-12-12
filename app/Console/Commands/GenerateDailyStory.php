@@ -95,6 +95,7 @@ class GenerateDailyStory extends Command
                 'yayin_tarihi' => now(),
                 'durum' => 'published',
                 'konu' => 'AI Auto-Gen',
+                'mood' => $data['mood'] ?? 'mystery', // Default to mystery if missing
                 'meta' => ($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''),
                 'etiketler' => $data['etiketler'] ?? [],
                 'sosyal_ozet' => $data['sosyal_ozet'] ?? '',
