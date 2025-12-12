@@ -60,6 +60,9 @@ class GenerateDailyStory extends Command
                 // Get Visual Constraints
                 $visualConstraints = $data['meta_visual_prompts'] ?? null;
 
+                // Rate Limiting: Sleep 4 seconds to avoid 502 Bad Gateway (Pollinations Overload)
+                sleep(4);
+
                 try {
                     // Generate Image URL
                     $remoteUrl = $aiService->generateImage($prompt, $visualConstraints);
