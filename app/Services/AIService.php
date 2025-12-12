@@ -232,6 +232,7 @@ class AIService
      */
     public function translateContent(string $title, string $content, string $summary, string $targetLang = 'English'): array
     {
+        try {
             // 1. Translate Title
             $titlePrompt = "Translate the following title from Turkish to {$targetLang}. Output ONLY the translated title, no quotes, no explanations.\nText: {$title}";
             $transTitle = $this->generateRawWithOpenRouter($titlePrompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
