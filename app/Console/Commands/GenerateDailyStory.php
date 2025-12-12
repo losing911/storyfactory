@@ -28,7 +28,7 @@ class GenerateDailyStory extends Command
      */
     public function handle(AIService $aiService, SocialPosterService $socialPoster)
     {
-        // Increase time limit to 10 minutes for slow AI/Backup operations
+        // Increase time limit to 10 minutes
         set_time_limit(600);
         
         $this->info('Günlük Cyberpunk Çizgi Roman üretimi başlıyor...');
@@ -38,7 +38,6 @@ class GenerateDailyStory extends Command
             // 1. Generate Story Structure (JSON)
             $data = $aiService->generateFullStory();
             
-            // Check if 'scenes' exists
             if (!isset($data['scenes']) || !is_array($data['scenes'])) {
                 throw new \Exception("AI yanıtı beklenen 'scenes' formatında değil.");
             }
@@ -47,7 +46,6 @@ class GenerateDailyStory extends Command
             $coverImageUrl = null;
             $slug = \Illuminate\Support\Str::slug($data['baslik'] ?? 'daily-story-' . now()->timestamp);
             $dateFolder = now()->format('Y-m-d');
-            $files = [];
 
             $this->info("Hikaye: {$data['baslik']}");
             $bar = $this->output->createProgressBar(count($data['scenes']));
@@ -58,37 +56,25 @@ class GenerateDailyStory extends Command
                 $prompt = $scene['img_prompt'];
                 $text = $scene['text'];
                 
-                $text = $scene['text'];
-                
                 // Get Visual Constraints
                 $visualConstraints = $data['meta_visual_prompts'] ?? null;
 
-                // Rate Limiting: Sleep 4 seconds to avoid 502 Bad Gateway (Pollinations Overload)
+                // Rate Limiting
                 sleep(4);
 
                 try {
-                    // Generate Image URL
                     $remoteUrl = $aiService->generateImage($prompt, $visualConstraints);
-                    
-                    // Download Image Locally
                     $localPath = "stories/$dateFolder/{$slug}_{$index}.jpg";
                     $localUrl = $aiService->downloadImage($remoteUrl, $localPath);
                 } catch (\Exception $e) {
-                    $this->error("Görsel Hatası (Sahne $index): " . $e->getMessage());
-                    // Fallback to a placeholder or skip image
-                    $localUrl = "https://placehold.co/1280x720/050505/00ff00?text=Cyberpunk+Image+Error"; 
+                    $localUrl = "https://placehold.co/1280x720/050505/00ff00?text=Error"; 
                 }
 
-                // Determine Layout
-                $layoutClass = ($index % 2 == 0) ? 'flex-row' : 'flex-row-reverse';
-
-                // Append to Story HTML
                 $storyHtml .= "<div class='scene-container mb-12 p-4 bg-gray-900/50 rounded-lg border border-gray-800'>";
                 $storyHtml .= "  <div class='mb-4'><img src='$localUrl' alt='Scene $index' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500'></div>";
                 $storyHtml .= "  <div class='prose prose-invert prose-lg text-gray-300 font-sans leading-relaxed'><p>" . nl2br(e($text)) . "</p></div>";
                 $storyHtml .= "</div>";
 
-                // Use the first image as cover (or fallback if first failed)
                 if ($index === 0) {
                     $coverImageUrl = $localUrl;
                 }
@@ -107,16 +93,39 @@ class GenerateDailyStory extends Command
                 'yayin_tarihi' => now(),
                 'durum' => 'published',
                 'konu' => 'AI Auto-Gen',
-                'mood' => $data['mood'] ?? 'mystery', // Default to mystery if missing
+                'mood' => $data['mood'] ?? 'mystery',
                 'meta' => ($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''),
                 'etiketler' => $data['etiketler'] ?? [],
                 'sosyal_ozet' => $data['sosyal_ozet'] ?? '',
                 'gorsel_prompt' => json_encode(array_column($data['scenes'], 'img_prompt')),
-            ]);
+            ]; // Array closed correctly
 
-            $this->info("Veritabanına kaydedildi: ID #{$story->id}");
+            $story = Story::create($storyData);
+            
+            // 4. Process New Lore (Auto-Extraction)
+            if (!empty($data['new_lore']) && is_array($data['new_lore'])) {
+                foreach ($data['new_lore'] as $loreItem) {
+                    try {
+                        if (empty($loreItem['title']) || empty($loreItem['type'])) continue;
+                        $loreSlug = \Illuminate\Support\Str::slug($loreItem['title']);
+                        
+                        // Check uniqueness
+                        if (!\App\Models\LoreEntry::where('slug', $loreSlug)->exists()) {
+                            \App\Models\LoreEntry::create([
+                                'title' => $loreItem['title'],
+                                'slug' => $loreSlug,
+                                'type' => strtolower($loreItem['type']) === 'location' ? 'city' : strtolower($loreItem['type']),
+                                'description' => $loreItem['description'] ?? 'AI tarafından keşfedildi.',
+                                'visual_prompt' => $loreItem['visual_prompt'] ?? null,
+                                'is_active' => true
+                            ]);
+                            \Illuminate\Support\Facades\Log::info("New Lore Auto-Discovered: {$loreItem['title']}");
+                        }
+                    } catch (\Exception $e) { }
+                }
+            }
 
-            // 4. Post to Social Media
+            // 5. Post to Social Media
             $socialPoster->postToSocialMedia($story);
 
             $this->info('Otomasyon Başarılı!');
