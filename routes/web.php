@@ -7,7 +7,16 @@ use App\Http\Controllers\LoginController;
 
 Route::get('/', function () {
     $stories = App\Models\Story::where('durum', 'published')->latest()->paginate(9);
-    return view('welcome', compact('stories'));
+    $latestStory = App\Models\Story::where('durum', 'published')->latest()->first();
+    $spotlightLore = App\Models\LoreEntry::where('is_active', true)->inRandomOrder()->first();
+    
+    $stats = [
+        'total_stories' => App\Models\Story::count(),
+        'active_nodes' => rand(340, 999), // Mock stat for atmosphere
+        'glitches_prevented' => rand(1200, 5000)
+    ];
+
+    return view('welcome', compact('stories', 'latestStory', 'spotlightLore', 'stats'));
 })->name('home');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
