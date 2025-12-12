@@ -46,8 +46,9 @@ class AIService
 
         $prompt = "Aşağıdaki özelliklere sahip bir Cyberpunk ÇİZGİ ROMAN (Comic Book) hikayesi oluştur. Çıktı SADECE JSON formatında olmalı ve dil KESİNLİKLE TÜRKÇE olmalı:\n\n";
         $prompt .= "Konu: " . ($topic ?? 'Rastgele bir Cyberpunk teması') . "\n";
+        $prompt .= "Konu: " . ($topic ?? 'Rastgele bir Cyberpunk teması') . "\n";
         $prompt .= "--- EVREN BİLGİSİ (LORE) ---\n" . $loreContext . "----------------------------\n";
-        $prompt .= "Stil: Frank Miller / Moebius tarzı, karanlık, yağmurlu, distopik, ciddi ve ağır atmosfer.\n";
+        $prompt .= "Stil: Cyberpunk 2077 / CD Projekt Red tarzı, fotogerçekçi, neon ışıklar, yüksek teknoloji, Night City atmosferi.\n";
         $prompt .= "ÖNEMLİ KURAL 1: Hikaye dili %100 TÜRKÇE olmalı.\n";
         $prompt .= "ÖNEMLİ KURAL 2: Başlıkta ve hikayede 'Neon' kelimesini ÇOK AZ kullan veya HİÇ KULLANMA. Teknoloji ve çürümüşlüğü vurgula, ışıkları değil.\n";
         $prompt .= "ÖNEMLİ KURAL 3: EVREN BİLGİSİ'ndeki Şehir, Karakter ve Faksiyonu MUTLAKA kullan.\n";
@@ -64,7 +65,7 @@ class AIService
         $prompt .= "7. SEO & Sosyal Medya alanlarını doldur.\n\n";
         $prompt .= "Görsel Prompt Kuralları:\n";
         $prompt .= "- Promptlar İNGİLİZCE olmalı.\n";
-        $prompt .= "- Stil belirteçleri ekle: 'comic book style, thick lines, atmospheric lighting, cel shaded, masterpiece, 8k'.\n";
+        $prompt .= "- Stil belirteçleri ekle: 'cyberpunk 2077 style, photorealistic, ray tracing, unreal engine 5, detailed textures, cinematic lighting'.\n";
         $prompt .= "- Konuşma balonu veya yazı İÇERMEMELİ ('no text, no speech bubbles').\n\n";
         $prompt .= "JSON Şeması:\n";
         $prompt .= "{\n";
@@ -79,7 +80,7 @@ class AIService
         $prompt .= "  \"etiketler\": [\"tag1\"],\n";
         $prompt .= "  \"sosyal_ozet\": \"...\"\n";
         $prompt .= "}";
-
+        
         try {
             // Priority 1: Google Gemini
             return $this->generateWithGemini($prompt);
@@ -169,8 +170,8 @@ class AIService
     public function generateImage(string $prompt, string $visualPrompt = null, string $refImageUrl = null): string
     {
         // Use Pollinations.ai with FLUX model (State of the Art)
-        // Add style keywords for high-quality Cyberpunk Comic look. Removed 'neon' emphasis.
-        $style = ", cyberpunk comic book style, gritty, noir atmosphere, frank miller aesthetic, cel shaded, bold thick lines, atmospheric lighting, muted colors, cinematic composition, highly detailed, masterpiece, 8k, uhd, no text, no speech bubbles";
+        // Updated Style: Cyberpunk 2077 / Photorealistic
+        $style = ", cyberpunk 2077 style, night city, photorealistic, ray tracing, unreal engine 5 render, cinematic lighting, neon lights, high tech low life, highly detailed, 8k, uhd, masterpiece, sharp focus";
         
         // 1. Inject Visual Consistency Prompt
         if ($visualPrompt) {
