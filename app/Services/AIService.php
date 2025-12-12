@@ -232,35 +232,80 @@ class AIService
      */
     public function translateContent(string $title, string $content, string $summary, string $targetLang = 'English'): array
     {
-        $prompt = "You are a professional translator. Translate the following story components from Turkish to {$targetLang}.\n";
+        // 1. Extract TEXT segments from HTML to avoid confusing the AI with large HTML structures
+        // Match content inside <p>...</p> tags
+        preg_match_all('/<p>(.*?)<\/p>/s', $content, $matches);
+        $paragraphs = $matches[1] ?? [];
+        
+        // If no paragraphs found, maybe it's raw text? Use whole content.
+        $segments = !empty($paragraphs) ? $paragraphs : [$content];
+        
+        // Prepare simple JSON structure for translation
+        $payload = [
+            'title' => $title,
+            'summary' => $summary,
+            'segments' => $segments
+        ];
+        
+        $jsonPayload = json_encode($payload, JSON_UNESCAPED_UNICODE);
+
+        $prompt = "You are a professional translator. Translate the JSON values from Turkish to {$targetLang}.\n";
         $prompt .= "RULES:\n";
-        $prompt .= "1. Output MUST be valid JSON.\n";
-        $prompt .= "2. Translate strictly to {$targetLang}. If you return Turkish text, I will delete you.\n";
-        $prompt .= "3. Keep all HTML tags exactly as they are. Only translate the text content inside tags.\n";
-        $prompt .= "Format: { \"title\": \"...\", \"content\": \"...\", \"summary\": \"...\" }\n\n";
-        $prompt .= "Input Data:\n";
-        $prompt .= "Title: {$title}\n";
-        $prompt .= "Summary: {$summary}\n";
-        $prompt .= "Content: {$content}\n";
+        $prompt .= "1. Output MUST be valid JSON matching the input structure.\n";
+        $prompt .= "2. Translate 'title', 'summary', and all items in 'segments' array.\n";
+        $prompt .= "3. Do NOT change the number of segments.\n";
+        $prompt .= "4. Strictly English output.\n";
+        $prompt .= "\nInput JSON:\n" . $jsonPayload;
 
         try {
             $response = $this->generateWithGemini($prompt);
             
-            // Validation: Check if AI was lazy
-            if (trim($response['title']) == trim($title) && str_word_count($title) > 1) {
-                throw new \Exception("AI returned original text without translation.");
+            // Reconstruct HTML if we had paragraphs
+            $translatedContent = $content;
+            if (!empty($paragraphs) && isset($response['segments']) && is_array($response['segments'])) {
+                foreach ($paragraphs as $index => $originalPara) {
+                    if (isset($response['segments'][$index])) {
+                        // Replace the original paragraph content with translated one
+                        // We use strict replacement to avoid replacing unintended parts
+                        $translatedContent = str_replace($originalPara, $response['segments'][$index], $translatedContent);
+                    }
+                }
+            } elseif(!empty($response['segments'][0])) {
+                 // Fallback for raw text
+                 $translatedContent = $response['segments'][0];
             }
 
-            return $response; 
+            return [
+                'title' => $response['title'] ?? $title,
+                'content' => $translatedContent,
+                'summary' => $response['summary'] ?? $summary
+            ];
+
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning("Gemini Translation Failed: " . $e->getMessage() . ". Trying OpenRouter...");
+            \Illuminate\Support\Facades\Log::warning("Gemini Translation Failed: " . $e->getMessage());
+            
+             // Fallback to OpenRouter with same chunk logic
             try {
-                // Fallback to OpenRouter
-                return $this->generateWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+                 $response = $this->generateWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+                 // Repeat reconstruction logic (Refactor into helper if needed, but duplication is safer for now)
+                 $translatedContent = $content;
+                 if (!empty($paragraphs) && isset($response['segments']) && is_array($response['segments'])) {
+                    foreach ($paragraphs as $index => $originalPara) {
+                        if (isset($response['segments'][$index])) {
+                            $translatedContent = str_replace($originalPara, $response['segments'][$index], $translatedContent);
+                        }
+                    }
+                }
+                return [
+                    'title' => $response['title'] ?? $title,
+                    'content' => $translatedContent,
+                    'summary' => $response['summary'] ?? $summary
+                ];
+
             } catch (\Exception $e2) {
                 \Illuminate\Support\Facades\Log::error("All Translation Providers Failed: " . $e2->getMessage());
                 return [
-                    'title' => $title . " [TR]", // Mark as failed in title so we know
+                    'title' => $title . " [FAIL]", 
                     'content' => $content,
                     'summary' => $summary
                 ];
