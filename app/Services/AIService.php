@@ -232,85 +232,102 @@ class AIService
      */
     public function translateContent(string $title, string $content, string $summary, string $targetLang = 'English'): array
     {
-        // 1. Extract TEXT segments from HTML to avoid confusing the AI with large HTML structures
-        // Match content inside <p>...</p> tags
-        preg_match_all('/<p>(.*?)<\/p>/s', $content, $matches);
-        $paragraphs = $matches[1] ?? [];
-        
-        // If no paragraphs found, maybe it's raw text? Use whole content.
-        $segments = !empty($paragraphs) ? $paragraphs : [$content];
-        
-        // Prepare simple JSON structure for translation
-        $payload = [
-            'title' => $title,
-            'summary' => $summary,
-            'segments' => $segments
-        ];
-        
-        $jsonPayload = json_encode($payload, JSON_UNESCAPED_UNICODE);
-
-        $prompt = "You are a professional translator. Translate the JSON values from Turkish to {$targetLang}.\n";
-        $prompt .= "RULES:\n";
-        $prompt .= "1. Output MUST be valid JSON matching the input structure.\n";
-        $prompt .= "2. Translate 'title', 'summary', and all items in 'segments' array.\n";
-        $prompt .= "3. Do NOT change the number of segments.\n";
-        $prompt .= "4. Strictly English output.\n";
-        $prompt .= "\nInput JSON:\n" . $jsonPayload;
-
+        // Strategy: Divide and Conquer (No more complex JSON payloads)
         try {
-            $response = $this->generateWithGemini($prompt);
-            
-            // Reconstruct HTML if we had paragraphs
-            $translatedContent = $content;
-            if (!empty($paragraphs) && isset($response['segments']) && is_array($response['segments'])) {
-                foreach ($paragraphs as $index => $originalPara) {
-                    if (isset($response['segments'][$index])) {
-                        // Replace the original paragraph content with translated one
-                        // We use strict replacement to avoid replacing unintended parts
-                        $translatedContent = str_replace($originalPara, $response['segments'][$index], $translatedContent);
-                    }
-                }
-            } elseif(!empty($response['segments'][0])) {
-                 // Fallback for raw text
-                 $translatedContent = $response['segments'][0];
-            }
+            // 1. Translate Title
+            $titlePrompt = "Translate the following title from Turkish to {$targetLang}. Output ONLY the translated title, no quotes, no explanations.\nText: {$title}";
+            $transTitle = $this->generateRawWithGemini($titlePrompt);
+            // Cleanup quotes if AI added them
+            $transTitle = trim($transTitle, " \"'\n\r\t\v\0");
+
+            // 2. Translate Summary
+            $summaryPrompt = "Translate the following summary from Turkish to {$targetLang}. Output ONLY the translated text.\nText: {$summary}";
+            $transSummary = $this->generateRawWithGemini($summaryPrompt);
+
+            // 3. Translate Content (HTML aware)
+            // We use the Chunk grouping logic from before but request PLAIN TEXT back
+             preg_match_all('/<p>(.*?)<\/p>/s', $content, $matches);
+             $paragraphs = $matches[1] ?? [];
+             
+             // If too few paragraphs, just translate the whole thing
+             if (count($paragraphs) < 2) {
+                 $contentPrompt = "Translate this HTML content from Turkish to {$targetLang}. Keep HTML tags (like <div>, <p>, <img>) EXACTLY as they are. Translate only the text.\n\nContent:\n{$content}";
+                 $transContent = $this->generateRawWithGemini($contentPrompt);
+             } else {
+                 // Chunk translation
+                 $transContent = $content;
+                 $chunks = array_chunk($paragraphs, 5); // Translate 5 paragraphs at a time
+                 
+                 foreach ($chunks as $chunk) {
+                     $textBlock = implode("\n|||\n", $chunk); // Delimiter
+                     $chunkPrompt = "Translate the following text blocks from Turkish to {$targetLang}. The blocks are separated by '|||'. Keep the separator in output. Output ONLY the translated blocks.\n\n{$textBlock}";
+                     
+                     try {
+                         $response = $this->generateRawWithGemini($chunkPrompt);
+                         $transBlocks = explode("|||", $response);
+                         
+                         foreach ($chunk as $index => $original) {
+                             if (isset($transBlocks[$index])) {
+                                 // Strict replace
+                                 $transContent = str_replace($original, trim($transBlocks[$index]), $transContent);
+                             }
+                         }
+                     } catch (\Exception $e) {
+                         // If a chunk fails, we just keep the original for that chunk
+                         Log::warning("Chunk translation failed: " . $e->getMessage());
+                     }
+                 }
+             }
 
             return [
-                'title' => $response['title'] ?? $title,
-                'content' => $translatedContent,
-                'summary' => $response['summary'] ?? $summary
+                'title' => !empty($transTitle) ? $transTitle : $title,
+                'content' => !empty($transContent) ? $transContent : $content,
+                'summary' => !empty($transSummary) ? $transSummary : $summary
             ];
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning("Gemini Translation Failed: " . $e->getMessage());
-            
-             // Fallback to OpenRouter with same chunk logic
-            try {
-                 $response = $this->generateWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
-                 // Repeat reconstruction logic (Refactor into helper if needed, but duplication is safer for now)
-                 $translatedContent = $content;
-                 if (!empty($paragraphs) && isset($response['segments']) && is_array($response['segments'])) {
-                    foreach ($paragraphs as $index => $originalPara) {
-                        if (isset($response['segments'][$index])) {
-                            $translatedContent = str_replace($originalPara, $response['segments'][$index], $translatedContent);
-                        }
-                    }
-                }
-                return [
-                    'title' => $response['title'] ?? $title,
-                    'content' => $translatedContent,
-                    'summary' => $response['summary'] ?? $summary
-                ];
-
-            } catch (\Exception $e2) {
-                \Illuminate\Support\Facades\Log::error("All Translation Providers Failed: " . $e2->getMessage());
-                return [
-                    'title' => $title . " [FAIL]", 
-                    'content' => $content,
-                    'summary' => $summary
-                ];
-            }
+            Log::error("Translation Major Failure: " . $e->getMessage());
+             return [
+                'title' => $title . " [ERR: " . substr($e->getMessage(), 0, 20) . "]", 
+                'content' => $content,
+                'summary' => $summary
+            ];
         }
+    }
+
+    protected function generateRawWithGemini($prompt)
+    {
+         if (!$this->apiKey) throw new \Exception('GEMINI_API_KEY missing');
+
+        // Gemini Raw Call
+        $response = Http::timeout(60)->post($this->baseUrl . '?key=' . $this->apiKey, [
+            'contents' => [['parts' => [['text' => $prompt]]]]
+        ]);
+
+        if ($response->successful()) {
+            return $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
+        }
+        
+        throw new \Exception('Gemini Raw Error: ' . $response->status());
+    }
+
+    protected function generateRawWithOpenRouter($prompt, $model) {
+        $key = config('services.openrouter.key');
+        if(!$key) throw new \Exception('OPENROUTER_KEY missing');
+        
+        $response = Http::timeout(120)->withHeaders([
+            'Authorization' => "Bearer $key",
+            'HTTP-Referer' => config('app.url'),
+            'X-Title' => config('app.name'),
+        ])->post('https://openrouter.ai/api/v1/chat/completions', [
+            'model' => $model,
+            'messages' => [['role' => 'user', 'content' => $prompt]],
+        ]);
+
+        if ($response->successful()) {
+            return $response->json()['choices'][0]['message']['content'] ?? '';
+        }
+        throw new \Exception('OpenRouter Error: ' . $response->status());
     }
 
     protected function getMockData(): array
