@@ -35,6 +35,7 @@
             }
         }
     </script>
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
     <style>
         body {
             background-color: #050505;
@@ -42,6 +43,10 @@
                 linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
             background-size: 50px 50px;
+        }
+        /* High Contrast Mode (Gritty B&W) */
+        body.contrast-active {
+            filter: grayscale(100%) contrast(120%);
         }
         .text-glow {
             text-shadow: 0 0 10px currentColor;
@@ -95,6 +100,13 @@
                 ANXIPUNK<span class="text-neon-pink text-sm ml-1">.ART</span>
             </a>
             <nav class="flex items-center space-x-8">
+                <!-- High Contrast Toggle -->
+                <button id="toggleContrast" class="text-gray-500 hover:text-white transition duration-300" title="Toggle High Contrast (B&W)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </button>
+                
                 <!-- Ambient Audio Toggle -->
                 <button id="toggleAmbient" class="text-gray-500 hover:text-neon-blue transition duration-300" title="Toggle City Ambience">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -125,30 +137,49 @@
     </footer>
 
     <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('SW registred: ', registration.scope))
+                    .catch(err => console.log('SW registration failed: ', err));
+            });
+        }
+
+        // High Contrast Logic
+        const contrastBtn = document.getElementById('toggleContrast');
+        contrastBtn.addEventListener('click', () => {
+            document.body.classList.toggle('contrast-active');
+            contrastBtn.classList.toggle('text-white');
+            contrastBtn.classList.toggle('text-gray-500');
+        });
+
         // Ambient Audio Engine (Web Audio API)
         const toggleBtn = document.getElementById('toggleAmbient');
         let audioCtx;
         let gainNode;
         let isPlaying = false;
+        
+        if(toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                if (!audioCtx) {
+                    initAudio();
+                }
 
-        toggleBtn.addEventListener('click', () => {
-            if (!audioCtx) {
-                initAudio();
-            }
-
-            if (isPlaying) {
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
-                toggleBtn.classList.remove('text-neon-blue', 'animate-pulse');
-                toggleBtn.classList.add('text-gray-500');
-                isPlaying = false;
-            } else {
-                audioCtx.resume();
-                gainNode.gain.exponentialRampToValueAtTime(0.15, audioCtx.currentTime + 1);
-                toggleBtn.classList.add('text-neon-blue', 'animate-pulse');
-                toggleBtn.classList.remove('text-gray-500');
-                isPlaying = true;
-            }
-        });
+                if (isPlaying) {
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+                    toggleBtn.classList.remove('text-neon-blue', 'animate-pulse');
+                    toggleBtn.classList.add('text-gray-500');
+                    isPlaying = false;
+                } else {
+                    audioCtx.resume();
+                    gainNode.gain.exponentialRampToValueAtTime(0.15, audioCtx.currentTime + 1);
+                    toggleBtn.classList.add('text-neon-blue', 'animate-pulse');
+                    toggleBtn.classList.remove('text-gray-500');
+                    isPlaying = true;
+                }
+            });
+        }
 
         function initAudio() {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
