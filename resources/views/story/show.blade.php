@@ -18,6 +18,9 @@
 
 @section('content')
 <article class="min-h-screen">
+    <!-- Reading Progress Bar -->
+    <div class="fixed top-0 left-0 h-1 bg-neon-pink z-50 transition-all duration-300 shadow-[0_0_10px_rgba(255,0,255,0.7)]" id="readingBar" style="width: 0%"></div>
+
     <!-- Header -->
     <header class="relative h-[70vh] flex items-end pb-20 bg-black">
         <div class="absolute inset-0">
@@ -28,9 +31,16 @@
         </div>
         
         <div class="relative z-10 max-w-4xl mx-auto px-4 text-center w-full">
-            <div class="inline-block border border-neon-green/30 px-3 py-1 mb-6 text-neon-green font-mono text-sm tracking-widest bg-black/50 backdrop-blur-sm">
-                {{ $story->yayin_tarihi->format('d F Y') }} // {{ $story->konu }}
+            <div class="flex justify-center items-center gap-4 mb-6">
+                 <div class="inline-block border border-neon-green/30 px-3 py-1 text-neon-green font-mono text-sm tracking-widest bg-black/50 backdrop-blur-sm">
+                    {{ $story->yayin_tarihi->format('d F Y') }} // {{ $story->konu }}
+                </div>
+                <!-- TTS Button -->
+                <button id="ttsButton" class="border border-neon-blue/50 text-neon-blue px-3 py-1 font-mono text-sm hover:bg-neon-blue/20 transition-colors flex items-center gap-2">
+                    <span>▶ AUDIO_PROTOCOL</span>
+                </button>
             </div>
+
             <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-8 leading-tight text-glow filter drop-shadow-lg">{{ $story->baslik }}</h1>
             
             <div class="flex justify-center gap-4 text-sm font-mono text-gray-400">
@@ -48,7 +58,7 @@
         <!-- Sidebar Line -->
         <div class="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-neon-pink to-transparent hidden lg:block opacity-50"></div>
 
-        <div class="prose prose-invert prose-lg max-w-none text-gray-300 font-sans leading-relaxed">
+        <div class="prose prose-invert prose-lg max-w-none text-gray-300 font-sans leading-relaxed" id="storyContent">
             {!! $story->metin !!}
         </div>
 
@@ -69,4 +79,57 @@
         </div>
     </div>
 </article>
+
+<script>
+    // 1. Reading Progress Bar Logic
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = (scrollTop / docHeight) * 100;
+        document.getElementById('readingBar').style.width = scrollPercent + '%';
+    });
+
+    // 2. Text-to-Speech (TTS) Logic
+    const ttsBtn = document.getElementById('ttsButton');
+    const content = document.getElementById('storyContent').innerText;
+    let isSpeaking = false;
+    let utterance = null;
+
+    if ('speechSynthesis' in window) {
+        ttsBtn.addEventListener('click', () => {
+            const synth = window.speechSynthesis;
+
+            if (isSpeaking) {
+                // Stop
+                synth.cancel();
+                isSpeaking = false;
+                ttsBtn.innerHTML = '<span>▶ AUDIO_PROTOCOL</span>';
+                ttsBtn.classList.remove('bg-neon-blue', 'text-black');
+            } else {
+                // Start
+                utterance = new SpeechSynthesisUtterance(content);
+                utterance.lang = 'tr-TR'; // Turkish
+                utterance.rate = 0.9; // Slightly slower
+                utterance.pitch = 0.8; // Deep/Robotic
+                
+                // Try to find a good voice
+                const voices = synth.getVoices();
+                // Prefer a male/deep voice if available (optional filter)
+                
+                utterance.onend = () => {
+                    isSpeaking = false;
+                    ttsBtn.innerHTML = '<span>▶ AUDIO_PROTOCOL</span>';
+                    ttsBtn.classList.remove('bg-neon-blue', 'text-black');
+                };
+
+                synth.speak(utterance);
+                isSpeaking = true;
+                ttsBtn.innerHTML = '<span>⏹ TERMINATE_AUDIO</span>';
+                ttsBtn.classList.add('bg-neon-blue', 'text-black');
+            }
+        });
+    } else {
+        ttsBtn.style.display = 'none'; // Not supported
+    }
+</script>
 @endsection
