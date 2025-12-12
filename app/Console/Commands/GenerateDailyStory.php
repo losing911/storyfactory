@@ -133,17 +133,34 @@ class GenerateDailyStory extends Command
                         
                         // Check uniqueness
                         if (!\App\Models\LoreEntry::where('slug', $loreSlug)->exists()) {
+                            
+                            $loreImageUrl = null;
+
+                            // Generate Image for Lore
+                            try {
+                                $lorePrompt = "Portrait of " . $loreItem['title'] . ", " . ($loreItem['visual_prompt'] ?? $loreItem['description']) . ", cyberpunk 2077 style, detailed, 8k";
+                                $remoteLoreUrl = $aiService->generateImage($lorePrompt);
+                                $localLorePath = "lore/" . $loreSlug . "_" . now()->timestamp . ".jpg";
+                                $loreImageUrl = $aiService->downloadImage($remoteLoreUrl, $localLorePath);
+                                $this->info("Lore Görseli Oluşturuldu: {$loreItem['title']}");
+                            } catch (\Exception $imgErr) {
+                                \Illuminate\Support\Facades\Log::warning("Lore Image Failed: " . $imgErr->getMessage());
+                            }
+
                             \App\Models\LoreEntry::create([
                                 'title' => $loreItem['title'],
                                 'slug' => $loreSlug,
                                 'type' => strtolower($loreItem['type']) === 'location' ? 'city' : strtolower($loreItem['type']),
                                 'description' => $loreItem['description'] ?? 'AI tarafından keşfedildi.',
                                 'visual_prompt' => $loreItem['visual_prompt'] ?? null,
+                                'image_url' => $loreImageUrl,
                                 'is_active' => true
                             ]);
                             \Illuminate\Support\Facades\Log::info("New Lore Auto-Discovered: {$loreItem['title']}");
                         }
-                    } catch (\Exception $e) { }
+                    } catch (\Exception $e) { 
+                        \Illuminate\Support\Facades\Log::error("Lore Entry Error: " . $e->getMessage());
+                    }
                 }
             }
 
