@@ -15,11 +15,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            LoreSeeder::class,
         ]);
+        
+        // Ensure Admin exists (optional if deploy script handles it, but good to have)
+        /*
+        User::factory()->create([
+            'name' => 'Admin',
+            'email' => 'admin@anxipunk.icu',
+        ]);
+        */
     }
 }
