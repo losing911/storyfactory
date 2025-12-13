@@ -96,8 +96,7 @@
 <body class="text-gray-300 antialiased min-h-screen flex flex-col">
     <header class="border-b border-gray-800 bg-black/80 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
-            <a href="{{ route('home') }}" class="text-3xl font-display font-black tracking-widest text-neon-blue text-glow hover:text-white transition duration-300">
-                ANXIPUNK<span class="text-neon-pink text-sm ml-1">.ICU</span>
+                ANXIPUNK
             </a>
             <nav class="flex items-center space-x-8">
                 <!-- High Contrast Toggle -->
@@ -107,54 +106,32 @@
                     </svg>
                 </button>
                 
-                <!-- Custom Language Switcher (Triggers Hidden Google Widget) -->
-                <div class="flex items-center space-x-3 font-mono text-sm border border-gray-800 bg-black/50 px-3 py-1 rounded">
-                    <button onclick="triggerGoogleTranslate('tr')" class="hover:text-neon-pink transition font-bold text-gray-400 focus:outline-none" id="btn-tr">TR</button>
-                    <span class="text-gray-700">|</span>
-                    <button onclick="triggerGoogleTranslate('en')" class="hover:text-neon-blue transition font-bold text-gray-400 focus:outline-none" id="btn-en">EN</button>
-                </div>
-                
-                <!-- Hidden Google Widget -->
-                <div id="google_translate_element" style="display:none !important;"></div>
-
-                <style>
-                    /* Force Hide Google Top Bar */
-                    .goog-te-banner-frame.skiptranslate { display: none !important; }
-                    body { top: 0px !important; }
-                </style>
-                
-                <script type="text/javascript">
-                    function googleTranslateElementInit() {
-                      new google.translate.TranslateElement({pageLanguage: 'tr', includedLanguages: 'en,tr', autoDisplay: false}, 'google_translate_element');
-                    }
-
-                    function triggerGoogleTranslate(lang) {
-                        // Select the Google dropdown
-                        var select = document.querySelector('.goog-te-combo');
-                        if (select) {
-                            select.value = lang;
-                            select.dispatchEvent(new Event('change'));
-                        }
-                    }
-                </script>
-                <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
                 <!-- Ambient Audio Toggle -->
-                <button id="toggleAmbient" class="text-gray-500 hover:text-neon-blue transition duration-300" title="Toggle City Ambience">
+                <button id="toggleAmbient" class="text-gray-500 hover:text-neon-blue transition duration-300" title="Şehir Sesi">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                     </svg>
                 </button>
 
-                <div class="hidden md:flex space-x-8">
-                    <a href="{{ route('home') }}" class="font-display uppercase tracking-widest hover:text-neon-green transition">Stories</a>
-                    <a href="{{ route('gallery.index') }}" class="font-display uppercase tracking-widest hover:text-neon-blue transition">Gallery</a>
-                    <a href="{{ route('lore.index') }}" class="font-display uppercase tracking-widest hover:text-neon-pink transition">Database</a>
-                    <a href="{{ route('about') }}" class="font-display uppercase tracking-widest hover:text-neon-purple transition">About</a>
-                    @auth
-                        <a href="{{ route('admin.stories.index') }}" class="font-display uppercase tracking-widest text-gray-500 hover:text-white">Admin</a>
-                    @endauth
-                </div>
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" class="md:hidden text-neon-blue hover:text-white transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobileMenu" class="md:hidden hidden bg-black/95 backdrop-blur-xl border-b border-gray-800 absolute top-20 left-0 w-full z-40 transition-all duration-300">
+            <nav class="flex flex-col p-4 space-y-4">
+                <a href="{{ route('home') }}" class="font-display uppercase tracking-widest text-neon-green hover:text-white py-2 border-b border-gray-800">Hikayeler</a>
+                <a href="{{ route('gallery.index') }}" class="font-display uppercase tracking-widest text-neon-blue hover:text-white py-2 border-b border-gray-800">Galeri</a>
+                <a href="{{ route('lore.index') }}" class="font-display uppercase tracking-widest text-neon-pink hover:text-white py-2 border-b border-gray-800">Veri Bankası</a>
+                <a href="{{ route('about') }}" class="font-display uppercase tracking-widest text-neon-purple hover:text-white py-2 border-b border-gray-800">Hakkında</a>
+                @auth
+                    <a href="{{ route('admin.stories.index') }}" class="font-display uppercase tracking-widest text-gray-500 hover:text-white py-2">Admin</a>
+                @endauth
             </nav>
         </div>
     </header>
@@ -165,7 +142,7 @@
 
     <footer class="border-t border-gray-800 bg-black py-12 mt-20">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="font-display text-gray-600 tracking-widest">© 2025 ANXIPUNK.ICU // SYSTEM_ONLINE</p>
+            <p class="font-display text-gray-600 tracking-widest">© 2025 ANXIPUNK // <span class="text-neon-green">SYSTEM_ONLINE</span></p>
         </div>
     </footer>
 
@@ -178,6 +155,13 @@
                     .catch(err => console.log('SW registration failed: ', err));
             });
         }
+
+        // Mobile Menu Logic
+        const mobileBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
 
         // High Contrast Logic
         const contrastBtn = document.getElementById('toggleContrast');
@@ -193,25 +177,31 @@
         let gainNode;
         let isPlaying = false;
         
-        if(toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                if (!audioCtx) {
-                    initAudio();
-                }
+        function toggleAudio() {
+             if (!audioCtx) {
+                initAudio();
+            }
 
-                if (isPlaying) {
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
-                    toggleBtn.classList.remove('text-neon-blue', 'animate-pulse');
-                    toggleBtn.classList.add('text-gray-500');
-                    isPlaying = false;
-                } else {
-                    audioCtx.resume();
-                    gainNode.gain.exponentialRampToValueAtTime(0.15, audioCtx.currentTime + 1);
-                    toggleBtn.classList.add('text-neon-blue', 'animate-pulse');
-                    toggleBtn.classList.remove('text-gray-500');
-                    isPlaying = true;
-                }
-            });
+            if (isPlaying) {
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+                toggleBtn.classList.remove('text-neon-blue', 'animate-pulse');
+                toggleBtn.classList.add('text-gray-500');
+                isPlaying = false;
+            } else {
+                audioCtx.resume();
+                gainNode.gain.exponentialRampToValueAtTime(0.15, audioCtx.currentTime + 1);
+                toggleBtn.classList.add('text-neon-blue', 'animate-pulse');
+                toggleBtn.classList.remove('text-gray-500');
+                isPlaying = true;
+            }
+        }
+
+        if(toggleBtn) {
+            toggleBtn.addEventListener('click', toggleAudio);
+            toggleBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Prevent phantom clicks
+                toggleAudio();
+            }); // Mobile support
         }
 
         function initAudio() {
