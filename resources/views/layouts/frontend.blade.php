@@ -97,7 +97,7 @@
     <header class="border-b border-gray-800 bg-black/80 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
             <a href="{{ route('home') }}" class="text-3xl font-display font-black tracking-widest text-neon-blue text-glow hover:text-white transition duration-300">
-                ANXIPUNK<span class="text-neon-pink text-sm ml-1">.ART</span>
+                ANXIPUNK<span class="text-neon-pink text-sm ml-1">.ICU</span>
             </a>
             <nav class="flex items-center space-x-8">
                 <!-- High Contrast Toggle -->
@@ -165,7 +165,7 @@
 
     <footer class="border-t border-gray-800 bg-black py-12 mt-20">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="font-display text-gray-600 tracking-widest">© 2025 ANXIPUNK.ART // SYSTEM_ONLINE</p>
+            <p class="font-display text-gray-600 tracking-widest">© 2025 ANXIPUNK.ICU // SYSTEM_ONLINE</p>
         </div>
     </footer>
 
