@@ -114,6 +114,16 @@
                     </svg>
                 </button>
 
+                <div class="hidden md:flex space-x-8">
+                    <a href="{{ route('home') }}" class="font-display uppercase tracking-widest hover:text-neon-green transition">Hikayeler</a>
+                    <a href="{{ route('gallery.index') }}" class="font-display uppercase tracking-widest hover:text-neon-blue transition">Galeri</a>
+                    <a href="{{ route('lore.index') }}" class="font-display uppercase tracking-widest hover:text-neon-pink transition">Veri Bankası</a>
+                    <a href="{{ route('about') }}" class="font-display uppercase tracking-widest hover:text-neon-purple transition">Hakkında</a>
+                    @auth
+                        <a href="{{ route('admin.stories.index') }}" class="font-display uppercase tracking-widest text-gray-500 hover:text-white">Admin</a>
+                    @endauth
+                </div>
+
                 <!-- Mobile Menu Button -->
                 <button id="mobileMenuBtn" class="md:hidden text-neon-blue hover:text-white transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
