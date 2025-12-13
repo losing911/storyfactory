@@ -96,6 +96,7 @@
 <body class="text-gray-300 antialiased min-h-screen flex flex-col">
     <header class="border-b border-gray-800 bg-black/80 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
+            <a href="{{ route('home') }}" class="text-3xl font-display font-black tracking-widest text-neon-blue text-glow hover:text-white transition duration-300">
                 ANXIPUNK
             </a>
             <nav class="flex items-center space-x-8">
