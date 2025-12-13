@@ -107,11 +107,60 @@
                     </svg>
                 </button>
                 
-                <!-- Google Translate Widget -->
-                <div id="google_translate_element"></div>
+                <!-- Google Translate Widget (Customized) -->
+                <div id="google_translate_element" class="cyber-translate"></div>
+                
+                <style>
+                    /* HACK: Google Translate Cyberpunk Override */
+                    .cyber-translate {
+                        display: inline-block;
+                    }
+                    .goog-te-gadget-simple {
+                        background-color: rgba(0,0,0,0.8) !important;
+                        border: 1px solid #00ffff !important;
+                        padding: 4px 8px !important;
+                        border-radius: 4px !important;
+                        font-family: 'Rajdhani', sans-serif !important;
+                        cursor: pointer !important;
+                        transition: all 0.3s ease;
+                    }
+                    .goog-te-gadget-simple:hover {
+                        box-shadow: 0 0 10px #00ffff !important;
+                        background-color: rgba(0, 255, 255, 0.1) !important;
+                    }
+                    .goog-te-menu-value {
+                        color: #00ffff !important;
+                        font-size: 14px !important;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                    }
+                    .goog-te-menu-value span {
+                        color: #00ffff !important;
+                        border-left: 1px solid #333 !important; /* Hide mostly */
+                    }
+                    .goog-te-gadget-icon {
+                        display: none !important;
+                    }
+                    /* Hide Top Bar */
+                    .goog-te-banner-frame.skiptranslate {
+                        display: none !important;
+                    }
+                    body {
+                        top: 0px !important;
+                    }
+                    #google_translate_element img {
+                        display: none !important;
+                    }
+                </style>
+
                 <script type="text/javascript">
                     function googleTranslateElementInit() {
-                      new google.translate.TranslateElement({pageLanguage: 'tr', includedLanguages: 'en,tr', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+                      new google.translate.TranslateElement({
+                          pageLanguage: 'tr', 
+                          includedLanguages: 'en,tr,de,ja,fr,es', 
+                          layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                          autoDisplay: false
+                      }, 'google_translate_element');
                     }
                 </script>
                 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
