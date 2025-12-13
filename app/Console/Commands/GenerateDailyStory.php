@@ -102,7 +102,9 @@ class GenerateDailyStory extends Command
 
             $story = Story::create($storyData);
             
-            // 4. Auto-Translate to English
+            // 4. Auto-Translate to English (DISABLED BY USER REQUEST)
+            // User requested to use Google Translate Widget instead to save AI resources.
+            /*
             try {
                 $this->info('İngiliz,ce Çeviri Başlatılıyor...');
                 // Strip HTML for translation context if needed, but we asked AI to keep HTML.
@@ -123,6 +125,7 @@ class GenerateDailyStory extends Command
                 $this->error('Çeviri Hatası: ' . $e->getMessage());
                 \Illuminate\Support\Facades\Log::error("Translation Failed: " . $e->getMessage());
             }
+            */
             
             // 5. Process New Lore (Auto-Extraction)
             if (!empty($data['new_lore']) && is_array($data['new_lore'])) {

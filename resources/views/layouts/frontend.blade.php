@@ -107,12 +107,14 @@
                     </svg>
                 </button>
                 
-                <!-- Language Switcher -->
-                <div class="flex items-center space-x-2 font-mono text-xs">
-                    <a href="{{ route('lang.switch', 'tr') }}" class="{{ app()->getLocale() == 'tr' ? 'text-neon-pink font-bold' : 'text-gray-500 hover:text-white' }} transition">TR</a>
-                    <span class="text-gray-700">|</span>
-                    <a href="{{ route('lang.switch', 'en') }}" class="{{ app()->getLocale() == 'en' ? 'text-neon-pink font-bold' : 'text-gray-500 hover:text-white' }} transition">EN</a>
-                </div>
+                <!-- Google Translate Widget -->
+                <div id="google_translate_element"></div>
+                <script type="text/javascript">
+                    function googleTranslateElementInit() {
+                      new google.translate.TranslateElement({pageLanguage: 'tr', includedLanguages: 'en,tr', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+                    }
+                </script>
+                <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
                 <!-- Ambient Audio Toggle -->
                 <button id="toggleAmbient" class="text-gray-500 hover:text-neon-blue transition duration-300" title="Toggle City Ambience">
