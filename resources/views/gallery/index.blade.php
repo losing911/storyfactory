@@ -1,14 +1,14 @@
 @extends('layouts.frontend')
 
-@section('title', 'Visual Archive')
-@section('meta_description', 'Archive of all generated cyberpunk visuals, locations, and characters.')
+@section('title', 'Görsel Arşiv')
+@section('meta_description', 'Oluşturulan tüm cyberpunk görselleri, mekanlar ve karakterler.')
 
 @section('content')
 <div class="container mx-auto px-4 py-12">
     <!-- Header -->
     <div class="mb-12 text-center relative">
         <h1 class="text-5xl md:text-7xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-blue via-white to-neon-pink animate-pulse tracking-tighter">
-            VISUAL_ARCHIVE
+            GÖRSEL_ARŞİV
         </h1>
         <p class="mt-4 text-neon-blue font-mono text-sm uppercase tracking-[0.2em] glitch-effect" data-text="System.load_resources(ALL)">
             System.load_resources(ALL)
@@ -25,7 +25,9 @@
             
             <!-- Overlay Content -->
             <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col justify-end p-6">
-                <span class="text-xs font-mono text-neon-green mb-1 uppercase tracking-widest">{{ $image->type }}</span>
+                <span class="text-xs font-mono text-neon-green mb-1 uppercase tracking-widest">
+                    {{ str_replace(['Database', 'Story Cover', 'Story Scene', 'Archive'], ['Veritabanı', 'Hikaye Kapağı', 'Hikaye Sahnesi', 'Arşiv'], $image->type) }}
+                </span>
                 <h3 class="text-xl font-display font-bold text-white leading-tight mb-2">{{ Str::limit($image->title, 40) }}</h3>
                 
                 <a href="{{ $image->link }}" class="inline-flex items-center text-sm font-mono text-neon-blue hover:text-white transition">
