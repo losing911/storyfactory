@@ -36,6 +36,9 @@ Route::get('/about', function () {
 Route::get('/database', [App\Http\Controllers\LoreController::class, 'index'])->name('lore.index');
 Route::get('/database/{slug}', [App\Http\Controllers\LoreController::class, 'show'])->name('lore.show');
 
+// Gallery
+Route::get('/gallery', [App\Http\Controllers\GalleryController::class, 'index'])->name('gallery.index');
+
 // Voting System
 Route::get('/poll/active', [App\Http\Controllers\PollController::class, 'getActivePoll']);
 Route::post('/poll/vote', [App\Http\Controllers\PollController::class, 'vote']);

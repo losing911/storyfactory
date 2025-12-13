@@ -123,6 +123,7 @@
 
                 <div class="hidden md:flex space-x-8">
                     <a href="{{ route('home') }}" class="font-display uppercase tracking-widest hover:text-neon-green transition">Stories</a>
+                    <a href="{{ route('gallery.index') }}" class="font-display uppercase tracking-widest hover:text-neon-blue transition">Gallery</a>
                     <a href="{{ route('lore.index') }}" class="font-display uppercase tracking-widest hover:text-neon-pink transition">Database</a>
                     <a href="{{ route('about') }}" class="font-display uppercase tracking-widest hover:text-neon-purple transition">About</a>
                     @auth
