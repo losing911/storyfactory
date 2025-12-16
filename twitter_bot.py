@@ -115,23 +115,49 @@ def post_to_twitter(story):
     except Exception as e:
         print(f"Text-only failed: {e}")
 
-    # 6. Post Tweet (Real)
+    import time
+    if image_file:
+        try:
+            print("Uploading media...")
+            media = api.media_upload(filename=image_file)
+            media_id = media.media_id
+            print(f"Media uploaded. ID: {media_id}")
+            print("Waiting 8 seconds for media processing...")
+            time.sleep(8) # Wait for Twitter to process the image
+        except Exception as e:
+            print(f"Media upload failed: {e}")
+    
+    # 6. Post Tweet (Try V2 first, then V1.1)
+    posted = False
+    
+    # Attempt V2
     try:
-        print("Posting real tweet...")
+        print("Posting tweet (V2)...")
         if media_id:
-             # media_ids expects a list of STRINGS
              response = client.create_tweet(text=text, media_ids=[str(media_id)])
         else:
              response = client.create_tweet(text=text)
-        
-        print(f"Tweet posted successfully! ID: {response.data['id']}")
-        
-        # Cleanup
-        if image_file and os.path.exists(image_file):
-            os.remove(image_file)
-            
+        print(f"Tweet posted successfully (V2)! ID: {response.data['id']}")
+        posted = True
     except Exception as e:
-        print(f"Failed to post tweet: {e}")
+        print(f"V2 Posting Failed: {e}")
+    
+    # Attempt V1.1 Fallback (if V2 failed)
+    if not posted:
+        try:
+            print("Attempting V1.1 Legacy Post...")
+            if media_id:
+                api.update_status(status=text, media_ids=[media_id])
+            else:
+                api.update_status(status=text)
+            print("Tweet posted successfully (V1.1)!")
+            posted = True
+        except Exception as e:
+            print(f"V1.1 Fallback Failed: {e}")
+
+    # Cleanup
+    if image_file and os.path.exists(image_file):
+        os.remove(image_file)
 
 if __name__ == "__main__":
     if not TWITTER_CONSUMER_KEY:
