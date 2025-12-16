@@ -37,21 +37,22 @@ class AIService
         }
         if ($char) {
             $loreContext .= "ANA KARAKTER: {$char->title} ({$char->description})\n";
+            $loreContext .= "  -> DİKKAT: Bu karakterin rolü/mesleği ({$char->type}) SABİTTİR. Asla değiştirme. Örneğin bir Direnişçi ise, asla Ajan olamaz.\n";
             if($char->visual_prompt) $visualConstraints[] = "Character Appearance ({$char->title}): " . $char->visual_prompt;
         }
         if ($faction) {
             $loreContext .= "ÇETE/FAKSİYON: {$faction->title} ({$faction->description})\n";
+            $loreContext .= "  -> DİKKAT: Bu grubun/çetenin sadakati ve amacı ({$faction->type}) SABİTTİR. Değiştirme.\n";
             if($faction->visual_prompt) $visualConstraints[] = "Faction Integrity: " . $faction->visual_prompt;
         }
 
         $prompt = "Aşağıdaki özelliklere sahip bir Cyberpunk ÇİZGİ ROMAN (Comic Book) hikayesi oluştur. Çıktı SADECE JSON formatında olmalı ve dil KESİNLİKLE TÜRKÇE olmalı:\n\n";
         $prompt .= "Konu: " . ($topic ?? 'Rastgele bir Cyberpunk teması') . "\n";
-        $prompt .= "Konu: " . ($topic ?? 'Rastgele bir Cyberpunk teması') . "\n";
-        $prompt .= "--- EVREN BİLGİSİ (LORE) ---\n" . $loreContext . "----------------------------\n";
+        $prompt .= "--- EVREN BİLGİSİ (LORE - DEĞİŞTİRİLEMEZ GERÇEKLER) ---\n" . $loreContext . "--------------------------------------------------------\n";
         $prompt .= "Stil: Cyberpunk 2077 / CD Projekt Red tarzı, fotogerçekçi, neon ışıklar, yüksek teknoloji, Night City atmosferi.\n";
         $prompt .= "ÖNEMLİ KURAL 1: Hikaye dili %100 TÜRKÇE olmalı.\n";
         $prompt .= "ÖNEMLİ KURAL 2: Başlıkta ve hikayede 'Neon' kelimesini ÇOK AZ kullan veya HİÇ KULLANMA. Teknoloji ve çürümüşlüğü vurgula, ışıkları değil.\n";
-        $prompt .= "ÖNEMLİ KURAL 3: EVREN BİLGİSİ'ndeki Şehir, Karakter ve Faksiyonu MUTLAKA kullan.\n";
+        $prompt .= "ÖNEMLİ KURAL 3: EVREN BİLGİSİ (Lore) verilerine sadık kal. Karakterlerin geçmişini veya tarafını ASLA değiştirme. Direnişçi direnişçidir, Ajan ajandır.\n";
         
         $prompt .= "ÖNEMLİ KURAL 4 (GÖRSEL DİNAMİZM): Karakterleri asla 'sabit dururken' veya 'poz verirken' tarif etme. Sahneye göre şu varyasyonlardan birini MUTLAKA kullan:\n";
         $prompt .= "  - 'Action Pose': Karakter hareket halinde, koşuyor veya zıplıyor.\n";
