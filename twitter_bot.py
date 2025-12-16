@@ -98,10 +98,20 @@ def post_to_twitter(story):
         except Exception as e:
             print(f"Media upload failed: {e}")
     
-    # 6. Post Tweet
+    # TEST: Try posting simple text first to check permissions
     try:
-        print("Posting tweet...")
+        print("Test: Posting text-only tweet...")
+        # client.create_tweet(text="Test tweet from Anxipunk Bot")
+        # print("Text-only tweet success!")
+    except Exception as e:
+        print(f"Text-only failed: {e}")
+
+    # 6. Post Tweet (Real)
+    try:
+        print("Posting real tweet...")
         if media_id:
+             # media_ids expects a list of STRINGS in some versions, or ints. Safest is list of strings?
+             # Tweepy documentation says list of integers or strings.
              response = client.create_tweet(text=text, media_ids=[media_id])
         else:
              response = client.create_tweet(text=text)
