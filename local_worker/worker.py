@@ -1,0 +1,205 @@
+import os
+import json
+import time
+import requests
+import websocket # pip install websocket-client
+import urllib.request
+import urllib.parse
+from dotenv import load_dotenv
+
+# Load Local Environment
+load_dotenv()
+
+# Configuration
+SERVER_URL = os.getenv("SERVER_URL", "http://anxipunk.icu/api") # Remote Server
+SERVER_TOKEN = os.getenv("SERVER_TOKEN", "change_me_to_secure_token")
+COMFY_URL = "127.0.0.1:8000"
+CLIENT_ID = "anxipunk_worker_1"
+
+import random
+import uuid
+
+# Helper: Upload Image to ComfyUI (Needed for Video Init)
+def upload_image_to_comfy(image_path_or_bytes, filename=None):
+    if filename is None:
+        filename = f"init_{int(time.time())}.png"
+    
+    files = {}
+    if isinstance(image_path_or_bytes, str):
+        files = {"image": (filename, open(image_path_or_bytes, 'rb'))}
+    else:
+        files = {"image": (filename, image_path_or_bytes)}
+        
+    data = {"overwrite": "true"}
+    resp = requests.post(f"http://{COMFY_URL}/upload/image", files=files, data=data)
+    return resp.json()
+
+# Helper: Load Workflow Template
+def load_workflow(name):
+    path = os.path.join(os.path.dirname(__file__), "workflows", name)
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+# Task: Generate Image (Flux)
+def generate_image(prompt):
+    print(f"Generating Image with Flux... Prompt: {prompt[:30]}...")
+    workflow = load_workflow("flux_schnell.json")
+    
+    # Modify Nodes
+    # Node 6: Positive Prompt
+    workflow["6"]["inputs"]["text"] = prompt
+    # Node 31: KSampler (Random Seed)
+    workflow["31"]["inputs"]["seed"] = random.randint(1, 999999999999999)
+    
+    return execute_workflow(workflow, output_node_id="9")
+
+# Task: Generate Video (Wan 2.2)
+def generate_video(image_bytes, prompt):
+    print(f"Generating Video with Wan 2.2... Prompt: {prompt[:30]}...")
+    
+    # 1. Upload Init Image
+    upload_resp = upload_image_to_comfy(image_bytes)
+    uploaded_filename = upload_resp["name"]
+    print(f"Init Image Uploaded: {uploaded_filename}")
+    
+    workflow = load_workflow("video_wan2_2_5B_ti2v.json")
+    
+    # Modify Nodes
+    # Node 56: Load Image
+    workflow["56"]["inputs"]["image"] = uploaded_filename
+    # Node 6: Positive Prompt
+    workflow["6"]["inputs"]["text"] = prompt
+    # Node 3: KSampler (Random Seed)
+    workflow["3"]["inputs"]["seed"] = random.randint(1, 999999999999999)
+    
+    # Output Node is 58 (SaveVideo) or checks if CreateVideo (57)
+    return execute_workflow(workflow, output_node_id="58")
+
+# Core: Execute and Wait
+def execute_workflow(workflow, output_node_id):
+    ws = websocket.WebSocket()
+    ws.connect(f"ws://{COMFY_URL}/ws?clientId={CLIENT_ID}")
+    
+    # Send Prompt
+    prompt_id = queue_prompt(workflow)['prompt_id']
+    print(f"Queued: {prompt_id}")
+    
+    # Wait for Completion via WebSocket
+    while True:
+        out = ws.recv()
+        if isinstance(out, str):
+            message = json.loads(out)
+            if message['type'] == 'executing':
+                data = message['data']
+                if data['node'] is None and data['prompt_id'] == prompt_id:
+                    print("Execution Complete!")
+                    break # Done
+                elif data['prompt_id'] == prompt_id:
+                    print(f"Executing Node: {data['node']}")
+    
+    # Fetch History to find output filename
+    history = get_history(prompt_id)[prompt_id]
+    outputs = history['outputs'][output_node_id]
+    
+    # Handle Image or Video output
+    file_data = []
+    
+    if 'images' in outputs:
+        for img in outputs['images']:
+            fname = img['filename']
+            subfolder = img['subfolder']
+            ftype = img['type']
+            content = get_image(fname, subfolder, ftype)
+            file_data.append((fname, content))
+            
+    elif 'gifs' in outputs: # Sometimes videos are under gifs/videos key
+         for vid in outputs['gifs']:
+            fname = vid['filename']
+            subfolder = vid['subfolder']
+            ftype = vid['type']
+            content = get_image(fname, subfolder, ftype)
+            file_data.append((fname, content))
+            
+    # ComfyUI SaveVideo often returns 'gifs' or custom keys depending on node.
+    # We will assume standard output structure or modify based on observation.
+    
+    return file_data
+
+def queue_prompt(workflow):
+    p = {"prompt": workflow, "client_id": CLIENT_ID}
+    data = json.dumps(p).encode('utf-8')
+    req = urllib.request.Request(f"http://{COMFY_URL}/prompt", data=data)
+    return json.loads(urllib.request.urlopen(req).read())
+
+def get_image(filename, subfolder, folder_type):
+    data = {"filename": filename, "subfolder": subfolder, "type": folder_type}
+    url_values = urllib.parse.urlencode(data)
+    with urllib.request.urlopen(f"http://{COMFY_URL}/view?{url_values}") as response:
+        return response.read()
+
+def get_history(prompt_id):
+    with urllib.request.urlopen(f"http://{COMFY_URL}/history/{prompt_id}") as response:
+        return json.loads(response.read())
+
+def run_test():
+    print("=== STARTING TEST DRIVE ===")
+    
+    # 1. Test Image (Flux)
+    # New Style: Hayao Miyazaki Cyberpunk
+    prompt = "A cyberpunk street scene in the style of Hayao Miyazaki and Studio Ghibli. Vibrant colors, anime style, lush details, soft shading, cel shaded, breathable atmosphere. A futuristic cat with tech goggles sitting on a mossy pipe."
+    print(f"STEP 1: Generating Image... '{prompt}'")
+    
+    try:
+        results = generate_image(prompt)
+        if not results:
+            print("Image Generation Failed (No Output).")
+            return
+
+        filename, content = results[0]
+        with open("test_flux.png", "wb") as f:
+            f.write(content)
+        print(f"STEP 1 SUCCESS: Saved 'test_flux.png'")
+        
+        # 2. Test Video (Wan)
+        print("STEP 2: Generating Video from Image...")
+        vid_results = generate_video(content, prompt + ", blinking eyes, looking around, movement")
+        
+        if not vid_results:
+            print("Video Generation Failed (No Output).")
+            return
+            
+        v_filename, v_content = vid_results[0]
+        with open("test_wan.mp4", "wb") as f:
+            f.write(v_content)
+        print(f"STEP 2 SUCCESS: Saved 'test_wan.mp4'")
+        
+        print("=== TEST DRIVE COMPLETE ===")
+        print("Check the 'local_worker' folder for results!")
+
+    except Exception as e:
+        print(f"TEST FAILED: {e}")
+        import traceback
+        traceback.print_exc()
+
+def main():
+    print(f"Worker Started. Connecting to {SERVER_URL}...")
+    print(f"ComfyUI Target: {COMFY_URL}")
+    
+    # Test Connection
+    try:
+        requests.get(f"http://{COMFY_URL}")
+        print("ComfyUI Connection: OK")
+    except:
+        print("ERROR: Could not connect to ComfyUI. Is it running?")
+        return
+
+    # RUN TEST MODE DIRECTLY
+    run_test()
+    return
+
+    # WebSocket for real-time status (Optional)
+    # ... (Rest of logic disabled for Test)
+
+
+if __name__ == "__main__":
+    main()
