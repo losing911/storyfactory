@@ -193,13 +193,22 @@ def main():
         print("ERROR: Could not connect to ComfyUI. Is it running?")
         return
 
-    # RUN TEST MODE DIRECTLY
-    run_test()
-    return
-
-    # WebSocket for real-time status (Optional)
-    # ... (Rest of logic disabled for Test)
-
+    # Production Loop
+    print("Worker is Active & Polling...")
+    
+    while True:
+        try:
+            job = fetch_pending_task() # This is currently mocked to return None
+            if job:
+                process_job(job)
+            else:
+                time.sleep(5) # Poll every 5 seconds
+        except KeyboardInterrupt:
+            print("Worker Stopped.")
+            break
+        except Exception as e:
+            print(f"Error in Loop: {e}")
+            time.sleep(5)
 
 if __name__ == "__main__":
     main()
