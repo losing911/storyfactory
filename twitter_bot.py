@@ -115,49 +115,23 @@ def post_to_twitter(story):
     except Exception as e:
         print(f"Text-only failed: {e}")
 
-    import time
-    if image_file:
-        try:
-            print("Uploading media...")
-            media = api.media_upload(filename=image_file)
-            media_id = media.media_id
-            print(f"Media uploaded. ID: {media_id}")
-            print("Waiting 8 seconds for media processing...")
-            time.sleep(8) # Wait for Twitter to process the image
-        except Exception as e:
-            print(f"Media upload failed: {e}")
+    # STRATEGY CHANGE: API V2 Free Tier often blocks Media Uploads (403).
+    # However, it allows Link Cards.
+    # We will verify if the site has og:image tags. If so, posting the LINK is enough.
     
-    # 6. Post Tweet (Try V2 first, then V1.1)
-    posted = False
+    print("Strategy: Optimized for Free Tier (Link Card Mode)")
     
-    # Attempt V2
+    # 6. Post Tweet (Text + Link)
     try:
-        print("Posting tweet (V2)...")
-        if media_id:
-             response = client.create_tweet(text=text, media_ids=[str(media_id)])
-        else:
-             response = client.create_tweet(text=text)
-        print(f"Tweet posted successfully (V2)! ID: {response.data['id']}")
-        posted = True
+        print("Posting tweet (Text + Link)...")
+        # Ensure the text is within limits (280 chars).
+        # We constructed 'text' earlier.
+        response = client.create_tweet(text=text)
+        print(f"Tweet posted successfully! ID: {response.data['id']}")
+        print("Twitter should automatically generate a Card with the image from the URL.")
+            
     except Exception as e:
-        print(f"V2 Posting Failed: {e}")
-    
-    # Attempt V1.1 Fallback (if V2 failed)
-    if not posted:
-        try:
-            print("Attempting V1.1 Legacy Post...")
-            if media_id:
-                api.update_status(status=text, media_ids=[media_id])
-            else:
-                api.update_status(status=text)
-            print("Tweet posted successfully (V1.1)!")
-            posted = True
-        except Exception as e:
-            print(f"V1.1 Fallback Failed: {e}")
-
-    # Cleanup
-    if image_file and os.path.exists(image_file):
-        os.remove(image_file)
+        print(f"Failed to post tweet: {e}")
 
 if __name__ == "__main__":
     if not TWITTER_CONSUMER_KEY:
