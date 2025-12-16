@@ -183,7 +183,7 @@ class AIService
     {
         // Use Pollinations.ai with FLUX model (State of the Art)
         // Updated Style: Hayao Miyazaki / Studio Ghibli Cyberpunk
-        $style = ", Hayao Miyazaki style, Studio Ghibli, cyberpunk, anime art style, vibrant colors, cel shaded, highly detailed, atmospheric, masterpiece, 8k, breathable world, hand drawn aesthetic";
+        $style = ", Hayao Miyazaki style, Studio Ghibli, cyberpunk, anime art style, vibrant colors, cel shaded, highly detailed, atmospheric, masterpiece, 8k, breathable world, hand drawn aesthetic";breathable world, hand drawn aesthetic";
         
         // 1. Inject Visual Consistency Prompt
         if ($visualPrompt) {

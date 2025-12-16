@@ -12,12 +12,69 @@ load_dotenv()
 
 # Configuration
 SERVER_URL = os.getenv("SERVER_URL", "http://anxipunk.icu/api") # Remote Server
-SERVER_TOKEN = os.getenv("SERVER_TOKEN", "change_me_to_secure_token")
+SERVER_TOKEN = os.getenv("SERVER_TOKEN", "anxipunk_secret_worker_key_2025")
 COMFY_URL = "127.0.0.1:8000"
 CLIENT_ID = "anxipunk_worker_1"
 
 import random
 import uuid
+import base64
+
+# API: Check for Jobs
+def fetch_pending_task():
+    try:
+        headers = {"Authorization": f"Bearer {SERVER_TOKEN}", "Accept": "application/json"}
+        resp = requests.get(f"{SERVER_URL}/jobs/pending", headers=headers, timeout=10)
+        
+        if resp.status_code == 200:
+            job = resp.json()
+            if job:
+                print(f"New Job Found: {job['id']} ({job['type']})")
+                return job
+        elif resp.status_code == 401:
+            print("Auth Failed! Check SERVER_TOKEN.")
+        
+        return None
+    except Exception as e:
+        print(f"Server check failed: {e}")
+        return None
+
+# API: Process and Upload
+def process_job(job):
+    print(f"Processing Job: {job['id']} - Prompt: {job['prompt'][:20]}...")
+    
+    try:
+        results = []
+        if job['type'] == 'image_generation':
+            results = generate_image(job['prompt'])
+            
+        if not results:
+            print("Generation Failed.")
+            return
+
+        # Upload Results
+        filename, content = results[0] # Take first image
+        b64_content = base64.b64encode(content).decode('utf-8')
+        
+        payload = {
+            "job_id": job['id'],
+            "type": job['type'],
+            "filename": filename,
+            "file_content": b64_content
+        }
+        
+        headers = {"Authorization": f"Bearer {SERVER_TOKEN}", "Content-Type": "application/json"}
+        resp = requests.post(f"{SERVER_URL}/jobs/complete", json=payload, headers=headers)
+        
+        if resp.status_code == 200:
+            print(f"Job {job['id']} Completed & Uploaded! URL: {resp.json().get('url')}")
+        else:
+            print(f"Upload Failed: {resp.text}")
+
+    except Exception as e:
+        print(f"Job Processing Failed: {e}")
+        import traceback
+        traceback.print_exc()
 
 # Helper: Upload Image to ComfyUI (Needed for Video Init)
 def upload_image_to_comfy(image_path_or_bytes, filename=None):
