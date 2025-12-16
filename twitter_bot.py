@@ -82,6 +82,8 @@ def post_to_twitter(story):
     print("Trends API unavailable on Free Tier. Using static tags.")
     trending_hashtags = ["#Gündem", "#Türkiye", "#YapayZeka", "#Cyberpunk", "#Sanat"]
 
+    # remove fallback tags if needed or just keep them
+    
     # 4. Prepare Content
     title = story.get('title')
     link = story.get('url')
@@ -91,44 +93,32 @@ def post_to_twitter(story):
     story_hashtags = [f"#{tag}" for tag in story_tags[:3]]
     all_hashtags = " ".join(story_hashtags + trending_hashtags)
     
-    text = f"🤖 {title}\n\n{story.get('summary')}\n\n🔗 Oku: {link}\n\n{all_hashtags}"
-    
-    # 5. Upload Image
-    media_id = None
-    image_file = download_image(story.get('image_url'))
-    if image_file:
-        try:
-            print("Uploading media...")
-            media = api.media_upload(filename=image_file)
-            media_id = media.media_id
-            print(f"Media uploaded. ID: {media_id}")
-        except Exception as e:
-            print(f"Media upload failed: {e}")
-    
-    # TEST: Try posting simple text first to check permissions (Unique content)
+    # Construct Tweet with Length Check
+    # URL takes 23 characters fixed.
+    # We leave 20 chars buffer. Max 280.
     import time
-    try:
-        print("Test: Posting text-only tweet...")
-        unique_text = f"Test tweet from Anxipunk Bot - {time.time()}"
-        client.create_tweet(text=unique_text)
-        print("Text-only tweet success! It is PERMISSION issue only with media or duplicates.")
-    except Exception as e:
-        print(f"Text-only failed: {e}")
+    timestamp = str(int(time.time())) # To avoid duplicate content errors during testing
+    
+    base_text = f"🤖 {title}\n\n"
+    footer = f"\n\n🔗 Oku: {link}\n\n{all_hashtags} [{timestamp}]"
+    
+    available_chars = 280 - len(base_text) - len(footer) - 5
+    summary = story.get('summary')
+    
+    if len(summary) > available_chars:
+        summary = summary[:available_chars] + "..."
+        
+    text = base_text + summary + footer
 
-    # STRATEGY CHANGE: API V2 Free Tier often blocks Media Uploads (403).
-    # However, it allows Link Cards.
-    # We will verify if the site has og:image tags. If so, posting the LINK is enough.
-    
-    print("Strategy: Optimized for Free Tier (Link Card Mode)")
-    
-    # 6. Post Tweet (Text + Link)
+    print("Strategy: Text + Link Card (Media Upload Skipped)")
+    print(f"Final Tweet Length: {len(text)}")
+    print(f"Tweet Content: {text}")
+
+    # 6. Post Tweet
     try:
-        print("Posting tweet (Text + Link)...")
-        # Ensure the text is within limits (280 chars).
-        # We constructed 'text' earlier.
+        print("Posting tweet...")
         response = client.create_tweet(text=text)
         print(f"Tweet posted successfully! ID: {response.data['id']}")
-        print("Twitter should automatically generate a Card with the image from the URL.")
             
     except Exception as e:
         print(f"Failed to post tweet: {e}")
