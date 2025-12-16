@@ -71,6 +71,13 @@ def post_to_twitter(story):
         access_token_secret=TWITTER_ACCESS_TOKEN_SECRET
     )
 
+    # Verify Credentials (V2)
+    try:
+        me = client.get_me()
+        print(f"V2 Auth Success: {me.data.name} (ID: {me.data.id})")
+    except Exception as e:
+        print(f"V2 Auth Failed: {e}")
+
     # 3. Trends (Skipped - Not available on Free Tier)
     print("Trends API unavailable on Free Tier. Using static tags.")
     trending_hashtags = ["#Gündem", "#Türkiye", "#YapayZeka", "#Cyberpunk", "#Sanat"]
@@ -98,11 +105,13 @@ def post_to_twitter(story):
         except Exception as e:
             print(f"Media upload failed: {e}")
     
-    # TEST: Try posting simple text first to check permissions
+    # TEST: Try posting simple text first to check permissions (Unique content)
+    import time
     try:
         print("Test: Posting text-only tweet...")
-        # client.create_tweet(text="Test tweet from Anxipunk Bot")
-        # print("Text-only tweet success!")
+        unique_text = f"Test tweet from Anxipunk Bot - {time.time()}"
+        client.create_tweet(text=unique_text)
+        print("Text-only tweet success! It is PERMISSION issue only with media or duplicates.")
     except Exception as e:
         print(f"Text-only failed: {e}")
 
@@ -110,9 +119,8 @@ def post_to_twitter(story):
     try:
         print("Posting real tweet...")
         if media_id:
-             # media_ids expects a list of STRINGS in some versions, or ints. Safest is list of strings?
-             # Tweepy documentation says list of integers or strings.
-             response = client.create_tweet(text=text, media_ids=[media_id])
+             # media_ids expects a list of STRINGS
+             response = client.create_tweet(text=text, media_ids=[str(media_id)])
         else:
              response = client.create_tweet(text=text)
         
