@@ -53,31 +53,19 @@ class GenerateDailyStory extends Command
 
             // 2. Process Scenes
             foreach ($data['scenes'] as $index => $scene) {
-                $prompt = $scene['img_prompt'];
-                $text = $scene['text'];
+                // WORKER MODE: Skip synchronous generation
+                // $prompt = $scene['img_prompt'];
+                // $remoteUrl = $aiService->generateImage($prompt, $data['meta_visual_prompts'] ?? null);
+                // $localUrl = $aiService->downloadImage($remoteUrl, "stories/$dateFolder/{$slug}_{$index}.jpg");
                 
-                // Get Visual Constraints
-                $visualConstraints = $data['meta_visual_prompts'] ?? null;
-
-                // Rate Limiting
-                sleep(4);
-
-                try {
-                    $remoteUrl = $aiService->generateImage($prompt, $visualConstraints);
-                    $localPath = "stories/$dateFolder/{$slug}_{$index}.jpg";
-                    $localUrl = $aiService->downloadImage($remoteUrl, $localPath);
-                } catch (\Exception $e) {
-                    $localUrl = "https://placehold.co/1280x720/050505/00ff00?text=Error"; 
-                }
+                // Use Placeholder for now, Worker will update Cover later.
+                // For inner scenes, we keep placeholders or maybe update them later too (Phase 2).
+                $localUrl = "https://placehold.co/1280x720/1f2937/00ff00?text=Generating+Visuals...";
 
                 $storyHtml .= "<div class='scene-container mb-12 p-4 bg-gray-900/50 rounded-lg border border-gray-800'>";
                 $storyHtml .= "  <div class='mb-4'><img src='$localUrl' alt='Scene $index' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500'></div>";
-                $storyHtml .= "  <div class='prose prose-invert prose-lg text-gray-300 font-sans leading-relaxed'><p>" . nl2br(e($text)) . "</p></div>";
+                $storyHtml .= "  <div class='prose prose-invert prose-lg text-gray-300 font-sans leading-relaxed'><p>" . nl2br(e($scene['text'])) . "</p></div>";
                 $storyHtml .= "</div>";
-
-                if ($index === 0) {
-                    $coverImageUrl = $localUrl;
-                }
                 
                 $bar->advance();
             }
@@ -88,10 +76,10 @@ class GenerateDailyStory extends Command
             $storyData = [
                 'baslik' => $data['baslik'],
                 'slug' => $slug,
-                'metin' => $storyHtml,
-                'gorsel_url' => $coverImageUrl,
+                'metin' => $storyHtml, // Contains placeholders
+                'gorsel_url' => null,  // Will be filled by Worker
                 'yayin_tarihi' => now(),
-                'durum' => 'published',
+                'durum' => 'pending_visuals', // TRIGGER THE WORKER
                 'konu' => 'AI Auto-Gen',
                 'mood' => $data['mood'] ?? 'mystery',
                 'meta' => ($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''),

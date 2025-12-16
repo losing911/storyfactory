@@ -29,10 +29,14 @@ class ApiController extends Controller
         $story = Story::where('status', 'pending_visuals')->first();
 
         if ($story) {
+             // Decode the prompts array
+             $prompts = json_decode($story->gorsel_prompt, true); // Note: Column is gorsel_prompt in code, img_prompt in JSON
+             $coverPrompt = is_array($prompts) ? ($prompts[0] ?? $story->title) : $story->title;
+
             return response()->json([
                 'id' => $story->id,
                 'type' => 'image_generation',
-                'prompt' => $story->img_prompt ?? "Cyberpunk scene, " . $story->title, // Fallback
+                'prompt' => $coverPrompt,
                 'style_preset' => 'flux_schnell' 
             ]);
         }
