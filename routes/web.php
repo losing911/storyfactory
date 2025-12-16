@@ -83,9 +83,10 @@ Route::get('/debug-locale', function() {
         'session_locale' => session('locale'),
         'story_id' => $story->id ?? null,
         'translations_count' => $story->translations->count() ?? 0,
-        'translations' => $story->translations->toArray() ?? [],
-        'text_en' => $story->getText('en'),
         'title_en' => $story->getTitle('en'),
+    ];
+});
+
 Route::get('/debug-api', function() {
     try {
         $controller = new App\Http\Controllers\ApiController();
