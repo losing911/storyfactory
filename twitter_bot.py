@@ -61,36 +61,17 @@ def post_to_twitter(story):
         access_token_secret=TWITTER_ACCESS_TOKEN_SECRET
     )
 
-    # 3. Fetch Trends (Turkey)
-    trending_hashtags = []
-    try:
-        # WOEID for Turkey is 23424969
-        trends = api.get_place_trends(id=23424969)
-        if trends:
-            # Get top 3 trends that start with # (to avoid plain text phrases if possible, or convert them)
-            count = 0
-            for trend in trends[0]['trends']:
-                name = trend['name']
-                if name.startswith('#'):
-                    trending_hashtags.append(name)
-                    count += 1
-                if count >= 3:
-                     break
-        print(f"Turkey Trends fetched: {trending_hashtags}")
-    except Exception as e:
-        print(f"Could not fetch trends (Permission/RateLimit): {e}")
-        # Fallback tags if trends fail
-        trending_hashtags = ["#Gündem", "#Türkiye", "#Haber"]
+    # 3. Trends (Skipped - Not available on Free Tier)
+    print("Trends API unavailable on Free Tier. Using static tags.")
+    trending_hashtags = ["#Gündem", "#Türkiye", "#YapayZeka", "#Cyberpunk", "#Sanat"]
 
     # 4. Prepare Content
     title = story.get('title')
-    link = story.get('url') # Link to the live site
+    link = story.get('url')
     story_tags = story.get('tags', [])
     
-    # Combine: Story Tags (Generic) + Trends (Traffic)
-    # Limit story tags to 3 to save space
+    # Combine Tags
     story_hashtags = [f"#{tag}" for tag in story_tags[:3]]
-    
     all_hashtags = " ".join(story_hashtags + trending_hashtags)
     
     text = f"🤖 {title}\n\n{story.get('summary')}\n\n🔗 Oku: {link}\n\n{all_hashtags}"
