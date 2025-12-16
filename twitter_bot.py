@@ -49,11 +49,21 @@ def post_to_twitter(story):
     """Post the story to Twitter."""
     
     # 1. Authenticate (V1.1 for Media Upload, V2 for Tweeting)
+    print("Authenticating...")
     auth = tweepy.OAuth1UserHandler(
         TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET,
         TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET
     )
     api = tweepy.API(auth)
+    
+    # Verify Credentials (V1.1)
+    try:
+        user = api.verify_credentials()
+        print(f"Authenticated as: {user.screen_name}")
+    except Exception as e:
+        print(f"Authentication Failed (Check Keys): {e}")
+        return
+
     client = tweepy.Client(
         consumer_key=TWITTER_CONSUMER_KEY,
         consumer_secret=TWITTER_CONSUMER_SECRET,
