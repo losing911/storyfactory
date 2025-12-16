@@ -167,8 +167,37 @@ class GenerateDailyStory extends Command
                 }
             }
 
-            // 6. Post to Social Media
+            // 6. Post to Social Media (Laravel Service - Legacy/Internal)
             $socialPoster->postToSocialMedia($story);
+            
+            // 7. Trigger Python Twitter Bot (Official API + Trends)
+            $this->info('Twitter Bot Tetikleniyor...');
+            try {
+                // Determine python command (python3 on server, python on windows)
+                $pythonCmd = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? 'python' : 'python3';
+                $scriptPath = base_path('twitter_bot.py');
+                
+                // Execute command asynchronously or synchronously? Sync is safer for logging.
+                // Redirect output to verify it runs
+                $output = [];
+                $returnVar = 0;
+                exec("$pythonCmd $scriptPath 2>&1", $output, $returnVar);
+                
+                // Log output
+                foreach ($output as $line) {
+                    $this->line("  [Bot]: $line");
+                    \Illuminate\Support\Facades\Log::info("Twitter Bot Output: $line");
+                }
+                
+                if ($returnVar === 0) {
+                    $this->info('Twitter Paylaşımı Başarılı!');
+                } else {
+                    $this->warn('Twitter Botu Hata Verdi (Exit Code: ' . $returnVar . ')');
+                }
+                
+            } catch (\Exception $e) {
+                $this->error('Twitter Bot Başlatılamadı: ' . $e->getMessage());
+            }
 
             $this->info('Otomasyon Başarılı!');
             \Illuminate\Support\Facades\Log::info("Daily Story Created Successfully: ID {$story->id}");
