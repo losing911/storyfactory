@@ -182,8 +182,8 @@ class AIService
     public function generateImage(string $prompt, string $visualPrompt = null, string $refImageUrl = null): string
     {
         // Use Pollinations.ai with FLUX model (State of the Art)
-        // Updated Style: Cyberpunk 2077 / Photorealistic
-        $style = ", cyberpunk 2077 style, night city, photorealistic, ray tracing, unreal engine 5 render, cinematic lighting, neon lights, high tech low life, highly detailed, 8k, uhd, masterpiece, sharp focus";
+        // Updated Style: Hayao Miyazaki / Studio Ghibli Cyberpunk
+        $style = ", Hayao Miyazaki style, Studio Ghibli, cyberpunk, anime art style, vibrant colors, cel shaded, highly detailed, atmospheric, masterpiece, 8k, breathable world, hand drawn aesthetic";
         
         // 1. Inject Visual Consistency Prompt
         if ($visualPrompt) {

@@ -8,8 +8,5 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// Public API Routes
-Route::get('/stories/latest', [ApiController::class, 'latestStory']);
-Route::get('/stories', [ApiController::class, 'stories']);
-Route::get('/lore', [ApiController::class, 'lore']);
-
+Route::get('/jobs/pending', [ApiController::class, 'getPendingJobs']);
+Route::post('/jobs/complete', [ApiController::class, 'completeJob']);

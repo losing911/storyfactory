@@ -4,53 +4,71 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Story;
-use App\Models\LoreEntry;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ApiController extends Controller
 {
-    /**
-     * Get the latest published story.
-     */
-    public function latestStory()
-    {
-        $story = Story::where('durum', 'published')
-            ->latest('yayin_tarihi')
-            ->first();
+    private function checkAuth(Request $request) {
+        $token = $request->header('Authorization');
+        // Simple Bearer token check
+        if ($token !== 'Bearer ' . env('WORKER_AUTH_TOKEN', 'anxipunk_secret_worker_key_2025')) {
+            abort(401, 'Unauthorized');
+        }
+    }
 
-        if (!$story) {
-            return response()->json(['error' => 'No stories found'], 404);
+    public function getPendingJobs(Request $request)
+    {
+        $this->checkAuth($request);
+
+        // Priority 1: Stories pending Video (if we implement video flow)
+        // Priority 2: Stories pending Images (Visuals)
+        
+        // Find a story that needs images
+        // We assume 'pending_visuals' status means images are needed
+        $story = Story::where('status', 'pending_visuals')->first();
+
+        if ($story) {
+            return response()->json([
+                'id' => $story->id,
+                'type' => 'image_generation',
+                'prompt' => $story->img_prompt ?? "Cyberpunk scene, " . $story->title, // Fallback
+                'style_preset' => 'flux_schnell' 
+            ]);
         }
 
-        return response()->json([
-            'id' => $story->id,
-            'title' => $story->getTitle('tr'), // Default to TR as site is TR
-            'slug' => $story->slug,
-            'summary' => $story->sosyal_ozet ?? mb_substr(strip_tags($story->metin), 0, 150) . '...',
-            'url' => route('story.show', $story->slug),
-            'image_url' => $story->gorsel_url ? asset($story->gorsel_url) : null,
-            'tags' => $story->etiketler,
-            'published_at' => $story->yayin_tarihi,
+        // Add Video Logic here later if needed
+        
+        return response()->json(null); // No jobs
+    }
+
+    public function completeJob(Request $request)
+    {
+        $this->checkAuth($request);
+        
+        $validated = $request->validate([
+            'job_id' => 'required',
+            'type' => 'required',
+            'file_content' => 'required', // Base64 encoded file
+            'filename' => 'required' 
         ]);
-    }
 
-    /**
-     * List stories with pagination.
-     */
-    public function stories()
-    {
-        $stories = Story::where('durum', 'published')
-            ->latest('yayin_tarihi')
-            ->paginate(10);
+        $story = Story::find($validated['job_id']);
+        if (!$story) return response()->json(['error' => 'Story not found'], 404);
 
-        return response()->json($stories);
-    }
+        $imageData = base64_decode($validated['file_content']);
+        $path = 'stories/images/' . $validated['filename'];
+        
+        // Save to public disk
+        Storage::disk('public')->put($path, $imageData);
+        
+        // Update Story
+        if ($validated['type'] == 'image_generation') {
+            $story->image_url = '/storage/' . $path;
+            $story->status = 'published'; // Publish immediately after image is ready
+            $story->save();
+        }
 
-    /**
-     * Get all lore entries.
-     */
-    public function lore()
-    {
-        $lore = LoreEntry::where('is_active', true)->get();
-        return response()->json($lore);
+        return response()->json(['status' => 'success', 'url' => $story->image_url]);
     }
 }
