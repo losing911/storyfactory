@@ -100,6 +100,9 @@ Route::get('/fix-stories', function() {
         $count++;
     }
     
+    return "Reset $count stories to 'pending_visuals'. Worker will now fix them!";
+});
+
 Route::get('/debug-pending', function() {
     $story = App\Models\Story::where('durum', 'pending_visuals')->first();
     if (!$story) return "No stories with status 'pending_visuals' found.";
