@@ -68,11 +68,11 @@ class ApiController extends Controller
         
         // Update Story
         if ($validated['type'] == 'image_generation') {
-            $story->image_url = '/storage/' . $path;
+            $story->gorsel_url = '/storage/' . $path;
             $story->durum = 'published'; // Publish immediately after image is ready
             $story->save();
         }
 
-        return response()->json(['status' => 'success', 'url' => $story->image_url]);
+        return response()->json(['status' => 'success', 'url' => $story->gorsel_url]);
     }
 }
