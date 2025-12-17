@@ -100,7 +100,24 @@ Route::get('/fix-stories', function() {
         $count++;
     }
     
-    return "Reset $count stories to 'pending_visuals'. Worker will now fix them!";
+Route::get('/debug-pending', function() {
+    $story = App\Models\Story::where('durum', 'pending_visuals')->first();
+    if (!$story) return "No stories with status 'pending_visuals' found.";
+    
+    $placeholderSign = "https://placehold.co/1280x720/1f2937/00ff00";
+    $hasPlaceholder = strpos($story->metin, $placeholderSign) !== false;
+    
+    preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Scene (\d+)[\'"]/s', $story->metin, $matches);
+    
+    return [
+        'id' => $story->id,
+        'title' => $story->baslik,
+        'status' => $story->durum,
+        'has_placeholder_strpos' => $hasPlaceholder,
+        'placeholder_search_term' => $placeholderSign,
+        'regex_match_result' => $matches,
+        'raw_html_sample' => substr($story->metin, 0, 500) // Show first 500 chars
+    ];
 });
 
 
