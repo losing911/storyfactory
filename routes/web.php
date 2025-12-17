@@ -88,14 +88,5 @@ Route::get('/debug-locale', function() {
 });
 
 Route::get('/debug-api', function() {
-    try {
-        $controller = new App\Http\Controllers\ApiController();
-        // Mock Request with Auth Header
-        $request = Illuminate\Http\Request::create('/api/jobs/pending', 'GET');
-        $request->headers->set('Authorization', 'Bearer anxipunk_secret_worker_key_2025');
-        
-        return $controller->getPendingJobs($request);
-    } catch (\Throwable $e) {
-        return "ERROR: " . $e->getMessage() . "<br>Line: " . $e->getLine() . "<br>File: " . $e->getFile();
-    }
+    return highlight_string(file_get_contents(app_path('Http/Controllers/ApiController.php')), true);
 });
