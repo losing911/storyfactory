@@ -21,28 +21,43 @@ class ApiController extends Controller
     {
         $this->checkAuth($request);
 
-        // Priority 1: Stories pending Video (if we implement video flow)
-        // Priority 2: Stories pending Images (Visuals)
-        
-        // Find a story that needs images
-        // We assume 'pending_visuals' status means images are needed
+        // Priority: Stories pending Visuals
         $story = Story::where('durum', 'pending_visuals')->first();
 
         if ($story) {
-             // Decode the prompts array
-             $prompts = json_decode($story->gorsel_prompt, true); // Note: Column is gorsel_prompt in code, img_prompt in JSON
-             $coverPrompt = is_array($prompts) ? ($prompts[0] ?? $story->title) : $story->title;
-
-            return response()->json([
-                'id' => $story->id,
-                'type' => 'image_generation',
-                'prompt' => $coverPrompt,
-                'style_preset' => 'flux_schnell' 
-            ]);
+            // "The Scavenger Hunt": Find which scene still has a placeholder
+            // We look for the placeholder URL used in GenerateDailyStory
+            $placeholderSign = "https://placehold.co/1280x720/1f2937/00ff00";
+            
+            if (strpos($story->metin, $placeholderSign) !== false) {
+                // Parse HTML to find the first image with this src
+                // Regex to find: <img src='...placehold...' ... alt='Scene X' ...>
+                // We rely on alt='Scene X' to know which index it is.
+                
+                preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Scene (\d+)[\'"]/s', $story->metin, $matches);
+                
+                if (isset($matches[1])) {
+                    $index = intval($matches[1]);
+                    $prompts = json_decode($story->gorsel_prompt, true);
+                    
+                    if (isset($prompts[$index])) {
+                        return response()->json([
+                            'id' => $story->id,
+                            'type' => 'image_generation',
+                            'scene_index' => $index, // Tell worker which scene this is
+                            'prompt' => $prompts[$index],
+                            'style_preset' => 'flux_schnell' 
+                        ]);
+                    }
+                }
+            } else {
+                // No placeholders found, but status is 'pending_visuals'? 
+                // Mark as published to fix state.
+                 $story->durum = 'published';
+                 $story->save();
+            }
         }
 
-        // Add Video Logic here later if needed
-        
         return response()->json(null); // No jobs
     }
 
@@ -53,8 +68,9 @@ class ApiController extends Controller
         $validated = $request->validate([
             'job_id' => 'required',
             'type' => 'required',
-            'file_content' => 'required', // Base64 encoded file
-            'filename' => 'required' 
+            'file_content' => 'required',
+            'filename' => 'required',
+            'scene_index' => 'required|integer' // We need to know which scene we fixed
         ]);
 
         $story = Story::find($validated['job_id']);
@@ -63,16 +79,40 @@ class ApiController extends Controller
         $imageData = base64_decode($validated['file_content']);
         $path = 'stories/images/' . $validated['filename'];
         
-        // Save to public disk
         Storage::disk('public')->put($path, $imageData);
+        $publicUrl = '/storage/' . $path;
         
-        // Update Story
         if ($validated['type'] == 'image_generation') {
-            $story->gorsel_url = '/storage/' . $path;
-            $story->durum = 'published'; // Publish immediately after image is ready
+            $index = $validated['scene_index'];
+            
+            // 1. If it's the first scene (Index 0), it's also the Cover
+            if ($index === 0) {
+                $story->gorsel_url = $publicUrl;
+            }
+
+            // 2. Replace the Placeholder in `metin` HTML
+            // We look for the specific tag for Scene X
+            $placeholderSign = "https://placehold.co/1280x720/1f2937/00ff00";
+            // Regex matches the whole img tag that contains the placeholder AND alt='Scene $index'
+            $pattern = '/<img[^>]+src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"][^>]+alt=[\'"]Scene ' . $index . '[\'"][^>]*>/i';
+            
+            // Construct new clean IMG tag
+            $newImgTag = "<img src='$publicUrl' alt='Scene $index' class='w-full rounded shadow-lg border-2 border-neon-blue/50 transition duration-500'>";
+            
+            $story->metin = preg_replace($pattern, $newImgTag, $story->metin);
+            
+            // 3. Check if any placeholders remain
+            if (strpos($story->metin, $placeholderSign) === false) {
+                $story->durum = 'published'; // All scenes done!
+                Log::info("Story {$story->id} fully visualized and published.");
+            } else {
+                // Still working...
+                Log::info("Story {$story->id} scene $index updated. More pending.");
+            }
+            
             $story->save();
         }
 
-        return response()->json(['status' => 'success', 'url' => $story->gorsel_url]);
+        return response()->json(['status' => 'success', 'url' => $publicUrl]);
     }
 }
