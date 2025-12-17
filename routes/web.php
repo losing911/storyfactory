@@ -87,4 +87,20 @@ Route::get('/debug-locale', function() {
     ];
 });
 
+Route::get('/fix-stories', function() {
+    // Find published stories that still have placeholders
+    $stories = App\Models\Story::where('durum', 'published')
+        ->where('metin', 'LIKE', '%placehold.co%')
+        ->get();
+        
+    $count = 0;
+    foreach ($stories as $story) {
+        $story->durum = 'pending_visuals';
+        $story->save();
+        $count++;
+    }
+    
+    return "Reset $count stories to 'pending_visuals'. Worker will now fix them!";
+});
+
 
