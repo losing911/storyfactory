@@ -87,30 +87,4 @@ Route::get('/debug-locale', function() {
     ];
 });
 
-Route::get('/debug-api', function() {
-    try {
-        // ID identified from logs
-        $id = 34; 
-        $story = App\Models\Story::find($id);
 
-        if (!$story) return "Story $id Not Found!";
-        
-        // Simulate Upload
-        $dummyContent = "TEST_CONTENT_" . time();
-        $filename = "test_upload_" . time() . ".txt";
-        $path = 'stories/images/' . $filename;
-        
-        // Step 1: Write to Disk
-        Illuminate\Support\Facades\Storage::disk('public')->put($path, $dummyContent);
-        
-        // Step 2: Update DB
-        $story->gorsel_url = '/storage/' . $path;
-        $story->durum = 'published';
-        $story->save();
-        
-        return "SUCCESS! Saved to $path and Updated DB. Check if Loop stops.";
-        
-    } catch (\Throwable $e) {
-        return "ERROR: " . $e->getMessage() . "<br>Trace: " . $e->getTraceAsString();
-    }
-});
