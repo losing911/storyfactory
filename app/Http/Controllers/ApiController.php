@@ -22,18 +22,17 @@ class ApiController extends Controller
         $this->checkAuth($request);
 
         // Priority: Stories pending Visuals
-        $story = Story::where('durum', 'pending_visuals')->first();
+        // Loop through pending stories to find one that ACTUALLY needs work
+        // This prevents "Zombie Stories" (Status: pending, but no placeholders) from blocking the queue
+        $stories = Story::where('durum', 'pending_visuals')->get();
+        $placeholderSign = "https://placehold.co/1280x720/1f2937/00ff00";
 
-        if ($story) {
-            // "The Scavenger Hunt": Find which scene still has a placeholder
-            // We look for the placeholder URL used in GenerateDailyStory
-            $placeholderSign = "https://placehold.co/1280x720/1f2937/00ff00";
+        foreach ($stories as $story) {
             
             if (strpos($story->metin, $placeholderSign) !== false) {
-                // Parse HTML to find the first image with this src
-                // Regex to find: <img src='...placehold...' ... alt='Scene X' ...>
-                // We rely on alt='Scene X' to know which index it is.
+                // FOUND ONE!
                 
+                // Parse HTML to find the first image with this src
                 preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Scene (\d+)[\'"]/s', $story->metin, $matches);
                 
                 if (isset($matches[1])) {
@@ -44,17 +43,17 @@ class ApiController extends Controller
                         return response()->json([
                             'id' => $story->id,
                             'type' => 'image_generation',
-                            'scene_index' => $index, // Tell worker which scene this is
+                            'scene_index' => $index,
                             'prompt' => $prompts[$index],
                             'style_preset' => 'flux_schnell' 
                         ]);
                     }
                 }
             } else {
-                // No placeholders found, but status is 'pending_visuals'? 
-                // Mark as published to fix state.
+                // No placeholders found? Mark as published and CONTINUE searching
                  $story->durum = 'published';
                  $story->save();
+                 Log::info("Auto-Published Zombie Story ID: {$story->id}");
             }
         }
 
