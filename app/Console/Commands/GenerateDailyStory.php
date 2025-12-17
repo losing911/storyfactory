@@ -35,11 +35,28 @@ class GenerateDailyStory extends Command
         \Illuminate\Support\Facades\Log::info('Daily Story Auto-Gen Started (Schedule/Command)');
 
         try {
-            // 1. Generate Story Structure (JSON)
-            $data = $aiService->generateFullStory();
+            // 1. Generate Story Structure (JSON) with Retries
+            $maxRetries = 3;
+            $data = [];
             
-            if (!isset($data['scenes']) || !is_array($data['scenes'])) {
-                throw new \Exception("AI yanıtı beklenen 'scenes' formatında değil.");
+            for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+                try {
+                    $this->info("AI Hikaye Oluşturuyor... (Deneme $attempt/$maxRetries)");
+                    $data = $aiService->generateFullStory();
+                    
+                    if (!isset($data['scenes']) || !is_array($data['scenes'])) {
+                        throw new \Exception("AI yanıtı beklenen 'scenes' formatında değil.");
+                    }
+                    
+                    // If successful, break loop
+                    break;
+                } catch (\Exception $e) {
+                    $this->warn("Deneme $attempt Başarısız: " . $e->getMessage());
+                    if ($attempt === $maxRetries) {
+                        throw $e; // Throw on final failure
+                    }
+                    sleep(2); // Wait before retry
+                }
             }
 
             $storyHtml = "";
