@@ -82,9 +82,10 @@ class GenerateDailyStory extends Command
                 'durum' => 'pending_visuals', // TRIGGER THE WORKER
                 'konu' => 'AI Auto-Gen',
                 'mood' => $data['mood'] ?? 'mystery',
-                'meta' => ($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''),
+                'mood' => $data['mood'] ?? 'mystery',
+                'meta' => \Illuminate\Support\Str::limit(($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''), 250),
                 'etiketler' => $data['etiketler'] ?? [],
-                'sosyal_ozet' => $data['sosyal_ozet'] ?? '',
+                'sosyal_ozet' => \Illuminate\Support\Str::limit($data['sosyal_ozet'] ?? '', 250),
                 'gorsel_prompt' => json_encode(array_column($data['scenes'], 'img_prompt')),
             ]; // Array closed correctly
 
