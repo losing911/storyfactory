@@ -26,7 +26,7 @@ class ApiController extends Controller
         
         // Find a story that needs images
         // We assume 'pending_visuals' status means images are needed
-        $story = Story::where('status', 'pending_visuals')->first();
+        $story = Story::where('durum', 'pending_visuals')->first();
 
         if ($story) {
              // Decode the prompts array
@@ -69,7 +69,7 @@ class ApiController extends Controller
         // Update Story
         if ($validated['type'] == 'image_generation') {
             $story->image_url = '/storage/' . $path;
-            $story->status = 'published'; // Publish immediately after image is ready
+            $story->durum = 'published'; // Publish immediately after image is ready
             $story->save();
         }
 
