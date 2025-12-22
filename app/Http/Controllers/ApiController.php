@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Story;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ApiController extends Controller
 {
@@ -101,8 +102,14 @@ class ApiController extends Controller
             $story->metin = preg_replace($pattern, $newImgTag, $story->metin);
             
             // 3. Check if any placeholders remain
+            $isFinished = false;
             if (strpos($story->metin, $placeholderSign) === false) {
-                $story->durum = 'published'; // All scenes done!
+                // Double check to ensure we didn't miss any
+                if ($story->durum !== 'published') {
+                    $story->durum = 'published';
+                    $story->save();
+                }
+                $isFinished = true;
                 Log::info("Story {$story->id} fully visualized and published.");
             } else {
                 // Still working...
@@ -112,6 +119,25 @@ class ApiController extends Controller
             $story->save();
         }
 
-        return response()->json(['status' => 'success', 'url' => $publicUrl]);
+        return response()->json([
+            'status' => 'success', 
+            'url' => $publicUrl,
+            'story_finished' => $isFinished ?? false
+        ]);
+    }
+
+    // Endpoint for Local Twitter Bot
+    public function getLatestStory() {
+        $story = Story::where('durum', 'published')->latest()->first();
+        if(!$story) return response()->json(null, 404);
+
+        return response()->json([
+            'id' => $story->id,
+            'title' => $story->baslik,
+            'summary' => $story->sosyal_ozet ?? Str::limit(strip_tags($story->metin), 200),
+            'url' => route('story.show', $story),
+            'tags' => $story->etiketler ?? ['Cyberpunk', 'Hikaye'],
+            'image_url' => asset($story->gorsel_url)
+        ]);
     }
 }

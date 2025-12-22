@@ -42,7 +42,7 @@
             </div>
 
             <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-8 leading-tight text-glow filter drop-shadow-lg glitch-effect" data-text="{{ $story->baslik }}">
-                {{ $story->baslik }}
+                {{ $story->baslik }}<span class="sr-only"> - Anxipunk Cyberpunk Story Archive</span>
             </h1>
             
             <div class="flex justify-center gap-4 text-sm font-mono text-gray-400">

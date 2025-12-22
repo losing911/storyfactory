@@ -20,7 +20,7 @@
     <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
         <span class="inline-block border border-neon-pink text-neon-pink px-2 py-1 text-xs font-mono mb-4 tracking-widest bg-black/50 backdrop-blur">{{ __('ui.latest_transmission') }}</span>
         <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6 glitch-effect uppercase leading-tight" data-text="{{ $latestStory->getTitle(app()->getLocale()) }}">{{ $latestStory->getTitle(app()->getLocale()) }}</h1>
-        <p class="text-gray-300 text-lg md:text-xl font-light mb-8 line-clamp-2 max-w-2xl mx-auto">{{ Str::limit(strip_tags($latestStory->getText(app()->getLocale())), 150) }}</p>
+        <p class="text-gray-300 text-lg md:text-xl font-light mb-8 line-clamp-2 max-w-2xl mx-auto">{{ Str::limit(strip_tags($latestStory->getText(app()->getLocale())), 300) }}</p>
         <a href="{{ route('story.show', $latestStory) }}" class="inline-block bg-neon-blue text-black font-display font-bold text-lg px-8 py-4 hover:bg-white hover:scale-105 transition duration-300 shadow-[0_0_20px_rgba(0,255,255,0.4)] clip-path-polygon">
             {{ __('ui.read_stream') }}
         </a>
@@ -74,7 +74,7 @@
                 </div>
                 <div class="p-6 flex-grow flex flex-col">
                      <h3 class="text-xl font-display font-bold text-white mb-2 group-hover:text-neon-pink transition duration-300 leading-tight">{{ $story->getTitle(app()->getLocale()) }}</h3>
-                     <p class="text-gray-500 text-sm line-clamp-3 mb-4 flex-grow">{{ Str::limit(strip_tags($story->getText(app()->getLocale())), 100) }}</p>
+                     <p class="text-gray-500 text-sm line-clamp-3 mb-4 flex-grow">{{ Str::limit(strip_tags($story->getText(app()->getLocale())), 200) }}</p>
                      <div class="text-xs font-mono text-gray-600 pt-4 border-t border-gray-800 flex justify-between">
                         <span>// {{ $story->yayin_tarihi->format('Y.m.d') }}</span>
                         <span>ID: {{ $story->id }}</span>

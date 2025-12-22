@@ -2,29 +2,36 @@ import os
 import json
 import time
 import requests
-import websocket # pip install websocket-client
-import urllib.request
+import base64
 import urllib.parse
+import random
 from dotenv import load_dotenv
 
 # Load Local Environment
 load_dotenv()
 
 # Configuration
-SERVER_URL = os.getenv("SERVER_URL", "http://anxipunk.icu/api") # Remote Server
+SERVER_URL = os.getenv("SERVER_URL", "https://anxipunk.icu/api")
 SERVER_TOKEN = os.getenv("SERVER_TOKEN", "anxipunk_secret_worker_key_2025")
-COMFY_URL = "127.0.0.1:8000"
-CLIENT_ID = "anxipunk_worker_1"
 
-import random
-import uuid
-import base64
+# Twitter Config
+TWITTER_CONSUMER_KEY = os.getenv('TWITTER_CONSUMER_KEY')
+TWITTER_CONSUMER_SECRET = os.getenv('TWITTER_CONSUMER_SECRET')
+TWITTER_ACCESS_TOKEN = os.getenv('TWITTER_ACCESS_TOKEN')
+TWITTER_ACCESS_TOKEN_SECRET = os.getenv('TWITTER_ACCESS_TOKEN_SECRET')
+
+try:
+    import tweepy
+except ImportError:
+    print("Warning: 'tweepy' not installed. Twitter bot will not run. (pip install tweepy)")
+    tweepy = None
 
 # API: Check for Jobs
 def fetch_pending_task():
     try:
         headers = {"Authorization": f"Bearer {SERVER_TOKEN}", "Accept": "application/json"}
-        resp = requests.get(f"{SERVER_URL}/jobs/pending", headers=headers, timeout=10)
+        # Increased timeout for slow connections
+        resp = requests.get(f"{SERVER_URL}/jobs/pending", headers=headers, timeout=20)
         
         if resp.status_code == 200:
             job = resp.json()
@@ -39,19 +46,110 @@ def fetch_pending_task():
         print(f"Server check failed: {e}")
         return None
 
+# Twitter Bot Logic
+def post_tweet_if_finished(job_result):
+    print(f"DEBUG: Story Finished Flag: {job_result.get('story_finished')}")
+    if not job_result.get('story_finished'):
+        return
+
+    print("Story Finished! Starting Twitter Bot...")
+    if not tweepy:
+        print("Twitter Bot Skipped: Tweepy not installed.")
+        return
+
+    try:
+        # Fetch Latest Story Details
+        headers = {"Authorization": f"Bearer {SERVER_TOKEN}", "Accept": "application/json"}
+        resp = requests.get(f"{SERVER_URL}/stories/latest", headers=headers)
+        if resp.status_code != 200:
+            print(f"Twitter Bot Error: Could not fetch story details (Status {resp.status_code})")
+            return
+            
+        story = resp.json()
+        print(f"DEBUG: Latest Story Fetched: {story.get('title')}")
+        
+        title = story['title']
+        raw_url = story['url']
+        summary = story['summary']
+        
+        # FIX: Ensure URL is Production (Not Localhost)
+        link = raw_url.replace("http://localhost/anxipunk.art", "https://anxipunk.icu") \
+                      .replace("http://localhost", "https://anxipunk.icu") \
+                      .replace("http://127.0.0.1", "https://anxipunk.icu")
+                      
+        if not link.startswith("https://anxipunk.icu"):
+             # If it's some other weird path, force it (assuming slug is correct)
+             slug = raw_url.split('/')[-1]
+             link = f"https://anxipunk.icu/story/{slug}"
+
+        # Auth
+        client = tweepy.Client(
+            consumer_key=TWITTER_CONSUMER_KEY,
+            consumer_secret=TWITTER_CONSUMER_SECRET,
+            access_token=TWITTER_ACCESS_TOKEN,
+            access_token_secret=TWITTER_ACCESS_TOKEN_SECRET
+        )
+        
+        # Prepare Tweet
+        hashtags = " ".join([f"#{tag.replace(' ', '')}" for tag in story.get('tags', [])[:3]])
+        footer = f"\n\n🔗 Oku: {link}\n\n{hashtags} #Cyberpunk #AI"
+        
+        # Truncate summary
+        limit = 280 - len(footer) - len(title) - 10
+        if len(summary) > limit:
+            summary = summary[:limit] + "..."
+            
+        text = f"🤖 {title}\n\n{summary}{footer}"
+        
+        print("Posting Tweet...")
+        resp = client.create_tweet(text=text)
+        print(f"✅ TWEET POSTED SUCCESSFULLY! ID: {resp.data['id']}")
+        
+    except Exception as e:
+        print(f"❌ Twitter Bot Failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+# Task: Generate via Pollinations.ai (FLUX)
+def generate_image_pollinations(prompt):
+    # Style Injection: Vibrant Ghibli Cyberpunk
+    style = ", Hayao Miyazaki style, Studio Ghibli, vibrant cyberpunk, anime art, highly detailed, cel shaded, breathable atmosphere, 8k, masterpiece"
+    clean_prompt = prompt.replace("photorealistic", "").replace("realistic", "") # Simple cleaning
+    
+    final_prompt = clean_prompt + style
+    encoded_prompt = urllib.parse.quote(final_prompt)
+    
+    seed = random.randint(1, 99999)
+    # Using 'flux' model via Pollinations
+    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model=flux&nologo=true&seed={seed}&enhance=true"
+    
+    print(f"Requesting Pollinations: {url[:60]}...")
+    
+    try:
+        resp = requests.get(url, timeout=60)
+        if resp.status_code == 200:
+            print("Pollinations Generation Success!")
+            return [(f"pollinations_{seed}.jpg", resp.content)]
+        else:
+            print(f"Pollinations Error: {resp.status_code}")
+            return []
+    except Exception as e:
+        print(f"Pollinations Request Failed: {e}")
+        return []
+
 # API: Process and Upload
 def process_job(job):
-    print(f"Processing Job: {job['id']} - Prompt: {job['prompt'][:20]}...")
+    print(f"Processing Job: {job['id']} (Pollinations Mode)")
     
     try:
         results = []
         if job['type'] == 'image_generation':
-            results = generate_image(job['prompt'])
+            results = generate_image_pollinations(job['prompt'])
             
         if not results:
             print("Generation Failed.")
-            return
-
+            return None
+ 
         # Upload Results
         filename, content = results[0] # Take first image
         b64_content = base64.b64encode(content).decode('utf-8')
@@ -60,212 +158,59 @@ def process_job(job):
             "job_id": job['id'],
             "type": job['type'],
             "filename": filename,
-            "file_content": b64_content
+            "file_content": b64_content,
+            "scene_index": job.get('scene_index', 0)
         }
         
         headers = {"Authorization": f"Bearer {SERVER_TOKEN}", "Content-Type": "application/json"}
+        print(f"Uploading result for Scene {job.get('scene_index', 0)}...")
         resp = requests.post(f"{SERVER_URL}/jobs/complete", json=payload, headers=headers)
         
         if resp.status_code == 200:
-            print(f"Job {job['id']} Completed & Uploaded! URL: {resp.json().get('url')}")
+            data = resp.json()
+            print(f"Job {job['id']} Uploaded! URL: {data.get('url')}")
+            return data # Return response data (contains story_finished)
         else:
-            print(f"Upload Failed: {resp.text}")
+            print(f"⚠️ UPLOAD FAILED [Status {resp.status_code}]")
+            print("Saving error details to 'last_error.html'...")
+            with open("last_error.html", "w", encoding="utf-8") as f:
+                f.write(resp.text)
+            time.sleep(10)
+            return None
 
     except Exception as e:
         print(f"Job Processing Failed: {e}")
-        import traceback
-        traceback.print_exc()
-
-# Helper: Upload Image to ComfyUI (Needed for Video Init)
-def upload_image_to_comfy(image_path_or_bytes, filename=None):
-    if filename is None:
-        filename = f"init_{int(time.time())}.png"
-    
-    files = {}
-    if isinstance(image_path_or_bytes, str):
-        files = {"image": (filename, open(image_path_or_bytes, 'rb'))}
-    else:
-        files = {"image": (filename, image_path_or_bytes)}
-        
-    data = {"overwrite": "true"}
-    resp = requests.post(f"http://{COMFY_URL}/upload/image", files=files, data=data)
-    return resp.json()
-
-# Helper: Load Workflow Template
-def load_workflow(name):
-    path = os.path.join(os.path.dirname(__file__), "workflows", name)
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-# Task: Generate Image (Flux)
-def generate_image(prompt):
-    print(f"Generating Image with Flux... Prompt: {prompt[:30]}...")
-    workflow = load_workflow("flux_schnell.json")
-    
-    # Modify Nodes
-    # Node 6: Positive Prompt
-    workflow["6"]["inputs"]["text"] = prompt
-    # Node 31: KSampler (Random Seed)
-    workflow["31"]["inputs"]["seed"] = random.randint(1, 999999999999999)
-    
-    return execute_workflow(workflow, output_node_id="9")
-
-# Task: Generate Video (Wan 2.2)
-def generate_video(image_bytes, prompt):
-    print(f"Generating Video with Wan 2.2... Prompt: {prompt[:30]}...")
-    
-    # 1. Upload Init Image
-    upload_resp = upload_image_to_comfy(image_bytes)
-    uploaded_filename = upload_resp["name"]
-    print(f"Init Image Uploaded: {uploaded_filename}")
-    
-    workflow = load_workflow("video_wan2_2_5B_ti2v.json")
-    
-    # Modify Nodes
-    # Node 56: Load Image
-    workflow["56"]["inputs"]["image"] = uploaded_filename
-    # Node 6: Positive Prompt
-    workflow["6"]["inputs"]["text"] = prompt
-    # Node 3: KSampler (Random Seed)
-    workflow["3"]["inputs"]["seed"] = random.randint(1, 999999999999999)
-    
-    # Output Node is 58 (SaveVideo) or checks if CreateVideo (57)
-    return execute_workflow(workflow, output_node_id="58")
-
-# Core: Execute and Wait
-def execute_workflow(workflow, output_node_id):
-    ws = websocket.WebSocket()
-    ws.connect(f"ws://{COMFY_URL}/ws?clientId={CLIENT_ID}")
-    
-    # Send Prompt
-    prompt_id = queue_prompt(workflow)['prompt_id']
-    print(f"Queued: {prompt_id}")
-    
-    # Wait for Completion via WebSocket
-    while True:
-        out = ws.recv()
-        if isinstance(out, str):
-            message = json.loads(out)
-            if message['type'] == 'executing':
-                data = message['data']
-                if data['node'] is None and data['prompt_id'] == prompt_id:
-                    print("Execution Complete!")
-                    break # Done
-                elif data['prompt_id'] == prompt_id:
-                    print(f"Executing Node: {data['node']}")
-    
-    # Fetch History to find output filename
-    history = get_history(prompt_id)[prompt_id]
-    outputs = history['outputs'][output_node_id]
-    
-    # Handle Image or Video output
-    file_data = []
-    
-    if 'images' in outputs:
-        for img in outputs['images']:
-            fname = img['filename']
-            subfolder = img['subfolder']
-            ftype = img['type']
-            content = get_image(fname, subfolder, ftype)
-            file_data.append((fname, content))
-            
-    elif 'gifs' in outputs: # Sometimes videos are under gifs/videos key
-         for vid in outputs['gifs']:
-            fname = vid['filename']
-            subfolder = vid['subfolder']
-            ftype = vid['type']
-            content = get_image(fname, subfolder, ftype)
-            file_data.append((fname, content))
-            
-    # ComfyUI SaveVideo often returns 'gifs' or custom keys depending on node.
-    # We will assume standard output structure or modify based on observation.
-    
-    return file_data
-
-def queue_prompt(workflow):
-    p = {"prompt": workflow, "client_id": CLIENT_ID}
-    data = json.dumps(p).encode('utf-8')
-    req = urllib.request.Request(f"http://{COMFY_URL}/prompt", data=data)
-    return json.loads(urllib.request.urlopen(req).read())
-
-def get_image(filename, subfolder, folder_type):
-    data = {"filename": filename, "subfolder": subfolder, "type": folder_type}
-    url_values = urllib.parse.urlencode(data)
-    with urllib.request.urlopen(f"http://{COMFY_URL}/view?{url_values}") as response:
-        return response.read()
-
-def get_history(prompt_id):
-    with urllib.request.urlopen(f"http://{COMFY_URL}/history/{prompt_id}") as response:
-        return json.loads(response.read())
-
-def run_test():
-    print("=== STARTING TEST DRIVE ===")
-    
-    # 1. Test Image (Flux)
-    # New Style: Hayao Miyazaki Cyberpunk
-    prompt = "A cyberpunk street scene in the style of Hayao Miyazaki and Studio Ghibli. Vibrant colors, anime style, lush details, soft shading, cel shaded, breathable atmosphere. A futuristic cat with tech goggles sitting on a mossy pipe."
-    print(f"STEP 1: Generating Image... '{prompt}'")
-    
-    try:
-        results = generate_image(prompt)
-        if not results:
-            print("Image Generation Failed (No Output).")
-            return
-
-        filename, content = results[0]
-        with open("test_flux.png", "wb") as f:
-            f.write(content)
-        print(f"STEP 1 SUCCESS: Saved 'test_flux.png'")
-        
-        # 2. Test Video (Wan)
-        print("STEP 2: Generating Video from Image...")
-        vid_results = generate_video(content, prompt + ", blinking eyes, looking around, movement")
-        
-        if not vid_results:
-            print("Video Generation Failed (No Output).")
-            return
-            
-        v_filename, v_content = vid_results[0]
-        with open("test_wan.mp4", "wb") as f:
-            f.write(v_content)
-        print(f"STEP 2 SUCCESS: Saved 'test_wan.mp4'")
-        
-        print("=== TEST DRIVE COMPLETE ===")
-        print("Check the 'local_worker' folder for results!")
-
-    except Exception as e:
-        print(f"TEST FAILED: {e}")
-        import traceback
-        traceback.print_exc()
+        time.sleep(5)
+        return None
 
 def main():
-    print(f"Worker Started. Connecting to {SERVER_URL}...")
-    print(f"ComfyUI Target: {COMFY_URL}")
-    
-    # Test Connection
-    try:
-        requests.get(f"http://{COMFY_URL}")
-        print("ComfyUI Connection: OK")
-    except:
-        print("ERROR: Could not connect to ComfyUI. Is it running?")
-        return
-
-    # Production Loop
-    print("Worker is Active & Polling...")
+    print(f"Worker Started. Engine: Pollinations.ai (Flux)")
+    print("Worker is Active & Polling (Calm Mode)...")
     
     while True:
         try:
-            job = fetch_pending_task() # This is currently mocked to return None
+            job = fetch_pending_task()
             if job:
-                process_job(job)
+                result = process_job(job)
+                
+                # Twitter Check
+                if result:
+                    post_tweet_if_finished(result)
+                
+                # "Sakin Sakin" - Cooldown after work
+                print("Cooling down for 20 seconds...")
+                time.sleep(20) 
             else:
-                time.sleep(5) # Poll every 5 seconds
+                # "Sakin Sakin" - Long Poll
+                print("No jobs. Sleeping for 60s...")
+                time.sleep(60) # Poll every 60 seconds
+                
         except KeyboardInterrupt:
             print("Worker Stopped.")
             break
         except Exception as e:
             print(f"Error in Loop: {e}")
-            time.sleep(5)
+            time.sleep(30) # Error cooldown
 
 if __name__ == "__main__":
     main()

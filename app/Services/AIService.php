@@ -46,19 +46,18 @@ class AIService
             if($faction->visual_prompt) $visualConstraints[] = "Faction Integrity: " . $faction->visual_prompt;
         }
 
-        $prompt = "Aşağıdaki özelliklere sahip bir Cyberpunk ÇİZGİ ROMAN (Comic Book) hikayesi oluştur. Çıktı SADECE JSON formatında olmalı ve dil KESİNLİKLE TÜRKÇE olmalı:\n\n";
-        $prompt .= "Konu: " . ($topic ?? 'Rastgele bir Cyberpunk teması') . "\n";
-        $prompt .= "--- EVREN BİLGİSİ (LORE - DEĞİŞTİRİLEMEZ GERÇEKLER) ---\n" . $loreContext . "--------------------------------------------------------\n";
-        $prompt .= "Stil: Cyberpunk 2077 / CD Projekt Red tarzı, fotogerçekçi, neon ışıklar, yüksek teknoloji, Night City atmosferi.\n";
-        $prompt .= "ÖNEMLİ KURAL 1: Hikaye dili %100 TÜRKÇE olmalı.\n";
-        $prompt .= "ÖNEMLİ KURAL 2: Başlıkta ve hikayede 'Neon' kelimesini ÇOK AZ kullan veya HİÇ KULLANMA. Teknoloji ve çürümüşlüğü vurgula, ışıkları değil.\n";
-        $prompt .= "ÖNEMLİ KURAL 3: EVREN BİLGİSİ (Lore) verilerine sadık kal. Karakterlerin geçmişini veya tarafını ASLA değiştirme. Direnişçi direnişçidir, Ajan ajandır.\n";
+        $prompt = "Aşağıdaki özelliklere sahip bir 'ANXIPUNK' (Anxiety + Cyberpunk) türünde, KARAKTER ODAKLI ve EDEBİ derinliği olan bir hikaye oluştur. Çıktı SADECE JSON formatında olmalı ve dil KESİNLİKLE TÜRKÇE olmalı:\n\n";
+        $prompt .= "Konu: " . ($topic ?? 'Karakterlerin psikolojisine, günlük yaşam mücadelesine ve teknolojik yabancılaşmaya odaklanan, aksiyondan çok atmosfer ve diyalog ağırlıklı bir yaşam kesiti (Slice of Life).') . "\n";
+        $prompt .= "--- EVREN BİLGİSİ (LORE) ---\n" . $loreContext . "--------------------------------------------------------\n";
+        $prompt .= "ATMOSFER & STİL (ANXIPUNK): Cyberpunk 2077'nin arka sokakları, yalnızlık, varoluşsal sancılar, ekonomik zorluklar, teknolojik bağımlılık. 'High Tech, Low Life' prensibinin 'Low Life' ve 'High Anxiety' kısmına odaklan.\n";
+        $prompt .= "ÖNEMLİ KURAL 1: Hikaye dili %100 EDEBİ TÜRKÇE olmalı. Basit cümleler kurma, betimlemeleri zengin tut.\n";
+        $prompt .= "ÖNEMLİ KURAL 2 (KLİŞELERİ YIK): 'Neon ışıkları altında', 'yağmur yağıyordu' gibi klasik girişleri yasakla. Okuyucuyu karakterin zihnine, o anki spesifik sorununa (açlık, borç, yalnızlık, glitch nöbeti vb.) odakla.\n";
+        $prompt .= "ÖNEMLİ KURAL 3 (KARAKTER DERİNLİĞİ): Karakter sadece bir 'sınıf' (Hacker, Solo vb.) değildir. Onun korkuları, takıntıları, küçük zevkleri olmalı. Diyaloglar doğal ve sokak ağzına uygun olsun.\n";
         
-        $prompt .= "ÖNEMLİ KURAL 4 (GÖRSEL DİNAMİZM): Karakterleri asla 'sabit dururken' veya 'poz verirken' tarif etme. Sahneye göre şu varyasyonlardan birini MUTLAKA kullan:\n";
-        $prompt .= "  - 'Action Pose': Karakter hareket halinde, koşuyor veya zıplıyor.\n";
-        $prompt .= "  - 'Combat-Ready Version': Karakter dövüş pozisyonunda, silahı çekili, çatışmanın ortasında.\n";
-        $prompt .= "  - 'Dramatic Scene Version': (Eski adı Stage) Karakter çok önemli, duygusal veya gergin bir anın içinde. Sinematik ışık, odaklanmış duruş. (Konser değil!)\n";
-        $prompt .= "  - 'Hücre-34 Uniform Version': Eğer karakter Hücre-34 üyesiyse, bu formayı giydiğini belirt.\n";
+        $prompt .= "ÖNEMLİ KURAL 4 (GÖRSEL DİNAMİZM): Karakterleri asla 'sabit dururken' tarif etme. Sahneye göre şu varyasyonlardan birini MUTLAKA kullan:\n";
+        $prompt .= "  - 'Candid Shot': Karakter habersizce yakalanmış, doğal bir anın içinde (yemek yerken, tamir yaparken, düşünürken).\n";
+        $prompt .= "  - 'Emotional Close-up': Yüz ifadesine ve gözlerdeki duyguya odaklan.\n";
+        $prompt .= "  - 'Environmental Portrait': Karakterin yaşadığı dağınık, kirli ama detaylı mekanı göster.\n";
 
         if(!empty($visualConstraints)) {
             $prompt .= "ÖNEMLİ KURAL 5 (GÖRSEL TUTARLILIK): img_prompt alanlarında şu görsel özellikleri KORU: " . implode(", ", $visualConstraints) . "\n";
@@ -66,7 +65,7 @@ class AIService
         $prompt .= "Yapı Gereksinimleri (ÇOK ÖNEMLİ):\n";
         $prompt .= "1. 'scenes' dizisi içinde EN AZ 6, EN FAZLA 10 sahne oluştur. Hikaye UZUN ve DETAYLI olmalı.\n";
         $prompt .= "2. Hikaye tam bir sonuca ulaşmalı (Giriş, Gelişme, Sonuç). Asla yarım kalmamalı.\n";
-        $prompt .= "3. Her sahne en az 100-150 kelimeden oluşmalı, toplam hikaye 1000 kelimeyi geçmeli.\n";
+        $prompt .= "3. Her sahne EN AZ 300 KELİME olmalı. Diyaloglar, iç sesler ve detaylı mekan tasvirleri ile sahneyi uzat. Acele etme.\n";
         $prompt .= "4. Ana Başlık (baslik) belirle. (İçinde Neon geçmesin)\n";
         $prompt .= "5. Karakter: Ana karakterin kısa profili.\n";
         $prompt .= "6. Mod (mood): Hikayenin atmosferine uygun tek bir kelime seç: 'action', 'mystery', 'melancholy', 'high-tech', 'corruption'.\n";
