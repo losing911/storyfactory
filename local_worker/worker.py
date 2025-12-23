@@ -8,7 +8,15 @@ import random
 from dotenv import load_dotenv
 
 # Load Local Environment
-load_dotenv()
+# Load Environment
+# Try loading from parent directory (Laravel root)
+parent_env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+if os.path.exists(parent_env_path):
+    print(f"Loading .env from: {parent_env_path}")
+    load_dotenv(parent_env_path)
+else:
+    print("Warning: Parent .env not found. Looking in current directory.")
+    load_dotenv()
 
 # Configuration
 SERVER_URL = os.getenv("SERVER_URL", "https://anxipunk.icu/api")
