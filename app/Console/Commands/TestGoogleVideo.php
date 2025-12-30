@@ -8,12 +8,13 @@ use Illuminate\Support\Facades\Storage;
 
 class TestGoogleVideo extends Command
 {
-    protected $signature = 'story:test-google-video {prompt : The prompt for the video}';
+    protected $signature = 'story:test-google-video {prompt : The prompt for the video} {--model=veo-3.1-fast-generate-001 : The model ID (e.g. veo-3.1-fast-generate-001, veo-2.0-generate-001)}';
     protected $description = 'Test video generation using Google Veo via Gemini API Key';
 
     public function handle()
     {
         $prompt = $this->argument('prompt');
+        $model = $this->option('model');
         $apiKey = env('GEMINI_API_KEY');
 
         if (!$apiKey) {
@@ -21,12 +22,11 @@ class TestGoogleVideo extends Command
             return;
         }
 
-        $this->info("Attempting to generate video with prompt: '$prompt' using Google Veo...");
+        $this->info("Attempting to generate video with prompt: '$prompt' using model: '$model'");
         $this->info("Using key: " . substr($apiKey, 0, 5) . "...");
 
-        // Endpoint for Veo (Experimental/Beta)
-        // Common endpoint pattern for generative tasks
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predict?key={$apiKey}";
+        // Endpoint for Veo
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:predict?key={$apiKey}";
         
         $this->info("Target URL: $url");
 
