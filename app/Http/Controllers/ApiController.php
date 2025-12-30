@@ -25,8 +25,14 @@ class ApiController extends Controller
         // Priority: Stories pending Visuals OR Drafts (Taslak)
         // Loop through pending stories to find one that ACTUALLY needs work
         // This prevents "Zombie Stories" (Status: pending, but no placeholders) from blocking the queue
-        $stories = Story::whereIn('durum', ['pending_visuals', 'taslak', 'draft'])->get();
+        // Priority: Stories pending Visuals OR Drafts (Taslak)
+        // Loop through pending stories to find one that ACTUALLY needs work
+        // This prevents "Zombie Stories" (Status: pending, but no placeholders) from blocking the queue
+        // Added Case-Insensitive variants just in case
+        $stories = Story::whereIn('durum', ['pending_visuals', 'taslak', 'draft', 'Taslak', 'Draft'])->get();
         $placeholderSign = "https://placehold.co/1280x720/1f2937/00ff00";
+
+        Log::info("Worker Polling: Found " . $stories->count() . " potential stories.");
 
         foreach ($stories as $story) {
             
@@ -41,6 +47,7 @@ class ApiController extends Controller
                     $prompts = json_decode($story->gorsel_prompt, true);
                     
                     if (isset($prompts[$index])) {
+                        Log::info("Job Dispatched: Story {$story->id} Scene {$index}");
                         return response()->json([
                             'id' => $story->id,
                             'type' => 'image_generation',
@@ -48,10 +55,13 @@ class ApiController extends Controller
                             'prompt' => $prompts[$index],
                             'style_preset' => 'turbo' 
                         ]);
+                    } else {
+                        Log::warning("Skipping Story {$story->id}: Prompt missing for index {$index}");
                     }
                 }
             } else {
                 // No placeholders found? 
+                Log::info("Skipping Story {$story->id}: No placeholders found in text.");
                 // If it was 'pending_visuals', it's a Zombie -> Auto Publish.
                 // If it was 'taslak' or 'draft', it's just a manual draft -> Leave it alone.
                  if ($story->durum === 'pending_visuals') {
