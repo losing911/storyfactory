@@ -143,8 +143,15 @@ def generate_image_pollinations(prompt, model='turbo'):
             time.sleep(120)
             return []
         else:
-            print(f"Pollinations Error: {resp.status_code}")
-            return []
+            # Check for "Fake Success" (Error Image)
+            # Pollinations sometimes returns a small image with text "Error" or "Rate Limit" and status 200
+            if len(resp.content) < 4096: # Less than 4KB is suspicious for a stored image
+                 print(f"⚠️ Suspiciously small image ({len(resp.content)} bytes). Likely an error placeholder. Retrying later...")
+                 time.sleep(10)
+                 return []
+                 
+            print("Pollinations Generation Success!")
+            return [(f"pollinations_{seed}.jpg", resp.content)]
     except Exception as e:
         print(f"Pollinations Request Failed: {e}")
         return []

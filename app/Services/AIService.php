@@ -46,10 +46,21 @@ class AIService
             if($faction->visual_prompt) $visualConstraints[] = "Faction Integrity: " . $faction->visual_prompt;
         }
 
+        // Randomize Mood/Genre to avoid constant melancholy
+        $moods = [
+            'High Octane Action: Chase scenes, combat, adrenaline, fast-paced.',
+            'Corporate Intrigue: Espionage, data theft, betrayal, white-collar crime.',
+            'Tech Discovery: Finding a lost technology, AI awakening, cyber-archaeology.',
+            'Neon Noir Mystery: Detective work, missing persons, solving a crime.',
+            'Underground Culture: Rave parties, illegal racing, cyber-drug trade, art.',
+            'Melancholic Slice of Life: Daily struggles, loneliness, rainy atmosphere.'
+        ];
+        $selectedMood = $moods[array_rand($moods)];
+
         $prompt = "Aşağıdaki özelliklere sahip bir 'ANXIPUNK' (Anxiety + Cyberpunk) türünde, KARAKTER ODAKLI ve EDEBİ derinliği olan bir hikaye oluştur. Çıktı SADECE JSON formatında olmalı ve dil KESİNLİKLE TÜRKÇE olmalı:\n\n";
-        $prompt .= "Konu: " . ($topic ?? 'Karakterlerin psikolojisine, günlük yaşam mücadelesine ve teknolojik yabancılaşmaya odaklanan, aksiyondan çok atmosfer ve diyalog ağırlıklı bir yaşam kesiti (Slice of Life).') . "\n";
+        $prompt .= "Konu: " . ($topic ?? "Odaklanılacak Tema: $selectedMood") . "\n";
         $prompt .= "--- EVREN BİLGİSİ (LORE) ---\n" . $loreContext . "--------------------------------------------------------\n";
-        $prompt .= "ATMOSFER & STİL (ANXIPUNK): Cyberpunk 2077'nin arka sokakları, yalnızlık, varoluşsal sancılar, ekonomik zorluklar, teknolojik bağımlılık. 'High Tech, Low Life' prensibinin 'Low Life' ve 'High Anxiety' kısmına odaklan.\n";
+        $prompt .= "ATMOSFER & STİL (ANXIPUNK): Cyberpunk 2077'nin arka sokakları. Ancak SADECE depresif değil; seçilen temaya ($selectedMood) uygun bir atmosfer yarat. 'High Tech, Low Life' prensibini koru.\n";
         $prompt .= "ÖNEMLİ KURAL 1: Hikaye dili %100 EDEBİ TÜRKÇE olmalı. Basit cümleler kurma, betimlemeleri zengin tut.\n";
         $prompt .= "ÖNEMLİ KURAL 2 (KLİŞELERİ YIK): 'Neon ışıkları altında', 'yağmur yağıyordu' gibi klasik girişleri yasakla. Okuyucuyu karakterin zihnine, o anki spesifik sorununa (açlık, borç, yalnızlık, glitch nöbeti vb.) odakla.\n";
         $prompt .= "ÖNEMLİ KURAL 3 (KARAKTER DERİNLİĞİ): Karakter sadece bir 'sınıf' (Hacker, Solo vb.) değildir. Onun korkuları, takıntıları, küçük zevkleri olmalı. Diyaloglar doğal ve sokak ağzına uygun olsun.\n";
