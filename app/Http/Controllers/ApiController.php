@@ -22,10 +22,10 @@ class ApiController extends Controller
     {
         $this->checkAuth($request);
 
-        // Priority: Stories pending Visuals
+        // Priority: Stories pending Visuals OR Drafts (Taslak)
         // Loop through pending stories to find one that ACTUALLY needs work
         // This prevents "Zombie Stories" (Status: pending, but no placeholders) from blocking the queue
-        $stories = Story::where('durum', 'pending_visuals')->get();
+        $stories = Story::whereIn('durum', ['pending_visuals', 'taslak', 'draft'])->get();
         $placeholderSign = "https://placehold.co/1280x720/1f2937/00ff00";
 
         foreach ($stories as $story) {
@@ -105,7 +105,9 @@ class ApiController extends Controller
             $isFinished = false;
             if (strpos($story->metin, $placeholderSign) === false) {
                 // Double check to ensure we didn't miss any
-                if ($story->durum !== 'published') {
+                // ONLY auto-publish if it was in 'pending_visuals' mode. 
+                // If it's a draft (taslak), keep it as draft for manual review.
+                if ($story->durum === 'pending_visuals') {
                     $story->durum = 'published';
                     $story->save();
                 }
