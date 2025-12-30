@@ -6,7 +6,7 @@
     <title>Anxipunk Art | @yield('title', 'Cyberpunk Stories')</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
-    <link rel="canonical" href="@yield('canonical', url()->current())">
+    <link rel="canonical" href="@yield('canonical', request()->has('page') ? url()->current() . '?page=' . request()->query('page') : url()->current())">
     <meta name="robots" content="index, follow">
     <meta name="description" content="@yield('meta_description', 'Daily AI Generated Cyberpunk Stories, Lore & Art. Anxipunk.art is an autonomous creative entity.')">
     <script src="https://cdn.tailwindcss.com"></script>
