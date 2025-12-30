@@ -118,8 +118,8 @@ def post_tweet_if_finished(job_result):
         import traceback
         traceback.print_exc()
 
-# Task: Generate via Pollinations.ai (FLUX)
-def generate_image_pollinations(prompt):
+# Task: Generate via Pollinations.ai
+def generate_image_pollinations(prompt, model='turbo'):
     # Style Injection: Vibrant Ghibli Cyberpunk
     style = ", Hayao Miyazaki style, Studio Ghibli, vibrant cyberpunk, anime art, highly detailed, cel shaded, breathable atmosphere, 8k, masterpiece"
     clean_prompt = prompt.replace("photorealistic", "").replace("realistic", "") # Simple cleaning
@@ -128,10 +128,10 @@ def generate_image_pollinations(prompt):
     encoded_prompt = urllib.parse.quote(final_prompt)
     
     seed = random.randint(1, 99999)
-    # Using 'flux' model via Pollinations
-    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model=flux&nologo=true&seed={seed}&enhance=true"
+    # Dynamic Model Usage
+    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1280&height=720&model={model}&nologo=true&seed={seed}&enhance=true"
     
-    print(f"Requesting Pollinations: {url[:60]}...")
+    print(f"Requesting Pollinations ({model}): {url[:60]}...")
     
     try:
         resp = requests.get(url, timeout=60)
@@ -152,7 +152,9 @@ def process_job(job):
     try:
         results = []
         if job['type'] == 'image_generation':
-            results = generate_image_pollinations(job['prompt'])
+            # Use style_preset from API or default to turbo
+            model = job.get('style_preset', 'turbo') 
+            results = generate_image_pollinations(job['prompt'], model=model)
             
         if not results:
             print("Generation Failed.")
