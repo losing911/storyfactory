@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class TestGoogleVideo extends Command
 {
-    protected $signature = 'story:test-google-video {prompt : The prompt for the video} {--model=veo-3.1-fast-generate-001 : The model ID} {--list : List available models}';
+    protected $signature = 'story:test-google-video {prompt : The prompt for the video} {--model=veo-3.1-fast-generate-preview : The model ID} {--list : List available models}';
     protected $description = 'Test video generation using Google Veo via Gemini API Key';
 
     public function handle()
