@@ -138,6 +138,10 @@ def generate_image_pollinations(prompt, model='turbo'):
         if resp.status_code == 200:
             print("Pollinations Generation Success!")
             return [(f"pollinations_{seed}.jpg", resp.content)]
+        elif resp.status_code == 429:
+            print(f"⚠️ Pollinations RATE LIMIT (429)! Cooling down for 120s...")
+            time.sleep(120)
+            return []
         else:
             print(f"Pollinations Error: {resp.status_code}")
             return []
@@ -208,8 +212,8 @@ def main():
                     post_tweet_if_finished(result)
                 
                 # "Sakin Sakin" - Cooldown after work
-                print("Cooling down for 20 seconds...")
-                time.sleep(20) 
+                print("Cooling down for 45 seconds...")
+                time.sleep(45) 
             else:
                 # "Sakin Sakin" - Long Poll
                 print("No jobs. Sleeping for 60s...")
