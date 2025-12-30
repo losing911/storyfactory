@@ -18,6 +18,8 @@ class Story extends Model
         'durum',
         'konu',
         'mood',
+        'music_url',
+        'music_prompt',
         'meta',
         'etiketler',
         'sosyal_ozet',

@@ -93,6 +93,7 @@ class AIService
         $prompt .= "  ],\n";
         $prompt .= "  \"karakter\": \"...\",\n";
         $prompt .= "  \"mood\": \"...\",\n";
+        $prompt .= "  \"music_prompt\": \"Music description (English). E.g: 'Dark synthwave, slow tempo, heavy bass, noir atmosphere'.\",\n";
         $prompt .= "  \"meta_baslik\": \"...\",\n";
         $prompt .= "  \"meta_aciklama\": \"...\",\n";
         $prompt .= "  \"etiketler\": [\"tag1\"],\n";

@@ -156,4 +156,63 @@ class ApiController extends Controller
             'image_url' => asset($story->gorsel_url)
         ]);
     }
+
+    // Public API: List Stories
+    public function index()
+    {
+        $stories = Story::where('durum', 'published')
+            ->select('id', 'baslik', 'slug', 'gorsel_url', 'yayin_tarihi', 'sosyal_ozet', 'mood', 'konu')
+            ->latest()
+            ->paginate(10);
+            
+        // Append full image URLs
+        $stories->getCollection()->transform(function ($story) {
+            $story->gorsel_url = $story->gorsel_url ? asset($story->gorsel_url) : null;
+            return $story;
+        });
+
+        return response()->json($stories);
+    }
+
+    // Public API: Show Story
+    public function show($id)
+    {
+        // Support ID or Slug
+        $story = is_numeric($id) 
+            ? Story::where('id', $id)->where('durum', 'published')->first()
+            : Story::where('slug', $id)->where('durum', 'published')->first();
+
+        if (!$story) return response()->json(['error' => 'Story not found'], 404);
+
+        return response()->json([
+            'id' => $story->id,
+            'title' => $story->baslik,
+            'slug' => $story->slug,
+            'content' => $story->metin, // Sends full HTML
+            'text_content' => strip_tags($story->metin), // Plain text for bots
+            'summary' => $story->sosyal_ozet,
+            'image_url' => $story->gorsel_url ? asset($story->gorsel_url) : null,
+            'published_at' => $story->yayin_tarihi,
+            'mood' => $story->mood,
+            'topic' => $story->konu,
+            'tags' => $story->etiketler,
+            'url' => route('story.show', $story)
+        ]);
+    }
+
+    // Public API: List Lore
+    public function lore()
+    {
+        $lore = \App\Models\LoreEntry::where('is_active', true)
+            ->select('title', 'slug', 'type', 'description', 'image_url')
+            ->latest()
+            ->get();
+            
+        $lore->transform(function ($item) {
+             $item->image_url = $item->image_url ? asset($item->image_url) : null;
+             return $item;
+        });
+
+        return response()->json($lore);
+    }
 }

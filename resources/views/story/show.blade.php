@@ -182,34 +182,46 @@
 
     // 4. Dynamic Soundtrack (Mood Based) -- NEURAL_LINK
     const storyMood = "{{ $story->mood ?? 'mystery' }}";
+    const customTrack = "{{ $story->music_url ?? '' }}"; // New AI Generated Track
+
     const audioTracks = {
-        'action': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', // Placeholder (High Energy)
-        'mystery': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3', // Placeholder (Dark)
-        'melancholy': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', // Placeholder (Sad)
-        'high-tech': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', // Placeholder (Clean)
-        'corruption': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3' // Placeholder (Distorted)
+        'action': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 
+        'mystery': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3',
+        'melancholy': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+        'high-tech': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+        'corruption': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3'
     };
     
-    // Create Audio Elements
-    let bgAudio = new Audio(audioTracks[storyMood] || audioTracks['mystery']);
-    bgAudio.loop = true;
-    bgAudio.volume = 0.3;
+    // Use custom track if available, else mood fallback
+    const finalTrack = customTrack && customTrack.length > 5 ? customTrack : (audioTracks[storyMood] || audioTracks['mystery']);
+    const isCustom = customTrack && customTrack.length > 5;
 
-    // We reuse the existing "Ambient Toggle" logic or add a new one? 
-    // Let's hook into the existing "Audio Protocol" button or add a dedicated music toggle.
-    // For now, let's Auto-Play if user interacts (Browsers block auto-play).
+    // Create Audio Elements
+    let bgAudio = new Audio(finalTrack);
+    bgAudio.loop = true;
+    bgAudio.volume = 0.4;
     
-    // Let's create a dedicated Music Control in the Floating Header if not exists, 
-    // OR just integrate it with the existing TTS button?
-    // Better: Add a "MUSIC: ON/OFF" text near the date.
+    // UI Control
+    const metaContainer = document.querySelector('.max-w-4xl.mx-auto.text-center.mb-12'); // This selector might be fragile if HTML changes
+    // Fallback if not found: document.body
+    const targetContainer = document.querySelector('.flex.justify-center.items-center.gap-4.mb-6') || document.body;
+
+    const musicControl = document.createElement('button');
+    musicControl.className = 'border border-gray-700 px-3 py-1 font-mono text-sm hover:bg-gray-800 transition-colors flex items-center gap-2 text-gray-400';
     
-    const metaContainer = document.querySelector('.max-w-4xl.mx-auto.text-center.mb-12');
-    const musicControl = document.createElement('div');
-    musicControl.className = 'mt-4 inline-block bg-gray-900 border border-gray-700 px-3 py-1 rounded cursor-pointer hover:border-neon-purple text-xs font-mono text-gray-400';
-    musicControl.innerHTML = `<span>♫ NEURAL_OST [${storyMood.toUpperCase()}]</span>`;
+    const label = isCustom ? "AI_OST_GENERATED" : `NEURAL_OST [${storyMood.toUpperCase()}]`;
+    musicControl.innerHTML = `<span>🎵 ${label}</span>`;
     
-    // Only append if container exists
-    if(metaContainer) metaContainer.appendChild(musicControl);
+    // Insert after the TTS button
+    const ttsButton = document.getElementById('ttsButton');
+    if(ttsButton && ttsButton.parentNode) {
+        ttsButton.parentNode.insertBefore(musicControl, ttsButton.nextSibling);
+    } else {
+        // Fallback append
+        if(targetContainer) targetContainer.appendChild(musicControl);
+    }
+
+    /* Reseting lines to match replacement logic */
 
     let isMusicPlaying = false;
     musicControl.addEventListener('click', () => {

@@ -26,7 +26,7 @@ class GenerateDailyStory extends Command
     /**
      * Execute the console command.
      */
-    public function handle(AIService $aiService, SocialPosterService $socialPoster)
+    public function handle(AIService $aiService, SocialPosterService $socialPoster, \App\Services\SunoService $sunoService)
     {
         // Increase time limit to 10 minutes
         set_time_limit(600);
@@ -105,7 +105,28 @@ class GenerateDailyStory extends Command
                 'etiketler' => $data['etiketler'] ?? [],
                 'sosyal_ozet' => \Illuminate\Support\Str::limit($data['sosyal_ozet'] ?? '', 250),
                 'gorsel_prompt' => json_encode(array_column($data['scenes'], 'img_prompt')),
-            ]; // Array closed correctly
+                'music_prompt' => $data['music_prompt'] ?? null,
+            ];
+
+            // 3.1 Generate Music (Suno)
+            if (!empty($data['music_prompt'])) {
+                $this->info("Müzik Üretiliyor: " . $data['music_prompt']);
+                try {
+                    $musicUrl = $sunoService->generateMusic($data['music_prompt']);
+                    if ($musicUrl) {
+                        $storyData['music_url'] = $musicUrl;
+                        $this->info("Müzik Başarıyla Oluşturuldu: $musicUrl");
+                    } else {
+                        $this->warn("Müzik oluşturulamadı (URL boş).");
+                    }
+                } catch (\Exception $musicErr) {
+                    $this->error("Müzik Hatası: " . $musicErr->getMessage());
+                }
+            }
+            
+            // Allow array close properly
+            // Note: closing bracket was in line 107 of original file
+
 
             $story = Story::create($storyData);
             
