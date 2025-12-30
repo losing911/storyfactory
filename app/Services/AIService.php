@@ -199,7 +199,7 @@ class AIService
         
         // Added '&model=flux' for better quality
         // Added '&enhance=true' (Pollinations feature)
-        return "https://image.pollinations.ai/prompt/{$encodedPrompt}?width=1280&height=720&nologo=true&model=flux&seed=" . rand(1, 99999);
+        return "https://image.pollinations.ai/prompt/{$encodedPrompt}?width=1280&height=720&nologo=true&model=turbo&seed=" . rand(1, 99999);
     }
 
     public function downloadImage(string $url, string $path): string

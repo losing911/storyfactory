@@ -46,7 +46,7 @@ class ApiController extends Controller
                             'type' => 'image_generation',
                             'scene_index' => $index,
                             'prompt' => $prompts[$index],
-                            'style_preset' => 'flux_schnell' 
+                            'style_preset' => 'turbo' 
                         ]);
                     }
                 }
