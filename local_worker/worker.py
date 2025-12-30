@@ -121,7 +121,8 @@ def post_tweet_if_finished(job_result):
 # Task: Generate via Pollinations.ai
 def generate_image_pollinations(prompt, model='turbo'):
     # Style Injection: Vibrant Ghibli Cyberpunk
-    style = ", Hayao Miyazaki style, Studio Ghibli, vibrant cyberpunk, anime art, highly detailed, cel shaded, breathable atmosphere, 8k, masterpiece"
+    # Style Injection: Vibrant High-End Anime (Makoto Shinkai, Ufotable, Cyberpunk)
+    style = ", anime masterpiece, Makoto Shinkai style, Ufotable animation, vivid cyberpunk colors, highly detailed, perfect lighting, lens flare, cinematic angle, 8k, digital illustration, trending on artstation"
     clean_prompt = prompt.replace("photorealistic", "").replace("realistic", "") # Simple cleaning
     
     final_prompt = clean_prompt + style
