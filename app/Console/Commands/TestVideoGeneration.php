@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Storage;
 
 class TestVideoGeneration extends Command
 {
-    protected $signature = 'story:test-video {prompt : The prompt for the video} {--model=veo : The model to use (veo, seedance, luma)}';
-    protected $description = 'Test video generation using Pollinations.ai (Models: veo, seedance)';
+    protected $signature = 'story:test-video {prompt : The prompt for the video} {--model=Veo 3.1 Fast : The model to use (e.g. "Veo 3.1 Fast", "Seedance Lite", "Seedance Pro-Fast")}';
+    protected $description = 'Test video generation using Pollinations.ai with specific models';
 
     public function handle()
     {
@@ -18,15 +18,14 @@ class TestVideoGeneration extends Command
 
         $this->info("Attempting to generate video with prompt: '$prompt' using model: '$model'");
 
-        // Encode Prompt
+        // Encode Prompt and Model
         $encodedPrompt = urlencode($prompt);
+        $encodedModel = urlencode($model);
         // Add random seed
         $seed = rand(1, 99999);
         
         // Construct URL
-        // Note: Pollinations video often uses the same endpoint but returns MP4 if model is right, OR redirect to a video URL.
-        // Let's try the standard image endpoint which acts as a gateway.
-        $url = "https://image.pollinations.ai/prompt/{$encodedPrompt}?width=1280&height=720&model={$model}&seed={$seed}&nologo=true";
+        $url = "https://image.pollinations.ai/prompt/{$encodedPrompt}?width=1280&height=720&model={$encodedModel}&seed={$seed}&nologo=true";
 
         $this->info("Requesting URL: $url");
         $this->info("Timeout set to 180 seconds...");
