@@ -8,19 +8,53 @@ use Illuminate\Support\Facades\Storage;
 
 class TestGoogleVideo extends Command
 {
-    protected $signature = 'story:test-google-video {prompt : The prompt for the video} {--model=veo-3.1-fast-generate-001 : The model ID (e.g. veo-3.1-fast-generate-001, veo-2.0-generate-001)}';
+    protected $signature = 'story:test-google-video {prompt : The prompt for the video} {--model=veo-3.1-fast-generate-001 : The model ID} {--list : List available models}';
     protected $description = 'Test video generation using Google Veo via Gemini API Key';
 
     public function handle()
     {
-        $prompt = $this->argument('prompt');
-        $model = $this->option('model');
         $apiKey = env('GEMINI_API_KEY');
 
         if (!$apiKey) {
             $this->error("GEMINI_API_KEY not found in .env");
             return;
         }
+
+        // Handle List Option
+        if ($this->option('list')) {
+            $this->info("Fetching available models from Google API...");
+            $url = "https://generativelanguage.googleapis.com/v1beta/models?key={$apiKey}";
+            
+            try {
+                $response = Http::get($url);
+                if ($response->successful()) {
+                    $models = $response->json()['models'] ?? [];
+                    $found = 0;
+                    foreach ($models as $m) {
+                        // Filter for relevant models
+                        if (str_contains($m['name'], 'veo') || str_contains($m['name'], 'video') || str_contains($m['name'], 'imagen')) {
+                            $this->line(" - <info>" . str_replace("models/", "", $m['name']) . "</info> | " . ($m['displayName'] ?? ''));
+                            $found++;
+                        }
+                    }
+                    if ($found == 0) {
+                        $this->warn("No specific 'veo' or 'video' models found in the public list.");
+                        $this->line("Printing top 5 models to verify connection:");
+                        foreach (array_slice($models, 0, 5) as $m) {
+                            $this->line(" - " . $m['name']);
+                        }
+                    }
+                } else {
+                    $this->error("Failed to list models: " . $response->body());
+                }
+            } catch (\Exception $e) {
+                $this->error("Connection Error: " . $e->getMessage());
+            }
+            return;
+        }
+
+        $prompt = $this->argument('prompt');
+        $model = $this->option('model');
 
         $this->info("Attempting to generate video with prompt: '$prompt' using model: '$model'");
         $this->info("Using key: " . substr($apiKey, 0, 5) . "...");
@@ -39,7 +73,7 @@ class TestGoogleVideo extends Command
             "parameters" => [
                 "sampleCount" => 1,
                 "aspectRatio" => "16:9",
-                "durationSeconds" => 6 // Default usually around 6-8s
+                "durationSeconds" => 6
             ]
         ];
 
