@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Storage;
 
 class TestVideoGeneration extends Command
 {
-    protected $signature = 'story:test-video {prompt : The prompt for the video} {--model=luma : The model to use (luma, video, classic)}';
-    protected $description = 'Test video generation using Pollinations.ai';
+    protected $signature = 'story:test-video {prompt : The prompt for the video} {--model=veo : The model to use (veo, seedance, luma)}';
+    protected $description = 'Test video generation using Pollinations.ai (Models: veo, seedance)';
 
     public function handle()
     {
