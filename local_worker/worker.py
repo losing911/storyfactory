@@ -194,7 +194,7 @@ def process_job(job):
         return None
 
 def main():
-    print(f"Worker Started. Engine: Pollinations.ai (Flux)")
+    print(f"Worker Started. Engine: Pollinations.ai (Turbo)")
     print("Worker is Active & Polling (Calm Mode)...")
     
     while True:
