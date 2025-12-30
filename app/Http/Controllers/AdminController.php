@@ -67,6 +67,12 @@ class AdminController extends Controller
         return redirect()->route('admin.stories.index')->with('success', 'Hikaye güncellendi.');
     }
 
+    public function publish(Story $story)
+    {
+        $story->update(['durum' => 'published']);
+        return redirect()->back()->with('success', 'Hikaye yayınlandı!');
+    }
+
     public function destroy(Story $story)
     {
         $story->delete();

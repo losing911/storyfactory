@@ -24,7 +24,7 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/story/{story}', function (App\Models\Story $story) {
-    if($story->durum !== 'published') abort(404);
+    if($story->durum !== 'published' && !auth()->check()) abort(404);
     return view('story.show', compact('story'));
 })->name('story.show');
 
@@ -56,6 +56,7 @@ Route::get('lang/{locale}', function ($locale) {
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::post('stories/{story}/publish', [AdminController::class, 'publish'])->name('stories.publish');
     Route::resource('stories', AdminController::class);
     Route::get('ai/create', [AdminController::class, 'createAI'])->name('ai.create');
     Route::get('ai/generate', function() { return redirect()->route('admin.ai.create'); });

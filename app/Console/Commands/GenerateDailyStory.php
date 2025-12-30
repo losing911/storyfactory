@@ -14,14 +14,14 @@ class GenerateDailyStory extends Command
      *
      * @var string
      */
-    protected $signature = 'app:generate-daily-story';
+    protected $signature = 'app:generate-daily-story {--draft : Taslak olarak oluştur (Yayınlama)}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Günlük Cyberpunk hikayesini oluşturur ve yayınlar.';
+    protected $description = 'Günlük Cyberpunk hikayesini oluşturur ve yayınlar (veya taslak bırakır).';
 
     /**
      * Execute the console command.
@@ -31,8 +31,9 @@ class GenerateDailyStory extends Command
         // Increase time limit to 10 minutes
         set_time_limit(600);
         
-        $this->info('Günlük Cyberpunk Çizgi Roman üretimi başlıyor...');
-        \Illuminate\Support\Facades\Log::info('Daily Story Auto-Gen Started (Schedule/Command)');
+        $isDraft = $this->option('draft');
+        $this->info('Günlük Cyberpunk Çizgi Roman üretimi başlıyor...' . ($isDraft ? ' (TASLAK MODU)' : ''));
+        \Illuminate\Support\Facades\Log::info('Daily Story Auto-Gen Started ' . ($isDraft ? '(Draft)' : ''));
 
         try {
             // 1. Generate Story Structure (JSON) with Retries
@@ -96,7 +97,7 @@ class GenerateDailyStory extends Command
                 'metin' => $storyHtml, // Contains placeholders
                 'gorsel_url' => null,  // Will be filled by Worker
                 'yayin_tarihi' => now(),
-                'durum' => 'pending_visuals', // TRIGGER THE WORKER
+                'durum' => $isDraft ? 'draft' : 'pending_visuals', // TRIGGER THE WORKER
                 'konu' => 'AI Auto-Gen',
                 'mood' => $data['mood'] ?? 'mystery',
                 'mood' => $data['mood'] ?? 'mystery',
