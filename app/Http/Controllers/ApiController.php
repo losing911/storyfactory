@@ -51,10 +51,14 @@ class ApiController extends Controller
                     }
                 }
             } else {
-                // No placeholders found? Mark as published and CONTINUE searching
-                 $story->durum = 'published';
-                 $story->save();
-                 Log::info("Auto-Published Zombie Story ID: {$story->id}");
+                // No placeholders found? 
+                // If it was 'pending_visuals', it's a Zombie -> Auto Publish.
+                // If it was 'taslak' or 'draft', it's just a manual draft -> Leave it alone.
+                 if ($story->durum === 'pending_visuals') {
+                     $story->durum = 'published';
+                     $story->save();
+                     Log::info("Auto-Published Zombie Story ID: {$story->id}");
+                 }
             }
         }
 
