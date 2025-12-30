@@ -60,7 +60,15 @@ class TestGoogleVideo extends Command
         $this->info("Using key: " . substr($apiKey, 0, 5) . "...");
 
         // Endpoint for Veo
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:predict?key={$apiKey}";
+        // Payload for Veo (Google AI Studio / Vertex AI style)
+        // Note: 'predict' might be wrong, trying 'predictLongRunning' or 'generateContent'
+        // Documentation suggests video generation is a long-running operation.
+        
+        $mode = 'predictLongRunning'; 
+        // Some docs suggest: https://generativelanguage.googleapis.com/v1beta/models/...:predict
+        // But user got "not supported for predict".
+        
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:{$mode}?key={$apiKey}";
         
         $this->info("Target URL: $url");
 
@@ -78,32 +86,63 @@ class TestGoogleVideo extends Command
         ];
 
         try {
-            $response = Http::timeout(120)->post($url, $payload);
+            $this->info("Sending LONG RUNNING request ($mode)...");
+            $response = Http::timeout(60)->post($url, $payload);
 
             if ($response->successful()) {
-                $this->info("API Call Successful!");
                 $data = $response->json();
-                
-                // Inspect structure
-                // Usually returns 'predictions' with bytes or a video URI
-                if (isset($data['predictions'][0]['bytesBase64Encoded'])) {
-                    $videoData = base64_decode($data['predictions'][0]['bytesBase64Encoded']);
-                    $filename = "google_veo_" . time() . ".mp4";
-                    Storage::disk('public')->put($filename, $videoData);
-                    $this->info("Video Saved: storage/app/public/$filename");
-                    $this->info("URL: " . asset("storage/$filename"));
-                } elseif (isset($data['predictions'][0]['videoUri'])) {
-                    $this->info("Video URI received: " . $data['predictions'][0]['videoUri']);
-                    // Download it?
-                    $this->warn("Model returned a URI, not bytes. You might need to download it manually.");
+                // Check for operation name
+                if (isset($data['name'])) {
+                    $operationName = $data['name'];
+                    $this->info("Operation started! ID: $operationName");
+                    $this->info("Polling for completion...");
+                    
+                    // POLLING LOOP
+                    $attempts = 0;
+                    while ($attempts < 30) {
+                        sleep(5);
+                        $attempts++;
+                        $pollUrl = "https://generativelanguage.googleapis.com/v1beta/{$operationName}?key={$apiKey}";
+                        $pollResp = Http::get($pollUrl);
+                        
+                        if ($pollResp->successful()) {
+                            $pollData = $pollResp->json();
+                            if (isset($pollData['done']) && $pollData['done'] === true) {
+                                if (isset($pollData['response']['predictions'][0]['videoUri'])) {
+                                    $videoUri = $pollData['response']['predictions'][0]['videoUri'];
+                                    $this->info("SUCCESS! Video generated.");
+                                    $this->info("Video URI: $videoUri");
+                                    $this->warn("Note: This URI might be short-lived. Download it manually if needed.");
+                                    return;
+                                } elseif (isset($pollData['error'])) {
+                                    $this->error("Operation failed with error: " . json_encode($pollData['error']));
+                                    return;
+                                } else {
+                                     // Check for 'result' field in some versions
+                                     $this->info("Operation done. Full response:");
+                                     $this->line(json_encode($pollData));
+                                     return;
+                                }
+                            } else {
+                                $this->info("... working ... (Attempt $attempts)");
+                            }
+                        } else {
+                            $this->error("Polling failed: " . $pollResp->status());
+                            break;
+                        }
+                    }
+                    $this->error("Timeout waiting for video generation.");
+
                 } else {
-                    $this->warn("Unexpected response structure:");
-                    $this->line(json_encode($data, JSON_PRETTY_PRINT));
+                     // Maybe it returned direct result?
+                     $this->info("Response received (No Operation ID):");
+                     $this->line(substr($response->body(), 0, 500));
                 }
 
             } else {
                 $this->error("Failed! Status: " . $response->status());
-                $this->error("Body: " . $response->body());
+                $this->error("Body : " . $response->body());
+                $this->warn("Try checking if 'Vertex AI API' is enabled in your Google Cloud Console project linked to this key.");
             }
 
         } catch (\Exception $e) {
