@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('app:generate-daily-story')->daily();
 Schedule::command('sitemap:generate')->daily();
+Schedule::command('app:distill-universe-history')->monthly();

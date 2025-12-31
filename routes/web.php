@@ -60,6 +60,7 @@ Route::get('/database/{slug}', [App\Http\Controllers\LoreController::class, 'sho
 
 // Gallery
 Route::get('/gallery', [App\Http\Controllers\GalleryController::class, 'index'])->name('gallery.index');
+Route::view('/kronikler', 'chronicles.index')->name('chronicles.index');
 
 // Voting System
 Route::get('/poll/active', [App\Http\Controllers\PollController::class, 'getActivePoll']);

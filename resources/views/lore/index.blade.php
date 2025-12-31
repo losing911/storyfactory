@@ -17,7 +17,7 @@
                 Burada Büyük Çöküş'ün parça parça tarihi, Şirketler Sendikası'nın yükselişi ve gölgelerde direnmeye cesaret eden azınlığın kayıtları yatar.
             </p>
             
-            <!-- Universe Story (Accordion or Section) -->
+                <!-- Universe Story (Accordion or Section) -->
             <div class="text-left max-w-4xl mx-auto bg-gray-900/50 border border-gray-800 p-8 hover:border-neon-blue transition duration-500 group">
                 <h2 class="text-2xl font-display text-white mb-4 flex items-center gap-3">
                     <span class="text-neon-blue">00.</span> 
@@ -31,18 +31,6 @@
                         Küllerden <strong>Neo-Pera</strong> doğdu. Eski İstanbul'un harabeleri üzerine inşa edilen bu şehir, teknoloji elitleri için bir sığınak, geri kalanlar içinse bir hapishane oldu. Şehir artık biyoteknoloji ve güvenlik firmalarından oluşan <em>Sendika (The Syndicate)</em> tarafından yönetiliyor. Tek geçerli para birimi: <strong>Temiz Veri</strong>.
                     </p>
                 </div>
-
-                <!-- AI Generated Monthly Chronicles -->
-                @if(view()->exists('lore.partials.history_generated'))
-                    <div class="border-t border-gray-800 pt-8 mt-8">
-                        <h3 class="text-xl font-display text-neon-pink mb-4 flex items-center gap-2">
-                             <span class="animate-pulse">///</span> SİSTEM GÜNLÜKLERİ (CANLI AKIŞ)
-                        </h3>
-                        <div class="prose prose-invert prose-sm max-w-none text-gray-300 font-mono">
-                            @include('lore.partials.history_generated')
-                        </div>
-                    </div>
-                @endif
             </div>
         </div>
 
