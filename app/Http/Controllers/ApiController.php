@@ -37,8 +37,7 @@ class ApiController extends Controller
         foreach ($stories as $story) {
             
             if (strpos($story->metin, $placeholderSign) !== false) {
-                // FOUND ONE!
-                
+                // ... (Existing Image Logic) ...
                 // Parse HTML to find the first image with this src
                 preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Scene (\d+)[\'"]/s', $story->metin, $matches);
                 
@@ -55,20 +54,28 @@ class ApiController extends Controller
                             'prompt' => $prompts[$index],
                             'style_preset' => 'turbo' 
                         ]);
-                    } else {
-                        Log::warning("Skipping Story {$story->id}: Prompt missing for index {$index}");
                     }
                 }
-            } else {
-                // No placeholders found? 
-                Log::info("Skipping Story {$story->id}: No placeholders found in text.");
+            } 
+            // Music Generation Logic (If visuals are done or concurrent)
+            elseif (!empty($story->music_prompt) && empty($story->music_url)) {
+                 Log::info("Job Dispatched: Story {$story->id} Music Generation");
+                 return response()->json([
+                     'id' => $story->id,
+                     'type' => 'music_generation',
+                     'prompt' => $story->music_prompt,
+                     'duration' => 30 // seconds
+                 ]);
+            }
+            else {
+                // No placeholders found AND Music is done (or not requested)
+                Log::info("Skipping Story {$story->id}: No placeholders found and music is set.");
                 // If it was 'pending_visuals', it's a Zombie -> Auto Publish.
-                // If it was 'taslak' or 'draft', it's just a manual draft -> Leave it alone.
-                 if ($story->durum === 'pending_visuals') {
+                if ($story->durum === 'pending_visuals') {
                      $story->durum = 'published';
                      $story->save();
                      Log::info("Auto-Published Zombie Story ID: {$story->id}");
-                 }
+                }
             }
         }
 
@@ -105,12 +112,9 @@ class ApiController extends Controller
             }
 
             // 2. Replace the Placeholder in `metin` HTML
-            // We look for the specific tag for Scene X
             $placeholderSign = "https://placehold.co/1280x720/1f2937/00ff00";
-            // Regex matches the whole img tag that contains the placeholder AND alt='Scene $index'
             $pattern = '/<img[^>]+src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"][^>]+alt=[\'"]Scene ' . $index . '[\'"][^>]*>/i';
             
-            // Construct new clean IMG tag
             $newImgTag = "<img src='$publicUrl' alt='Scene $index' class='w-full rounded shadow-lg border-2 border-neon-blue/50 transition duration-500'>";
             
             $story->metin = preg_replace($pattern, $newImgTag, $story->metin);
@@ -118,9 +122,6 @@ class ApiController extends Controller
             // 3. Check if any placeholders remain
             $isFinished = false;
             if (strpos($story->metin, $placeholderSign) === false) {
-                // Double check to ensure we didn't miss any
-                // ONLY auto-publish if it was in 'pending_visuals' mode. 
-                // If it's a draft (taslak), keep it as draft for manual review.
                 if ($story->durum === 'pending_visuals') {
                     $story->durum = 'published';
                     $story->save();
@@ -128,11 +129,17 @@ class ApiController extends Controller
                 $isFinished = true;
                 Log::info("Story {$story->id} fully visualized and published.");
             } else {
-                // Still working...
                 Log::info("Story {$story->id} scene $index updated. More pending.");
             }
             
             $story->save();
+        }
+        
+        // Handle Music Generation
+        if ($validated['type'] == 'music_generation') {
+            $story->music_url = $publicUrl;
+            $story->save();
+            Log::info("Story {$story->id} music added: $publicUrl");
         }
 
         return response()->json([

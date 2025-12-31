@@ -1,0 +1,38 @@
+{
+    "3": {
+        "inputs": {
+            "model_path": "medium.pth"
+        },
+        "class_type": "MusicGenModelLoader",
+        "_meta": {
+            "title": "MusicGen Model Loader"
+        }
+    },
+    "4": {
+        "inputs": {
+            "text": "uplifting trance track, euphoric, synthesizer, arpeggio, 138 bpm",
+            "duration": 30,
+            "model": [
+                "3",
+                0
+            ]
+        },
+        "class_type": "MusicGenSampler",
+        "_meta": {
+            "title": "MusicGen Sampler"
+        }
+    },
+    "5": {
+        "inputs": {
+            "filename_prefix": "anxipunk_music",
+            "audio": [
+                "4",
+                0
+            ]
+        },
+        "class_type": "SaveAudio",
+        "_meta": {
+            "title": "Save Audio"
+        }
+    }
+}
