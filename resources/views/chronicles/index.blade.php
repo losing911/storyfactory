@@ -30,18 +30,24 @@
                 </h2>
 
                 @if(view()->exists('lore.partials.history_generated'))
-                    <div class="prose prose-invert prose-lg max-w-none font-sans leading-relaxed
-                        prose-headings:font-display prose-headings:font-black prose-headings:uppercase prose-headings:tracking-widest 
-                        prose-h1:text-5xl prose-h1:text-neon-pink prose-h1:text-glow
-                        prose-h2:text-3xl prose-h2:text-neon-blue prose-h2:border-b prose-h2:border-gray-700 prose-h2:pb-2
-                        prose-h3:text-2xl prose-h3:text-neon-green prose-h3:mt-8
-                        prose-p:text-gray-300 prose-p:text-justify prose-p:mb-6 prose-p:leading-8
+                    <!-- Comic/Book Layout Container -->
+                    <div class="prose prose-invert prose-lg max-w-none font-serif leading-loose text-gray-300
+                        md:columns-2 md:gap-12 md:rule-neon-blue/30
+                        prose-headings:font-display prose-headings:font-black prose-headings:uppercase prose-headings:tracking-widest prose-headings:break-inside-avoid
+                        prose-h1:text-6xl prose-h1:text-neon-pink prose-h1:text-glow prose-h1:mb-12 prose-h1:border-b-4 prose-h1:border-neon-pink
+                        prose-h2:text-4xl prose-h2:text-white prose-h2:bg-neon-blue/10 prose-h2:p-4 prose-h2:-ml-4 prose-h2:border-l-8 prose-h2:border-neon-blue prose-h2:mb-8 prose-h2:mt-12
+                        prose-h3:text-2xl prose-h3:text-neon-green prose-h3:mt-8 prose-h3:mb-4 prose-h3:font-bold prose-h3:decoration-neon-green prose-h3:underline prose-h3:decoration-2 prose-h3:underline-offset-4
+                        prose-p:text-justify prose-p:mb-6 prose-p:leading-8 prose-p:break-inside-avoid-orphans
                         prose-strong:text-white prose-strong:font-bold prose-strong:bg-neon-pink/20 prose-strong:px-1
-                        prose-blockquote:border-l-4 prose-blockquote:border-neon-purple prose-blockquote:bg-gray-800/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:italic prose-blockquote:text-gray-400">
+                        prose-blockquote:border-l-0 prose-blockquote:border-t-4 prose-blockquote:border-neon-purple prose-blockquote:bg-gray-800 prose-blockquote:p-6 prose-blockquote:my-8 prose-blockquote:shadow-neon-purple prose-blockquote:not-italic prose-blockquote:font-mono prose-blockquote:text-sm
+                        first-letter:text-5xl first-letter:font-black first-letter:text-neon-pink first-letter:float-left first-letter:mr-3 first-letter:mt-2">
+                        
                         @include('lore.partials.history_generated')
                     </div>
-                    <div class="mt-8 text-xs font-mono text-gray-600 text-right">
-                        LAST_UPDATE: {{ now()->format('Y-m-d H:i:s') }} // SOURCE: NEURAL_NET
+                    
+                    <div class="mt-12 pt-8 border-t border-gray-800 flex justify-between items-center text-xs font-mono text-gray-600">
+                        <span>VOLUME: 01 // CYCLE: 2075</span>
+                        <span>SOURCE: NEURAL_NET_ARCHIVE</span>
                     </div>
                 @else
                     <div class="text-center py-12">
