@@ -178,9 +178,32 @@ Route::get('/debug-story', function() {
         // 4. Check Processed Content (Lore Linking)
         echo "<h2>4. Processed Content (Lore)</h2>";
         try {
+            // Debug the Cache / Patterns
+            $patterns = \Illuminate\Support\Facades\Cache::get('lore_patterns');
+            echo "Cached Patterns Count: " . ($patterns ? count($patterns) : 'NULL (Cache Empty)') . "<br>";
+            
+            if(!$patterns) {
+                echo "Re-fetching patterns directly...<br>";
+                $entries = \App\Models\LoreEntry::where('is_active', true)->get(['title', 'slug', 'keywords']);
+                echo "Active DB Entries: " . $entries->count() . "<br>";
+                if($entries->count() > 0) {
+                    foreach($entries->take(3) as $e) {
+                         echo "Entry: {$e->title} (Slug: {$e->slug})<br>";
+                    }
+                }
+            } else {
+                echo "<h3>First 3 Patterns:</h3>";
+                foreach(array_slice($patterns, 0, 3) as $p) {
+                    echo "Pattern: " . htmlspecialchars($p['pattern']) . "<br>";
+                }
+            }
+
             $content = $story->processed_content;
-            echo "Content Length: " . strlen($content) . " chars<br>";
-            echo "Sample: " . substr(strip_tags($content), 0, 100) . "...<br>";
+            echo "<h3>Result Content Sample:</h3>";
+            echo "<div style='border:1px solid #ccc; padding:10px; background:#f0f0f0;'>";
+            echo nl2br(substr(htmlspecialchars($content), 0, 1000));
+            echo "</div>";
+            
         } catch (\Exception $e) {
             echo "<span style='color:red'>LORE PROC ERROR: " . $e->getMessage() . "</span><br>";
             echo "Trace: " . $e->getTraceAsString();
