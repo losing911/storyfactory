@@ -15,7 +15,7 @@ class LoreSeeder extends Seeder
             'title' => 'Neo-Pera',
             'slug' => Str::slug('Neo-Pera'),
             'type' => 'city',
-            'description' => 'A dystopian megacity rising from the ruins of old Istanbul. Dominated by neon-drenched skyscrapers, constant acid rain, and a sharp divide between the gleaming Upper Towers and the chaotic Lower Districts.',
+            'description' => 'Eski İstanbul\'un kalıntıları üzerinde yükselen distopik bir mega şehir. Neon ışıklı gökdelenlerin, sürekli yağan asit yağmurlarının ve Parlak Kuleler ile kaotik Alt Bölgeler arasındaki keskin ayrımın hüküm sürdüğü yer.',
             'is_active' => true
         ]);
 
@@ -24,16 +24,16 @@ class LoreSeeder extends Seeder
             'title' => 'Delfin',
             'slug' => Str::slug('Delfin'),
             'type' => 'character',
-            'description' => 'Resistance leader and prodigy. Possesses high intelligence, expert mastery of martial arts and firearms, and advanced hacking skills. She operates from the shadows, dismantling corporate control one node at a time.',
+            'description' => 'Direniş lideri ve dahi bir hacker. Üstün zekası, dövüş sanatlarındaki ustalığı ve veri sızma yetenekleriyle bilinir. Gölgelerden hareket ederek Şirket hakimiyetini her seferinde bir düğüm sökerek parçalar.',
             'is_active' => true
         ]);
         
-        // Placeholder Faction
+        // Faction: The Syndicate -> Sendika
         LoreEntry::create([
-            'title' => 'The Syndicate',
-            'slug' => 'the-syndicate',
+            'title' => 'Sendika',
+            'slug' => 'sendika',
             'type' => 'faction',
-            'description' => 'The ruling corporate entity controlling Neo-Pera\'s water and data supply.',
+            'description' => 'Neo-Pera\'nın su ve veri kaynaklarını kontrol eden, şehri demir yumrukla yöneten şirketler birliği.',
             'is_active' => true
         ]);
     }

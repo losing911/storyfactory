@@ -91,18 +91,36 @@ class Story extends Model
 
         // Cache the lore patterns for 1 hour to avoid DB hits on every request
         // Key is 'lore_patterns', shared across all stories
+        // Cache the lore patterns for 1 hour to avoid DB hits on every request
+        // Key is 'lore_patterns', shared across all stories
         $patterns = \Illuminate\Support\Facades\Cache::remember('lore_patterns', 3600, function () {
-            // FIX: LoreEntry uses 'title' not 'baslik'
-            $entries = \App\Models\LoreEntry::where('is_active', true)->get(['title', 'slug']);
+            // Fetch title, keywords, and slug
+            $entries = \App\Models\LoreEntry::where('is_active', true)->get(['title', 'slug', 'keywords']);
             $p = [];
             foreach ($entries as $entry) {
-                // Pre-compile regex for performance
+                // 1. Add Main Title
                 $p[] = [
                     'pattern' => '/(?<!<a href="[^"]*">)\b(' . preg_quote($entry->title, '/') . ')(?!\w)\b(?!<\/a>)/iu',
                     'slug' => $entry->slug,
                     'title' => $entry->title
                 ];
+
+                // 2. Add Keywords/Aliases (if any)
+                if (!empty($entry->keywords) && is_array($entry->keywords)) {
+                    foreach ($entry->keywords as $keyword) {
+                        $p[] = [
+                            'pattern' => '/(?<!<a href="[^"]*">)\b(' . preg_quote($keyword, '/') . ')(?!\w)\b(?!<\/a>)/iu',
+                            'slug' => $entry->slug,
+                            'title' => $entry->title // Use main title for hover tooltip
+                        ];
+                    }
+                }
             }
+            // Sort patterns by length (longest first) to avoid partial matches on shorter substrings
+            usort($p, function($a, $b) {
+                return strlen($b['pattern']) - strlen($a['pattern']);
+            });
+
             return $p;
         });
         
