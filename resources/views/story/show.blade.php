@@ -40,7 +40,11 @@
                             <span class="text-gray-500 text-[10px] uppercase leading-none">{{ $story->author->role }}</span>
                         </div>
                     @else
-                        <span class="text-neon-green font-mono text-xs">ANXIPUNK_CORE</span>
+                        <div class="w-8 h-8 rounded-full border border-neon-green bg-gray-800 flex items-center justify-center text-[10px]">🤖</div>
+                        <div class="flex flex-col text-left">
+                            <span class="text-neon-green font-mono text-xs tracking-widest leading-none">ANXIPUNK_CORE</span>
+                            <span class="text-gray-500 text-[10px] uppercase leading-none">SYSTEM_GENERATED</span>
+                        </div>
                     @endif
                 </div>
                 <div class="inline-block border border-gray-700 px-3 py-1 text-gray-400 font-mono text-sm tracking-widest bg-black/50 backdrop-blur-sm">

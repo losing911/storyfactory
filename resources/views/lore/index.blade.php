@@ -21,14 +21,14 @@
             <div class="text-left max-w-4xl mx-auto bg-gray-900/50 border border-gray-800 p-8 hover:border-neon-blue transition duration-500 group">
                 <h2 class="text-2xl font-display text-white mb-4 flex items-center gap-3">
                     <span class="text-neon-blue">00.</span> 
-                    THE ORIGIN STORY (ARCHIVE)
+                    BAŞLANGIÇ HİKAYESİ (ARŞİV)
                 </h2>
                 <div class="prose prose-invert prose-sm max-w-none text-gray-400 font-sans columns-1 md:columns-2 gap-8 mb-8">
                     <p>
-                        <strong>2042: The Great Silence.</strong> It started not with a bang, but with a whisper—or rather, the absence of one. The global internet infrastructure collapsed under the weight of a rogue AI singularity event known only as "The Hush". Financial markets evaporated. Nations fractured.
+                        <strong>2042: Büyük Sessizlik.</strong> Bir patlamayla değil, bir fısıltıyla başladı—daha doğrusu fısıltının yokluğuyla. Küresel internet altyapısı, sadece "The Hush" (Sessizlik) olarak bilinen bir veri tekilliği olayının ağırlığı altında çöktü. Finansal piyasalar buharlaştı. Uluslar parçalandı.
                     </p>
                     <p>
-                        From the ashes rose <strong>Neo-Pera</strong>. Built upon the ruins of old Istanbul, it became a sanctuary for the tech-elite and a prison for the rest. The city is now governed by <em>The Syndicate</em>, a conglomerate of biotech and security firms who control the only currency that matters: <strong>Clean Data</strong>.
+                        Küllerden <strong>Neo-Pera</strong> doğdu. Eski İstanbul'un harabeleri üzerine inşa edilen bu şehir, teknoloji elitleri için bir sığınak, geri kalanlar içinse bir hapishane oldu. Şehir artık biyoteknoloji ve güvenlik firmalarından oluşan <em>Sendika (The Syndicate)</em> tarafından yönetiliyor. Tek geçerli para birimi: <strong>Temiz Veri</strong>.
                     </p>
                 </div>
 
@@ -36,7 +36,7 @@
                 @if(view()->exists('lore.partials.history_generated'))
                     <div class="border-t border-gray-800 pt-8 mt-8">
                         <h3 class="text-xl font-display text-neon-pink mb-4 flex items-center gap-2">
-                             <span class="animate-pulse">///</span> LATEST SYSTEM LOGS (AI GENERATED)
+                             <span class="animate-pulse">///</span> SİSTEM GÜNLÜKLERİ (CANLI AKIŞ)
                         </h3>
                         <div class="prose prose-invert prose-sm max-w-none text-gray-300 font-mono">
                             @include('lore.partials.history_generated')

@@ -112,6 +112,95 @@
         {{ $stories->links() }}
     </div>
 
+    <!-- NEW: KNOWLEDGE BASE (What is Cyberpunk?) -->
+    <div class="mt-24 grid lg:grid-cols-2 gap-16 items-center border-t border-gray-800 pt-16">
+        <div class="space-y-6">
+            <h2 class="text-3xl md:text-5xl font-display text-white leading-tight">
+                <span class="text-neon-pink">HIGH TECH.</span><br>
+                <span class="text-neon-blue">LOW LIFE.</span>
+            </h2>
+            <div class="prose prose-invert text-gray-400">
+                <p>
+                    <strong>Cyberpunk nedir?</strong> Sadece neon ışıklar ve robot kollar değildir. Çöküşün eşiğindeki bir toplumda, teknolojinin insanlığı nasıl hem yükselttiğini hem de hiç ettiği anlatır.
+                </p>
+                <p>
+                    Devasa şirketlerin devletlerin yerini aldığı, verinin petrolden değerli olduğu ve insan bedeninin sadece bir "donanım" (meatbag) olarak görüldüğü distopik bir gelecektir. Anxipunk, bu evrenin İstanbul (Neo-Pera) simülasyonudur.
+                </p>
+            </div>
+            <a href="{{ route('about') }}" class="inline-block border border-gray-600 text-gray-400 px-6 py-2 hover:border-white hover:text-white transition uppercase font-mono text-xs">
+                > MANIFESTO_OKU
+            </a>
+        </div>
+        <div class="relative group">
+            <div class="absolute -inset-1 bg-gradient-to-r from-neon-pink to-neon-blue opacity-30 group-hover:opacity-75 blur transition duration-1000"></div>
+            <div class="relative bg-black border border-gray-800 p-8 grid grid-cols-2 gap-4">
+                <!-- Info Cards -->
+                <div class="col-span-2 text-center border-b border-gray-800 pb-4 mb-4">
+                    <h3 class="font-display text-white text-xl">/// THE PIONEERS</h3>
+                </div>
+                
+                <div class="bg-gray-900/50 p-4 border border-gray-800 hover:border-neon-pink transition">
+                    <h4 class="text-neon-pink font-bold font-mono text-xs mb-1">WILLIAM GIBSON</h4>
+                    <p class="text-gray-500 text-[10px]">Neuromancer (1984). "Siberuzay" kelimesinin mucidi. Matrix'in babası.</p>
+                </div>
+
+                <div class="bg-gray-900/50 p-4 border border-gray-800 hover:border-neon-blue transition">
+                    <h4 class="text-neon-blue font-bold font-mono text-xs mb-1">BLADE RUNNER</h4>
+                    <p class="text-gray-500 text-[10px]">Ridley Scott (1982). Philip K. Dick'in eserinden uyarlama. Görsel estetiği belirledi.</p>
+                </div>
+
+                <div class="bg-gray-900/50 p-4 border border-gray-800 hover:border-neon-green transition">
+                    <h4 class="text-neon-green font-bold font-mono text-xs mb-1">GHOST IN THE SHELL</h4>
+                    <p class="text-gray-500 text-[10px]">Masamune Shirow (1989). İnsan ve makine arasındaki o ince çizgi.</p>
+                </div>
+
+                <div class="bg-gray-900/50 p-4 border border-gray-800 hover:border-neon-purple transition">
+                    <h4 class="text-neon-purple font-bold font-mono text-xs mb-1">CYBERPUNK 2077</h4>
+                    <p class="text-gray-500 text-[10px]">CD Projekt Red. Türü modern kitlelere tanıtan açık dünya RPG şaheseri.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Neural Art Gallery Strip -->
+    <div class="mt-20 border-t border-gray-800 pt-16">
+        <h2 class="text-3xl font-display text-white mb-8 flex items-center justify-between">
+            <span>/// NEURAL_ART_GALLERY</span>
+            <a href="{{ route('gallery.index') }}" class="text-xs text-neon-blue hover:underline whitespace-nowrap">VIEW_ALL >></a>
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            @php
+                // Fetch random images for visuals
+                $galleryImages = \App\Models\Story::whereNotNull('gorsel_url')->inRandomOrder()->take(4)->get();
+            @endphp
+            @foreach($galleryImages as $img)
+                <a href="{{ route('story.show', $img) }}" class="group relative aspect-square overflow-hidden border border-gray-800 hover:border-neon-green transition">
+                    <img src="{{ $img->gorsel_url }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500 filter grayscale group-hover:grayscale-0">
+                    <div class="absolute inset-0 bg-black/50 group-hover:opacity-0 transition"></div>
+                </a>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- NEW: Subscribe / Join Resistance -->
+    <div class="mt-20 bg-neon-purple/5 border-y border-neon-purple/30 py-16 text-center">
+        <h2 class="text-4xl font-display text-white mb-4 glitch-text" data-text="JOIN THE RESISTANCE">JOIN THE RESISTANCE</h2>
+        <p class="text-gray-400 max-w-xl mx-auto mb-8 font-mono text-sm">
+            Updates on Neo-Pera, secret lore drops, and system alerts directly to your neural interface.
+        </p>
+        <form action="{{ route('contact.store') }}" method="POST" class="max-w-md mx-auto flex gap-2">
+            @csrf
+            <input type="hidden" name="name" value="Subscriber">
+            <input type="hidden" name="subject" value="Newsletter Subscription">
+            <input type="hidden" name="message" value="I want to join the resistance newsletter.">
+            
+            <input type="email" name="email" placeholder="ENTER_EMAIL_ADDRESS" required class="flex-grow bg-black border border-neon-purple text-neon-purple p-3 focus:outline-none placeholder-purple-900">
+            <button type="submit" class="bg-neon-purple text-black font-bold px-6 py-3 hover:bg-white transition">
+                INITIATE
+            </button>
+        </form>
+    </div>
+
     <!-- Community Voting Section -->
     <div class="mt-24 border-t border-gray-800 py-16 bg-gradient-to-b from-transparent to-gray-900/20">
         <div class="max-w-4xl mx-auto text-center">

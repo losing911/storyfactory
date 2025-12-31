@@ -52,6 +52,7 @@ Route::get('/legal/privacy-policy', function () { return view('pages.privacy'); 
 Route::get('/legal/terms-of-service', function () { return view('pages.terms'); })->name('legal.terms');
 Route::get('/legal/cookie-policy', function () { return view('pages.cookies'); })->name('legal.cookies');
 Route::get('/contact', function () { return view('pages.contact'); })->name('contact');
+Route::post('/contact', [App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
 
 // Lore / Wiki System
 Route::get('/database', [App\Http\Controllers\LoreController::class, 'index'])->name('lore.index');
