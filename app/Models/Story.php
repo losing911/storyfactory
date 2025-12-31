@@ -92,14 +92,15 @@ class Story extends Model
         // Cache the lore patterns for 1 hour to avoid DB hits on every request
         // Key is 'lore_patterns', shared across all stories
         $patterns = \Illuminate\Support\Facades\Cache::remember('lore_patterns', 3600, function () {
-            $entries = \App\Models\LoreEntry::where('is_active', true)->get(['baslik', 'slug']);
+            // FIX: LoreEntry uses 'title' not 'baslik'
+            $entries = \App\Models\LoreEntry::where('is_active', true)->get(['title', 'slug']);
             $p = [];
             foreach ($entries as $entry) {
                 // Pre-compile regex for performance
                 $p[] = [
-                    'pattern' => '/(?<!<a href="[^"]*">)\b(' . preg_quote($entry->baslik, '/') . ')(?!\w)\b(?!<\/a>)/iu',
+                    'pattern' => '/(?<!<a href="[^"]*">)\b(' . preg_quote($entry->title, '/') . ')(?!\w)\b(?!<\/a>)/iu',
                     'slug' => $entry->slug,
-                    'title' => $entry->baslik
+                    'title' => $entry->title
                 ];
             }
             return $p;
