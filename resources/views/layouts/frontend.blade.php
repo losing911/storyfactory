@@ -167,6 +167,11 @@
 
     <footer class="border-t border-gray-800 bg-black py-12 mt-20">
         <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8 mb-6">
+                <a href="{{ route('legal.privacy') }}" class="text-gray-500 hover:text-neon-blue transition text-sm tracking-widest uppercase">Gizlilik Politikası</a>
+                <a href="{{ route('legal.terms') }}" class="text-gray-500 hover:text-neon-pink transition text-sm tracking-widest uppercase">Kullanım Şartları</a>
+                <a href="{{ route('contact') }}" class="text-gray-500 hover:text-neon-green transition text-sm tracking-widest uppercase">İletişim</a>
+            </div>
             <p class="font-display text-gray-600 tracking-widest">© 2025 ANXIPUNK // <span class="text-neon-green">SYSTEM_ONLINE</span></p>
         </div>
     </footer>

@@ -39,6 +39,11 @@ Route::get('/about', function () {
     return view('about');
 })->name('about');
 
+// Legal Pages (AdSense Requirement)
+Route::get('/legal/privacy-policy', function () { return view('pages.privacy'); })->name('legal.privacy');
+Route::get('/legal/terms-of-service', function () { return view('pages.terms'); })->name('legal.terms');
+Route::get('/contact', function () { return view('pages.contact'); })->name('contact');
+
 // Lore / Wiki System
 Route::get('/database', [App\Http\Controllers\LoreController::class, 'index'])->name('lore.index');
 Route::get('/database/{slug}', [App\Http\Controllers\LoreController::class, 'show'])->name('lore.show');
