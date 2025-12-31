@@ -59,14 +59,10 @@ class Story extends Model
         if ($locale === 'tr') return $this->baslik;
         $trans = $this->translations->where('locale', $locale)->first();
         return $trans ? $trans->title : $this->baslik;
-    
+    }
+
     public function author()
     {
         return $this->belongsTo(Author::class);
-    }
-
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
     }
 }
