@@ -209,7 +209,7 @@
     const musicControl = document.createElement('button');
     musicControl.className = 'border border-gray-700 px-3 py-1 font-mono text-sm hover:bg-gray-800 transition-colors flex items-center gap-2 text-gray-400';
     
-    const label = isCustom ? "AI_OST_GENERATED" : `NEURAL_OST [${storyMood.toUpperCase()}]`;
+    const label = isCustom ? "SYNTH_OST_ONLINE" : `CYBER_OST [${storyMood.toUpperCase()}]`;
     musicControl.innerHTML = `<span>🎵 ${label}</span>`;
     
     // Insert after the TTS button

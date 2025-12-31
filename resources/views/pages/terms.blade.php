@@ -14,7 +14,7 @@
 
         <section>
             <h2 class="text-2xl font-bold text-neon-pink mb-4">2. İçerik ve Telif Hakkı</h2>
-            <p>Bu web sitesindeki hikayeler ve görseller yapay zeka destekli olarak üretilmektedir. İçerikler kişisel kullanım içindir. İzinsiz ticari kullanımı yasaktır.</p>
+            <p>Bu web sitesindeki hikayeler ve görseller dijital teknolojiler ve algoritmalar kullanılarak üretilmektedir. İçerikler kişisel kullanım içindir. İzinsiz ticari kullanımı yasaktır.</p>
         </section>
 
         <section>
