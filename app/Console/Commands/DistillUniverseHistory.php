@@ -54,7 +54,7 @@ class DistillUniverseHistory extends Command
         $prompt .= "1. Analyze these events to find connecting threads, recurring conflicts, or shifts in power.\n";
         $prompt .= "2. Write a 'State of the Universe' report (Title: 'The Neo-Pera Chronicles: Current Era').\n";
         $prompt .= "3. Format it as an HTML section. Use <h3> for Chapter Titles. Use <blockquote> for important character quotes or 'system logs'. Use <strong> to highlight key terms (like 'Sendika', 'Glitch').\n";
-        $prompt .= "4. Theme: Dark, gritty, analytical but atmospheric. Mention 'The Syndicate', 'Resistance', and 'The Glitch' if they fit.\n";
+        $prompt .= "4. Theme: HIGH-ENERGY CYBERPUNK. Do NOT make it overly melancholic or depressive. Focus on FACTION WARS, REBELLION, HEISTS, and TECHNOLOGICAL BREAKTHROUGHS. The tone should be electric, dangerous, and dynamic.\n";
         $prompt .= "5. Output ONLY the HTML content, no JSON, no markdown code blocks. Do NOT use <h1> or <h2>.\n";
         $prompt .= "6. Language: TURKISH.\n";
         $prompt .= "7. IMPORTANT: The dates provided ([2024-xx-xx]) are Real World Dates. You MUST translate them to the 'Neo-Pera Calendar' by adding 50 years (e.g., 2025 -> 2075). NEVER use 2024/2025 in the output. Use 'Era 2075', 'Cycle 75', or just '2075'.\n";

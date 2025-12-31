@@ -53,7 +53,7 @@ class AIService
             'Tech Discovery: Finding a lost technology, AI awakening, cyber-archaeology.',
             'Neon Noir Mystery: Detective work, missing persons, solving a crime.',
             'Underground Culture: Rave parties, illegal racing, cyber-drug trade, art.',
-            'Melancholic Slice of Life: Daily struggles, loneliness, rainy atmosphere.'
+            'Cyber-Revolution: Riots, hacking the system, overthrowing the elite, high stakes.'
         ];
         $selectedMood = $moods[array_rand($moods)];
 
