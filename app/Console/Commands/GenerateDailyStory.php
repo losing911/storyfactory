@@ -125,20 +125,9 @@ class GenerateDailyStory extends Command
                 }
             }
             
-            $story = Story::create($storyData);
-
-            // 3.2 Auto-Comments (Netizen Reactions)
-            $this->info("Netizen Yorumları Simüle Ediliyor...");
-            $comments = $aiService->generateComments($data['sosyal_ozet'], $data['mood']);
-            foreach($comments as $c) {
-                $story->comments()->create([
-                     'nickname' => $c['user'],
-                     'message' => $c['text'],
-                     'is_approved' => true,
-                     'ip_address' => '127.0.0.1'
-                ]);
-            }
-            $this->info(count($comments) . " yorum eklendi.");
+            // 3.2 Auto-Comments (REMOVED: Moved to manual command story:simulate-comments)
+            // $this->info("Netizen Yorumları Simüle Ediliyor...");
+            // ...
             
             // 4. Auto-Translate to English (DISABLED BY USER REQUEST)
             // User requested to use Google Translate Widget instead to save AI resources.
