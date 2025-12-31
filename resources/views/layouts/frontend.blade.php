@@ -170,7 +170,9 @@
             <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8 mb-6">
                 <a href="{{ route('legal.privacy') }}" class="text-gray-500 hover:text-neon-blue transition text-sm tracking-widest uppercase">Gizlilik Politikası</a>
                 <a href="{{ route('legal.terms') }}" class="text-gray-500 hover:text-neon-pink transition text-sm tracking-widest uppercase">Kullanım Şartları</a>
+                <a href="{{ route('legal.cookies') }}" class="text-gray-500 hover:text-neon-purple transition text-sm tracking-widest uppercase">Çerez Politikası</a>
                 <a href="{{ route('contact') }}" class="text-gray-500 hover:text-neon-green transition text-sm tracking-widest uppercase">İletişim</a>
+                <a href="https://x.com/AnxlPunk" target="_blank" class="text-gray-500 hover:text-white transition text-sm tracking-widest uppercase border-l border-gray-800 pl-4">X / Twitter</a>
             </div>
             <p class="font-display text-gray-600 tracking-widest">© 2025 ANXIPUNK // <span class="text-neon-green">SYSTEM_ONLINE</span></p>
         </div>

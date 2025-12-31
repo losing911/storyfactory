@@ -1,18 +1,18 @@
 @extends('layouts.frontend')
 
-@section('title', $story->meta_baslik ?? $story->baslik)
-@section('meta_description', $story->meta_aciklama ?? Str::limit(strip_tags($story->metin), 160))
+@section('title', $story->seo_title)
+@section('meta_description', $story->seo_description)
 
 @section('meta_tags')
-    <meta property="og:title" content="{{ $story->meta_baslik ?? $story->baslik }}" />
-    <meta property="og:description" content="{{ $story->meta_aciklama ?? Str::limit(strip_tags($story->metin), 160) }}" />
+    <meta property="og:title" content="{{ $story->seo_title }}" />
+    <meta property="og:description" content="{{ $story->seo_description }}" />
     <meta property="og:image" content="{{ asset($story->gorsel_url) }}" />
     <meta property="og:url" content="{{ url()->current() }}" />
     <meta property="og:type" content="article" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@anxipunkart" />
-    <meta name="twitter:title" content="{{ $story->meta_baslik ?? $story->baslik }}" />
-    <meta name="twitter:description" content="{{ $story->meta_aciklama ?? Str::limit(strip_tags($story->metin), 160) }}" />
+    <meta name="twitter:title" content="{{ $story->seo_title }}" />
+    <meta name="twitter:description" content="{{ $story->seo_description }}" />
     <meta name="twitter:image" content="{{ asset($story->gorsel_url) }}" />
 @endsection
 
@@ -71,8 +71,20 @@
         <!-- Sidebar Line -->
         <div class="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-neon-pink to-transparent hidden lg:block opacity-50"></div>
 
+        <!-- SEO Intro Paragraph -->
+        @if($story->sosyal_ozet)
+        <div class="mb-8 p-6 bg-gray-900/30 border-l-4 border-neon-green font-sans text-lg text-gray-300 italic leading-relaxed backdrop-blur-sm">
+            {{ $story->sosyal_ozet }}
+        </div>
+        @endif
+
         <div class="prose prose-invert prose-lg max-w-none text-gray-300 font-sans leading-relaxed" id="storyContent">
-            {!! $story->metin !!}
+            {!! $story->processed_content !!}
+        </div>
+        
+        <!-- Anxipunk Universe Note -->
+        <div class="mt-8 p-4 bg-black border border-gray-800 text-xs font-mono text-gray-500 text-center">
+            > SYSTEM_NOTE: Bu hikaye Anxipunk Evreni (v2.4) dahilinde kurgulanmıştır. Karakterler ve mekanlar veritabanına kayıtlıdır.
         </div>
 
         <!-- Share Protocol -->
@@ -90,6 +102,35 @@
                  </a>
             </div>
         </div>
+    </div>
+        
+        <!-- Similar Stories (Internal Linking) -->
+        @if(isset($similarStories) && $similarStories->count() > 0)
+        <div class="mt-12 border-t border-gray-800 pt-8">
+            <h4 class="font-display text-white mb-6 text-sm tracking-widest uppercase border-l-4 border-neon-purple pl-4">/// NEURAL_RECOMMENDATIONS</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                @foreach($similarStories as $simStory)
+                <a href="{{ route('story.show', $simStory) }}" class="group block bg-gray-900 border border-gray-800 hover:border-neon-purple transition duration-300">
+                    <div class="relative h-32 overflow-hidden">
+                        @if($simStory->gorsel_url)
+                            <img src="{{ $simStory->gorsel_url }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500 opacity-60 group-hover:opacity-100">
+                        @else
+                             <div class="w-full h-full bg-gray-800 flex items-center justify-center"><span class="text-xs font-mono text-gray-600">NO_DATA</span></div>
+                        @endif
+                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+                    </div>
+                    <div class="p-4">
+                        <h5 class="text-neon-blue font-display text-sm truncate group-hover:text-neon-pink transition">{{ $simStory->baslik }}</h5>
+                        <div class="text-xs text-gray-500 mt-2 font-mono flex justify-between">
+                            <span>{{ $simStory->yayin_tarihi->format('d.m') }}</span>
+                            <span>READ_LOG</span>
+                        </div>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
     </div>
     <!-- Hacker Chat (Terminal Style) -->
     <div class="mt-20 border-t-2 border-dashed border-gray-800 pt-12 pb-24">

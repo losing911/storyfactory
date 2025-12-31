@@ -32,7 +32,15 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/story/{story}', function (App\Models\Story $story) {
     if($story->durum !== 'published' && !auth()->check()) abort(404);
-    return view('story.show', compact('story'));
+    
+    // Fetch 3 random suggested stories (excluding current)
+    $similarStories = App\Models\Story::where('durum', 'published')
+        ->where('id', '!=', $story->id)
+        ->inRandomOrder()
+        ->take(3)
+        ->get();
+
+    return view('story.show', compact('story', 'similarStories'));
 })->name('story.show');
 
 Route::get('/about', function () {
@@ -42,6 +50,7 @@ Route::get('/about', function () {
 // Legal Pages (AdSense Requirement)
 Route::get('/legal/privacy-policy', function () { return view('pages.privacy'); })->name('legal.privacy');
 Route::get('/legal/terms-of-service', function () { return view('pages.terms'); })->name('legal.terms');
+Route::get('/legal/cookie-policy', function () { return view('pages.cookies'); })->name('legal.cookies');
 Route::get('/contact', function () { return view('pages.contact'); })->name('contact');
 
 // Lore / Wiki System

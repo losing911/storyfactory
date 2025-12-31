@@ -65,4 +65,54 @@ class Story extends Model
     {
         return $this->belongsTo(Author::class);
     }
+
+    // SEO Accessors
+    public function getSeoTitleAttribute()
+    {
+        return "{$this->baslik} | Cyberpunk Hikâye – Anxipunk";
+    }
+
+    public function getSeoDescriptionAttribute()
+    {
+        // Use custom meta description if valid, otherwise generate template
+        if (!empty($this->meta_aciklama) && strlen($this->meta_aciklama) > 10) {
+            return $this->meta_aciklama;
+        }
+
+        return "{$this->baslik}, Anxipunk evreninde geçen karanlık bir cyberpunk hikâyedir. Dijital bilinç, veri ve distopik gelecek temalarını işler.";
+    }
+
+    // Lore Cross-Linking (Smart Content) - Optimized with Cache
+    public function getProcessedContentAttribute()
+    {
+        $content = $this->metin;
+        // Verify LoreEntry exists
+        if (!class_exists(\App\Models\LoreEntry::class)) return $content;
+
+        // Cache the lore patterns for 1 hour to avoid DB hits on every request
+        // Key is 'lore_patterns', shared across all stories
+        $patterns = \Illuminate\Support\Facades\Cache::remember('lore_patterns', 3600, function () {
+            $entries = \App\Models\LoreEntry::where('is_active', true)->get(['baslik', 'slug']);
+            $p = [];
+            foreach ($entries as $entry) {
+                // Pre-compile regex for performance
+                $p[] = [
+                    'pattern' => '/(?<!<a href="[^"]*">)\b(' . preg_quote($entry->baslik, '/') . ')(?!\w)\b(?!<\/a>)/iu',
+                    'slug' => $entry->slug,
+                    'title' => $entry->baslik
+                ];
+            }
+            return $p;
+        });
+        
+        foreach($patterns as $item) {
+            $replacement = '<a href="/database/'.$item['slug'].'" class="text-neon-pink hover:underline border-b border-neon-pink/30" title="Veri Bankası: '.$item['title'].'">$1</a>';
+            try {
+                // Limit 1 replacement per term per story
+                $content = preg_replace($item['pattern'], $replacement, $content, 1);
+            } catch (\Exception $e) { continue; }
+        }
+
+        return $content;
+    }
 }

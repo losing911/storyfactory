@@ -22,9 +22,13 @@
         </section>
 
         <section>
-            <h2 class="text-2xl font-bold text-neon-pink mb-4">3. Reklamlar (Google AdSense)</h2>
-            <p>Sitemizde reklam yayınlamak için Google AdSense kullanıyoruz. Google, kullanıcıların sitemizi ve internetteki diğer siteleri ziyaretlerine dayalı reklamlar sunmak için çerezleri (örneğin DART çerezleri) kullanabilir.</p>
-            <p>Kullanıcılar, Google reklam ve içerik ağı gizlilik politikasını ziyaret ederek DART çerezinin kullanımını devre dışı bırakabilirler.</p>
+            <h2 class="text-2xl font-bold text-neon-pink mb-4">3. Reklamlar ve Üçüncü Taraf Satıcılar</h2>
+            <p>Sitemizde reklam yayınlamak için <strong>Google AdSense</strong> kullanıyoruz.</p>
+            <ul class="list-disc pl-5 mt-2 space-y-1">
+                <li>Google dahil üçüncü taraf satıcılar, kullanıcının web sitemize veya diğer web sitelerine yaptığı önceki ziyaretlere dayalı olarak reklam yayınlamak için çerezleri kullanmaktadır.</li>
+                <li>Google'ın reklam çerezlerini kullanması, kendisinin ve iş ortaklarının, kullanıcıların sitemize ve/veya internetteki diğer sitelere yaptıkları ziyaretlere dayalı olarak onlara uygun reklamlar sunmasını sağlar.</li>
+                <li>Kullanıcılar, <a href="https://www.google.com/settings/ads" target="_blank" class="text-neon-blue hover:underline">Reklam Ayarları</a> sayfasını ziyaret ederek kişiselleştirilmiş reklamcılığı devre dışı bırakabilirler.</li>
+            </ul>
         </section>
 
         <section>

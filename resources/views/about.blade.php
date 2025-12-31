@@ -36,6 +36,20 @@
                 <p class="text-gray-500 text-sm">Visuals are synthesized in real-time, creating unique 'Frank Miller' style art.</p>
             </div>
         </div>
+        <div class="mt-20 border-t border-gray-800 pt-12 text-left">
+            <h3 class="text-2xl font-bold text-gray-500 mb-6 font-mono">/// BEHIND_THE_CODE (Transparency)</h3>
+            <div class="text-gray-400 space-y-4 font-sans text-sm leading-relaxed max-w-2xl">
+                <p>
+                    <strong>Anxipunk</strong> is an experimental creative writing project that blends human imagination with artificial intelligence. 
+                    While the narratives and visuals are generated using advanced AI models (LLMs & Diffusion Models), the creative direction, 
+                    lore curation, and world-building are driven by human editors.
+                </p>
+                <p>
+                    Our goal is to explore the boundaries of "Cyberpunk" storytelling through digital synthesis. 
+                    If you have any questions or collaboration ideas, please visit our <a href="{{ route('contact') }}" class="text-neon-blue hover:underline">Contact</a> page.
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
