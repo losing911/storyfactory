@@ -145,5 +145,51 @@ Route::get('/debug-pending', function() {
         'raw_html_sample' => substr($story->metin, 0, 500) // Show first 500 chars
     ];
 });
+Route::get('/debug-story', function() {
+    try {
+        $story = App\Models\Story::where('durum', 'published')->latest()->first();
+        if(!$story) return "No published stories found.";
 
+        echo "<h1>Debug Report for Story ID: {$story->id}</h1>";
+        
+        // 1. Check Columns
+        echo "<h2>1. Raw Attributes</h2>";
+        dump($story->getAttributes());
+
+        // 2. Check Author Relationship
+        echo "<h2>2. Author Relationship</h2>";
+        try {
+            echo "Author ID: " . ($story->author_id ?? 'NULL') . "<br>";
+            $author = $story->author;
+            echo "Author Loaded: " . ($author ? $author->name : 'NULL (No relation)') . "<br>";
+        } catch (\Exception $e) {
+            echo "<span style='color:red'>AUTHOR ERROR: " . $e->getMessage() . "</span><br>";
+        }
+
+        // 3. Check SEO Accessors
+        echo "<h2>3. SEO Accessors</h2>";
+        try {
+            echo "SEO Title: " . $story->seo_title . "<br>";
+            echo "SEO Desc: " . $story->seo_description . "<br>";
+        } catch (\Exception $e) {
+            echo "<span style='color:red'>SEO ERROR: " . $e->getMessage() . "</span><br>";
+        }
+
+        // 4. Check Processed Content (Lore Linking)
+        echo "<h2>4. Processed Content (Lore)</h2>";
+        try {
+            $content = $story->processed_content;
+            echo "Content Length: " . strlen($content) . " chars<br>";
+            echo "Sample: " . substr(strip_tags($content), 0, 100) . "...<br>";
+        } catch (\Exception $e) {
+            echo "<span style='color:red'>LORE PROC ERROR: " . $e->getMessage() . "</span><br>";
+            echo "Trace: " . $e->getTraceAsString();
+        }
+
+        return "<hr>End of Report";
+
+    } catch (\Exception $e) {
+        return "CRITICAL FAILURE: " . $e->getMessage() . "<br>" . $e->getTraceAsString();
+    }
+});
 
