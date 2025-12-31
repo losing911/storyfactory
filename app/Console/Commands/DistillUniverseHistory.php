@@ -27,10 +27,10 @@ class DistillUniverseHistory extends Command
     {
         $this->info("Initiating Universe Distillation Protocol...");
 
-        // 1. Fetch Stories (Optimization: Get latest 50 to avoid token overflow)
+        // 1. Fetch Stories (Optimization: Get latest 150 to cover more history)
         $stories = \App\Models\Story::where('durum', 'published')
             ->latest()
-            ->take(50)
+            ->take(150)
             ->get(['baslik', 'sosyal_ozet', 'mood', 'yayin_tarihi']);
 
         if ($stories->isEmpty()) {
@@ -48,7 +48,7 @@ class DistillUniverseHistory extends Command
 
         // 3. Build AI Prompt
         $prompt = "You are the 'Grand Historian' (Chronicler) of the Cyberpunk city 'Neo-Pera'.\n";
-        $prompt .= "Below is a chronological list of recent events (stories) that happened in the city:\n\n";
+        $prompt .= "Below is a chronological list of 150 recent events (stories) that happened in the city:\n\n";
         $prompt .= $context;
         $prompt .= "\n\nTASK:\n";
         $prompt .= "1. Analyze these events to find connecting threads, recurring conflicts, or shifts in power.\n";
@@ -58,6 +58,7 @@ class DistillUniverseHistory extends Command
         $prompt .= "5. Output ONLY the HTML content, no JSON, no markdown code blocks.\n";
         $prompt .= "6. Language: TURKISH.\n";
         $prompt .= "7. IMPORTANT: The dates provided ([2024-xx-xx]) are Real World Dates. You MUST translate them to the 'Neo-Pera Calendar' by adding 50 years (e.g., 2025 -> 2075). NEVER use 2024/2025 in the output. Use 'Era 2075', 'Cycle 75', or just '2075'.\n";
+        $prompt .= "8. LENGTH REQUIREMENT: This must be a 'Long-Form' chronicle. Do not summarize briefly. Create a cohesive story that weaves these events together. Aim for at least 1500 words. Divide into multiple chapters using <h3> tags.\n";
 
         // 4. Generate with AI Service
         $ai = new \App\Services\AIService();
