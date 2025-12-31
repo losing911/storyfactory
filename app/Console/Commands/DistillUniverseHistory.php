@@ -53,9 +53,9 @@ class DistillUniverseHistory extends Command
         $prompt .= "\n\nTASK:\n";
         $prompt .= "1. Analyze these events to find connecting threads, recurring conflicts, or shifts in power.\n";
         $prompt .= "2. Write a 'State of the Universe' report (Title: 'The Neo-Pera Chronicles: Current Era').\n";
-        $prompt .= "3. Format it as an HTML section with <h3> headers for distinct eras/events and <p> for text.\n";
+        $prompt .= "3. Format it as an HTML section. Use <h3> for Chapter Titles. Use <blockquote> for important character quotes or 'system logs'. Use <strong> to highlight key terms (like 'Sendika', 'Glitch').\n";
         $prompt .= "4. Theme: Dark, gritty, analytical but atmospheric. Mention 'The Syndicate', 'Resistance', and 'The Glitch' if they fit.\n";
-        $prompt .= "5. Output ONLY the HTML content, no JSON, no markdown code blocks.\n";
+        $prompt .= "5. Output ONLY the HTML content, no JSON, no markdown code blocks. Do NOT use <h1> or <h2>.\n";
         $prompt .= "6. Language: TURKISH.\n";
         $prompt .= "7. IMPORTANT: The dates provided ([2024-xx-xx]) are Real World Dates. You MUST translate them to the 'Neo-Pera Calendar' by adding 50 years (e.g., 2025 -> 2075). NEVER use 2024/2025 in the output. Use 'Era 2075', 'Cycle 75', or just '2075'.\n";
         $prompt .= "8. LENGTH REQUIREMENT: This must be a 'Long-Form' chronicle. Do not summarize briefly. Create a cohesive story that weaves these events together. Aim for at least 1500 words. Divide into multiple chapters using <h3> tags.\n";

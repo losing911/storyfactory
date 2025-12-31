@@ -30,7 +30,14 @@
                 </h2>
 
                 @if(view()->exists('lore.partials.history_generated'))
-                    <div class="prose prose-invert prose-lg max-w-none text-gray-300 font-sans leading-relaxed">
+                    <div class="prose prose-invert prose-lg max-w-none font-sans leading-relaxed
+                        prose-headings:font-display prose-headings:font-black prose-headings:uppercase prose-headings:tracking-widest 
+                        prose-h1:text-5xl prose-h1:text-neon-pink prose-h1:text-glow
+                        prose-h2:text-3xl prose-h2:text-neon-blue prose-h2:border-b prose-h2:border-gray-700 prose-h2:pb-2
+                        prose-h3:text-2xl prose-h3:text-neon-green prose-h3:mt-8
+                        prose-p:text-gray-300 prose-p:text-justify prose-p:mb-6 prose-p:leading-8
+                        prose-strong:text-white prose-strong:font-bold prose-strong:bg-neon-pink/20 prose-strong:px-1
+                        prose-blockquote:border-l-4 prose-blockquote:border-neon-purple prose-blockquote:bg-gray-800/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:italic prose-blockquote:text-gray-400">
                         @include('lore.partials.history_generated')
                     </div>
                     <div class="mt-8 text-xs font-mono text-gray-600 text-right">
