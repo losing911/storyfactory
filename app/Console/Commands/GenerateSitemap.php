@@ -47,30 +47,8 @@ class GenerateSitemap extends Command
 
         $sitemap->writeToFile(public_path('sitemap.xml'));
         
+        $sitemap->writeToFile(public_path('sitemap.xml'));
+        
         $this->info('Sitemap generated successfully at public/sitemap.xml');
-
-        // Ping Search Engines
-        $this->pingSearchEngines();
-    }
-
-    protected function pingSearchEngines()
-    {
-        // Google & Bing (Bing now handles both generally or deprecated, but good to try)
-        $sitemapUrl = url('sitemap.xml');
-        $engines = [
-             "http://www.google.com/ping?sitemap={$sitemapUrl}",
-             "http://www.bing.com/ping?sitemap={$sitemapUrl}"
-        ];
-
-        foreach ($engines as $url) {
-            try {
-                // Simple fire-and-forget GET request
-                file_get_contents($url);
-                $this->info("Pinged: $url");
-            } catch (\Exception $e) {
-                // Ignore errors for pings
-                $this->warn("Ping Failed for $url: " . $e->getMessage());
-            }
-        }
     }
 }
