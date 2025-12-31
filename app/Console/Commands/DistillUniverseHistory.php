@@ -57,6 +57,7 @@ class DistillUniverseHistory extends Command
         $prompt .= "4. Theme: Dark, gritty, analytical but atmospheric. Mention 'The Syndicate', 'Resistance', and 'The Glitch' if they fit.\n";
         $prompt .= "5. Output ONLY the HTML content, no JSON, no markdown code blocks.\n";
         $prompt .= "6. Language: TURKISH.\n";
+        $prompt .= "7. IMPORTANT: The dates provided ([2024-xx-xx]) are Real World Dates. You MUST translate them to the 'Neo-Pera Calendar' by adding 50 years (e.g., 2025 -> 2075). NEVER use 2024/2025 in the output. Use 'Era 2075', 'Cycle 75', or just '2075'.\n";
 
         // 4. Generate with AI Service
         $ai = new \App\Services\AIService();
