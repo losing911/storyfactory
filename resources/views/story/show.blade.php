@@ -32,8 +32,19 @@
         
         <div class="relative z-10 max-w-4xl mx-auto px-4 text-center w-full">
             <div class="flex justify-center items-center gap-4 mb-6">
-                 <div class="inline-block border border-neon-green/30 px-3 py-1 text-neon-green font-mono text-sm tracking-widest bg-black/50 backdrop-blur-sm">
-                    {{ $story->yayin_tarihi->format('d F Y') }} // {{ $story->konu }}
+                <div class="flex items-center gap-3 bg-black/50 backdrop-blur-sm border border-neon-green/30 px-4 py-2 rounded-full">
+                    @if($story->author)
+                        <img src="{{ $story->author->avatar }}" class="w-8 h-8 rounded-full border border-neon-green">
+                        <div class="flex flex-col text-left">
+                            <span class="text-neon-green font-mono text-xs tracking-widest leading-none">{{ $story->author->name }}</span>
+                            <span class="text-gray-500 text-[10px] uppercase leading-none">{{ $story->author->role }}</span>
+                        </div>
+                    @else
+                        <span class="text-neon-green font-mono text-xs">ANXIPUNK_CORE</span>
+                    @endif
+                </div>
+                <div class="inline-block border border-gray-700 px-3 py-1 text-gray-400 font-mono text-sm tracking-widest bg-black/50 backdrop-blur-sm">
+                    {{ $story->yayin_tarihi->format('d F Y') }}
                 </div>
                 <!-- TTS Button -->
                 <button id="ttsButton" class="border border-neon-blue/50 text-neon-blue px-3 py-1 font-mono text-sm hover:bg-neon-blue/20 transition-colors flex items-center gap-2">

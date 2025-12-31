@@ -106,6 +106,7 @@ class GenerateDailyStory extends Command
                 'sosyal_ozet' => \Illuminate\Support\Str::limit($data['sosyal_ozet'] ?? '', 250),
                 'gorsel_prompt' => json_encode(array_column($data['scenes'], 'img_prompt')),
                 'music_prompt' => $data['music_prompt'] ?? null,
+                'author_id' => \App\Models\Author::inRandomOrder()->first()->id ?? null,
             ];
 
             // 3.1 Generate Music (Suno)
@@ -124,11 +125,20 @@ class GenerateDailyStory extends Command
                 }
             }
             
-            // Allow array close properly
-            // Note: closing bracket was in line 107 of original file
-
-
             $story = Story::create($storyData);
+
+            // 3.2 Auto-Comments (Netizen Reactions)
+            $this->info("Netizen Yorumları Simüle Ediliyor...");
+            $comments = $aiService->generateComments($data['sosyal_ozet'], $data['mood']);
+            foreach($comments as $c) {
+                $story->comments()->create([
+                     'nickname' => $c['user'],
+                     'message' => $c['text'],
+                     'is_approved' => true,
+                     'ip_address' => '127.0.0.1'
+                ]);
+            }
+            $this->info(count($comments) . " yorum eklendi.");
             
             // 4. Auto-Translate to English (DISABLED BY USER REQUEST)
             // User requested to use Google Translate Widget instead to save AI resources.

@@ -344,6 +344,33 @@ class AIService
          throw new \Exception('OpenRouter Failed after 3 retries.');
     }
 
+    public function generateComments(string $storySummary, string $mood): array
+    {
+        $prompt = "Generate 3-5 fictional user comments (Turkish language) for a cyberpunk story with the following summary:\n";
+        $prompt .= "Summary: $storySummary\n";
+        $prompt .= "Mood: $mood\n\n";
+        $prompt .= "The comments should be from 'netizens' of a dystopian city. Mix of slang, tech-speak, and philosophical dread.\n";
+        $prompt .= "Personas:\n1. The Skeptic (doubts the truth)\n2. The Fan (loves the action)\n3. The Doomer (depressed)\n4. The Glitch (speaks in cryptic code)\n\n";
+        $prompt .= "Output JSON format only: [{ \"user\": \"Nickname\", \"text\": \"Comment content\" }]";
+
+        try {
+            // Use lighter model or same as story
+            $json = $this->generateRawWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+            
+            // Clean markdown
+            $json = str_replace(['```json', '```'], '', $json);
+            if (preg_match('/\[.*\]/s', $json, $matches)) {
+                $json = $matches[0];
+            }
+            
+            $data = json_decode($json, true);
+            return is_array($data) ? $data : [];
+        } catch (\Exception $e) {
+            Log::error("Comment Generation Failed: " . $e->getMessage());
+            return [];
+        }
+    }
+
     protected function getMockData(): array
     {
         return []; // Mock data deprecated
