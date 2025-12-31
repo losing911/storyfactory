@@ -319,7 +319,7 @@ class AIService
         while ($attempt < $maxRetries) {
             $attempt++;
             
-            $response = Http::timeout(120)->withHeaders([
+            $response = Http::timeout(600)->withHeaders([
                 'Authorization' => "Bearer $key",
                 'HTTP-Referer' => config('app.url'),
                 'X-Title' => config('app.name'),
