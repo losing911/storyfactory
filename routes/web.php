@@ -15,6 +15,13 @@ Route::get('/', function () {
         'active_nodes' => rand(340, 999), // Mock stat for atmosphere
         'glitches_prevented' => rand(1200, 5000)
     ];
+    
+    // Explicit Sitemap Route (Backup)
+    Route::get('/sitemap.xml', function() {
+        return response()->file(public_path('sitemap.xml'), [
+            'Content-Type' => 'text/xml'
+        ]);
+    });
 
     return view('welcome', compact('stories', 'latestStory', 'spotlightLore', 'stats'));
 })->name('home');
