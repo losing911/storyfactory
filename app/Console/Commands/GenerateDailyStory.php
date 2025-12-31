@@ -125,6 +125,10 @@ class GenerateDailyStory extends Command
                 }
             }
             
+            // 3.3 SAVE STORY TO DB (CRITICAL FIX)
+            $story = Story::create($storyData);
+            $this->info("Hikaye Veritabanına Kaydedildi: ID {$story->id}");
+            
             // 3.2 Auto-Comments (REMOVED: Moved to manual command story:simulate-comments)
             // $this->info("Netizen Yorumları Simüle Ediliyor...");
             // ...
