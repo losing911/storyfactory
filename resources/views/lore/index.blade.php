@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
-@section('title', 'NEXUS PROTOCOL - DATABASE')
-@section('meta_description', 'Access the Anxipunk Lore Database. Information on Cities, Factions, and Characters.')
+@section('title', 'NEXUS PROTOKOLÜ - VERİ BANKASI')
+@section('meta_description', 'Anxipunk Lore Veritabanına Erişim. Şehirler, Hizipler ve Karakterler hakkında bilgiler.')
 
 @section('content')
 <div class="pt-32 pb-20 min-h-screen">
@@ -11,10 +11,10 @@
             <div class="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
                 <span class="text-[12rem] font-black text-white font-display">LORE</span>
             </div>
-            <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6 glitch-effect relative z-10" data-text="ARCHIVE_CORE">ARCHIVE_CORE</h1>
+            <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6 glitch-effect relative z-10" data-text="ARŞİV_ÇEKİRDEĞİ">ARŞİV_ÇEKİRDEĞİ</h1>
             <p class="font-mono text-neon-green text-sm tracking-widest mb-8 max-w-2xl mx-auto leading-relaxed">
-                /// WELCOME TO THE MEMORY BANKS OF NEO-PERA.<br>
-                Here lies the fragmented history of the Great Collapse, the rise of the Corporate Syndicate, and the few who dare to resist in the shadows.
+                /// NEO-PERA HAFIZA BANKALARINA HOŞGELDİNİZ.<br>
+                Burada Büyük Çöküş'ün parça parça tarihi, Şirketler Sendikası'nın yükselişi ve gölgelerde direnmeye cesaret eden azınlığın kayıtları yatar.
             </p>
             
             <!-- Universe Story (Accordion or Section) -->
@@ -49,7 +49,7 @@
         <!-- Section: Cities -->
         @if($cities->count() > 0)
         <div class="mb-16">
-            <h2 class="text-2xl font-display text-neon-purple mb-8 border-b border-gray-800 pb-2">/// SECTORS & CITIES</h2>
+            <h2 class="text-2xl font-display text-neon-purple mb-8 border-b border-gray-800 pb-2">/// ÇÖKÜNTÜ ALANLARI & ŞEHİRLER</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($cities as $entry)
                     @include('lore.card', ['entry' => $entry])
@@ -61,7 +61,7 @@
         <!-- Section: Factions -->
         @if($factions->count() > 0)
         <div class="mb-16">
-            <h2 class="text-2xl font-display text-neon-pink mb-8 border-b border-gray-800 pb-2">/// SYNDICATES & FACTIONS</h2>
+            <h2 class="text-2xl font-display text-neon-pink mb-8 border-b border-gray-800 pb-2">/// SENDİKALAR & HİZİPLER</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($factions as $entry)
                     @include('lore.card', ['entry' => $entry])
@@ -73,7 +73,7 @@
         <!-- Section: Characters -->
         @if($characters->count() > 0)
         <div class="mb-16">
-            <h2 class="text-2xl font-display text-neon-blue mb-8 border-b border-gray-800 pb-2">/// ROGUE AGENTS & NPCS</h2>
+            <h2 class="text-2xl font-display text-neon-blue mb-8 border-b border-gray-800 pb-2">/// KAÇAK AJANLAR & NPCS</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($characters as $entry)
                     @include('lore.card', ['entry' => $entry])

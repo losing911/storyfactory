@@ -165,8 +165,8 @@
     <!-- NEW: Neural Art Gallery Strip -->
     <div class="mt-20 border-t border-gray-800 pt-16">
         <h2 class="text-3xl font-display text-white mb-8 flex items-center justify-between">
-            <span>/// NEURAL_ART_GALLERY</span>
-            <a href="{{ route('gallery.index') }}" class="text-xs text-neon-blue hover:underline whitespace-nowrap">VIEW_ALL >></a>
+            <span>/// NÖRAL_SANAT_GALERİSİ</span>
+            <a href="{{ route('gallery.index') }}" class="text-xs text-neon-blue hover:underline whitespace-nowrap">TÜMÜNÜ_GÖR >></a>
         </h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             @php
@@ -184,19 +184,19 @@
 
     <!-- NEW: Subscribe / Join Resistance -->
     <div class="mt-20 bg-neon-purple/5 border-y border-neon-purple/30 py-16 text-center">
-        <h2 class="text-4xl font-display text-white mb-4 glitch-text" data-text="JOIN THE RESISTANCE">JOIN THE RESISTANCE</h2>
+        <h2 class="text-4xl font-display text-white mb-4 glitch-text" data-text="DİRENİŞE KATIL">DİRENİŞE KATIL</h2>
         <p class="text-gray-400 max-w-xl mx-auto mb-8 font-mono text-sm">
-            Updates on Neo-Pera, secret lore drops, and system alerts directly to your neural interface.
+            Neo-Pera güncellemeleri, gizli lore belgeleri ve sistem uyarıları doğrudan nöral arayüzünüze iletilir.
         </p>
         <form action="{{ route('contact.store') }}" method="POST" class="max-w-md mx-auto flex gap-2">
             @csrf
-            <input type="hidden" name="name" value="Subscriber">
-            <input type="hidden" name="subject" value="Newsletter Subscription">
-            <input type="hidden" name="message" value="I want to join the resistance newsletter.">
+            <input type="hidden" name="name" value="Abone">
+            <input type="hidden" name="subject" value="Bülten Aboneliği">
+            <input type="hidden" name="message" value="Direniş bültenine katılmak istiyorum.">
             
-            <input type="email" name="email" placeholder="ENTER_EMAIL_ADDRESS" required class="flex-grow bg-black border border-neon-purple text-neon-purple p-3 focus:outline-none placeholder-purple-900">
+            <input type="email" name="email" placeholder="E-POSTA_ADRESİ_GİRİN" required class="flex-grow bg-black border border-neon-purple text-neon-purple p-3 focus:outline-none placeholder-purple-900">
             <button type="submit" class="bg-neon-purple text-black font-bold px-6 py-3 hover:bg-white transition">
-                INITIATE
+                BAŞLAT
             </button>
         </form>
     </div>
