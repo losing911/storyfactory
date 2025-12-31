@@ -35,8 +35,8 @@
                         md:columns-2 md:gap-12 md:rule-neon-blue/30
                         prose-headings:font-display prose-headings:font-black prose-headings:uppercase prose-headings:tracking-widest prose-headings:break-inside-avoid
                         prose-h1:text-6xl prose-h1:text-neon-pink prose-h1:text-glow prose-h1:mb-12 prose-h1:border-b-4 prose-h1:border-neon-pink
-                        prose-h2:text-4xl prose-h2:text-white prose-h2:bg-neon-blue/10 prose-h2:p-4 prose-h2:-ml-4 prose-h2:border-l-8 prose-h2:border-neon-blue prose-h2:mb-8 prose-h2:mt-12
-                        prose-h3:text-2xl prose-h3:text-neon-green prose-h3:mt-8 prose-h3:mb-4 prose-h3:font-bold prose-h3:decoration-neon-green prose-h3:underline prose-h3:decoration-2 prose-h3:underline-offset-4
+                        prose-h2:text-4xl prose-h2:text-neon-blue prose-h2:text-glow prose-h2:bg-gray-900/50 prose-h2:p-4 prose-h2:-ml-4 prose-h2:border-l-8 prose-h2:border-neon-blue prose-h2:mb-8 prose-h2:mt-12
+                        prose-h3:text-2xl prose-h3:text-neon-green prose-h3:text-glow prose-h3:mt-8 prose-h3:mb-4 prose-h3:font-bold prose-h3:decoration-neon-green prose-h3:underline prose-h3:decoration-2 prose-h3:underline-offset-4
                         prose-p:text-justify prose-p:mb-6 prose-p:leading-8 prose-p:break-inside-avoid-orphans
                         prose-strong:text-white prose-strong:font-bold prose-strong:bg-neon-pink/20 prose-strong:px-1
                         prose-blockquote:border-l-0 prose-blockquote:border-t-4 prose-blockquote:border-neon-purple prose-blockquote:bg-gray-800 prose-blockquote:p-6 prose-blockquote:my-8 prose-blockquote:shadow-neon-purple prose-blockquote:not-italic prose-blockquote:font-mono prose-blockquote:text-sm
