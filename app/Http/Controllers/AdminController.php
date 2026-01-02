@@ -39,7 +39,10 @@ class AdminController extends Controller
         // Recent Logs
         $recentLogs = \Illuminate\Support\Facades\DB::table('analytics_logs')->latest()->take(10)->get();
 
-        return view('admin.dashboard', compact('stats', 'insight', 'recentLogs'));
+        // Recent E-Books
+        $ebooks = \App\Models\EBook::latest()->take(5)->get();
+
+        return view('admin.dashboard', compact('stats', 'insight', 'recentLogs', 'ebooks'));
     }
 
     public function create()
