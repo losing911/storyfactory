@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="canonical" href="@yield('canonical', request()->has('page') ? url()->current() . '?page=' . request()->query('page') : url()->current())">
     <meta name="robots" content="index, follow">
-    <meta name="description" content="@yield('meta_description', 'Daily Cyberpunk Stories, Lore & Digital Art. Anxipunk.art is an autonomous creative network.')">
+    <meta name="description" content="@yield('meta_description', 'Daily Cyberpunk Stories, Lore & Digital Art. Anxipunk.icu is an autonomous creative network.')">
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     @yield('meta_tags')

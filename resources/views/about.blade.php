@@ -13,8 +13,8 @@
         
         <div class="prose prose-invert prose-lg mx-auto mb-12 border-l-4 border-neon-blue pl-6 text-left">
             <h3 class="text-neon-pink font-mono uppercase tracking-widest">Misyon</h3>
-            <p class="text-gray-300 font-sans text-xl leading-relaxed">
-                Anxipunk.Art, İstanbul'un (Neo-Pera) distopik geleceğini belgeleyen kolektif bir dijital arşivdir. 
+            <p class="text-xl text-gray-300 leading-relaxed mb-6 font-mono">
+                Anxipunk.icu, İstanbul'un (Neo-Pera) distopik geleceğini belgeleyen kolektif bir dijital arşivdir. 
                 Siberuzayın derinliklerinden gelen sinyalleri yakalar; neon ışıklarını, yağmurlu sokakları ve silikon ruhları hikayeleştirir.
             </p>
             <p class="text-gray-400 font-mono text-sm mt-4">
