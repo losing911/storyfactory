@@ -195,7 +195,7 @@ class AIService
     {
         // Use Pollinations.ai with FLUX model (State of the Art)
         // Updated Style: Anime / Manga / Ghibli Cyberpunk Mix
-        $style = ", anime style, studio ghibli, akira vibes, mamoru oshii style, cyberpunk, cel shaded, vibrant colors, detailed line art, 8k, atmospheric, masterpiece, no text";
+        $style = ", anime style, studio ghibli, akira vibes, mamoru oshii style, cyberpunk, cel shaded, vibrant colors, detailed line art, 2D, flat colors, 8k, atmospheric, masterpiece, no text, (anime:1.5)";
         
         // 1. Inject Visual Consistency Prompt
         if ($visualPrompt) {
@@ -210,9 +210,9 @@ class AIService
         // Current Strategy: Strong Prompting (Visual Prompt) is safer.
         // Future: If local Stable Diffusion, we would pass init_image.
         
-        // Added '&model=flux' for better quality
+        // Added '&model=flux' for better quality (Replace turbo)
         // Added '&enhance=true' (Pollinations feature)
-        return "https://image.pollinations.ai/prompt/{$encodedPrompt}?width=1280&height=720&nologo=true&model=turbo&seed=" . rand(1, 99999);
+        return "https://image.pollinations.ai/prompt/{$encodedPrompt}?width=1280&height=720&nologo=true&model=flux&seed=" . rand(1, 99999);
     }
 
     public function downloadImage(string $url, string $path): string
