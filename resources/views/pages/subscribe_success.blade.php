@@ -10,13 +10,13 @@
             CONNECTION_ESTABLISHED
         </div>
         
-        <h1 class="text-4xl md:text-6xl font-display text-white mb-6 glitch-text" data-text="WELCOME TO THE RESISTANCE">
-            WELCOME TO THE<br><span class="text-neon-green">RESISTANCE</span>
+        <h1 class="text-4xl md:text-6xl font-display text-white mb-6 glitch-text" data-text="DİRENİŞE HOŞ GELDİNİZ">
+            DİRENİŞE<br><span class="text-neon-green">HOŞ GELDİNİZ</span>
         </h1>
         
         <p class="text-gray-400 font-mono text-lg mb-8 leading-relaxed">
-            Your neural link has been verified. You have successfully bypassed the corporate firewall.<br>
-            Expect encrypted transmissions to arrive in your inbox shortly.
+            Nöral bağlantınız (neural link) doğrulandı. Şirket güvenlik duvarını (corporate firewall) başarıyla aştınız.<br>
+            Şifreli veri paketlerinin kısa süre içinde gelen kutunuza ulaşmasını bekleyin.
         </p>
         
         <div class="flex justify-center gap-4">
