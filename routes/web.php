@@ -62,6 +62,9 @@ Route::get('/database/{slug}', [App\Http\Controllers\LoreController::class, 'sho
 Route::get('/kutuphane', [App\Http\Controllers\EBookController::class, 'index'])->name('ebooks.index');
 Route::get('/kutuphane/{slug}', [App\Http\Controllers\EBookController::class, 'show'])->name('ebooks.show');
 
+// Author Profiles
+Route::get('/author/{slug}', [App\Http\Controllers\AuthorController::class, 'show'])->name('author.show');
+
 // Gallery
 Route::get('/gallery', [App\Http\Controllers\GalleryController::class, 'index'])->name('gallery.index');
 Route::view('/kronikler', 'chronicles.index')->name('chronicles.index');

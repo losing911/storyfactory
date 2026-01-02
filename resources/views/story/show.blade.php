@@ -32,13 +32,15 @@
         
         <div class="relative z-10 max-w-4xl mx-auto px-4 text-center w-full">
             <div class="flex justify-center items-center gap-4 mb-6">
-                <div class="flex items-center gap-3 bg-black/50 backdrop-blur-sm border border-neon-green/30 px-4 py-2 rounded-full">
+                <div class="flex items-center gap-3 bg-black/50 backdrop-blur-sm border border-neon-green/30 px-4 py-2 rounded-full hover:bg-black/80 transition group">
                     @if($story->author)
-                        <img src="{{ $story->author->avatar }}" class="w-8 h-8 rounded-full border border-neon-green">
-                        <div class="flex flex-col text-left">
-                            <span class="text-neon-green font-mono text-xs tracking-widest leading-none">{{ $story->author->name }}</span>
-                            <span class="text-gray-500 text-[10px] uppercase leading-none">{{ $story->author->role }}</span>
-                        </div>
+                        <a href="{{ route('author.show', $story->author->slug) }}" class="flex items-center gap-3">
+                            <img src="{{ $story->author->avatar }}" class="w-8 h-8 rounded-full border border-neon-green group-hover:scale-110 transition">
+                            <div class="flex flex-col text-left">
+                                <span class="text-neon-green font-mono text-xs tracking-widest leading-none group-hover:text-white transition">{{ $story->author->name }}</span>
+                                <span class="text-gray-500 text-[10px] uppercase leading-none">{{ $story->author->role }}</span>
+                            </div>
+                        </a>
                     @else
                         <div class="w-8 h-8 rounded-full border border-neon-green bg-gray-800 flex items-center justify-center text-[10px]">🤖</div>
                         <div class="flex flex-col text-left">
