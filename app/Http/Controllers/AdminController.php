@@ -26,23 +26,28 @@ class AdminController extends Controller
 
     public function dashboard()
     {
-        // Stats
-        $stats = [
-            'total_stories' => Story::count(),
-            'total_views' => \Illuminate\Support\Facades\DB::table('analytics_logs')->count(),
-            'unique_visitors' => \Illuminate\Support\Facades\DB::table('analytics_logs')->distinct('visitor_id')->count('visitor_id'),
-        ];
+        try {
+            // Stats
+            $stats = [
+                'total_stories' => Story::count(),
+                'total_views' => \Illuminate\Support\Facades\DB::table('analytics_logs')->count(),
+                'unique_visitors' => \Illuminate\Support\Facades\DB::table('analytics_logs')->distinct('visitor_id')->count('visitor_id'),
+            ];
 
-        // Latest AI Insight
-        $insight = \Illuminate\Support\Facades\DB::table('analytics_insights')->orderBy('report_date', 'desc')->first();
+            // Latest AI Insight
+            $insight = \Illuminate\Support\Facades\DB::table('analytics_insights')->orderBy('report_date', 'desc')->first();
 
-        // Recent Logs
-        $recentLogs = \Illuminate\Support\Facades\DB::table('analytics_logs')->latest()->take(10)->get();
+            // Recent Logs
+            $recentLogs = \Illuminate\Support\Facades\DB::table('analytics_logs')->latest()->take(10)->get();
 
-        // Recent E-Books
-        $ebooks = \App\Models\EBook::latest()->take(5)->get();
+            // Recent E-Books
+            $ebooks = \App\Models\EBook::latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('stats', 'insight', 'recentLogs', 'ebooks'));
+            return view('admin.dashboard', compact('stats', 'insight', 'recentLogs', 'ebooks'));
+            
+        } catch (\Exception $e) {
+            dd("ADMIN DASHBOARD ERROR: " . $e->getMessage(), $e->getTraceAsString());
+        }
     }
 
     public function create()
