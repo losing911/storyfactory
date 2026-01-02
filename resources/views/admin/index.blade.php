@@ -50,6 +50,16 @@
                         </form>
                     @endif
 
+                    <!-- Regenerate Images Button -->
+                    @if($story->gorsel_prompt)
+                    <form action="{{ route('admin.stories.regenerate', $story) }}" method="POST" class="inline" onsubmit="return confirm('Görseller yeniden üretilecek. Bu işlem 2-3 dakika sürebilir. Onaylıyor musunuz?')">
+                        @csrf
+                        <button type="submit" class="text-neon-pink hover:text-white border border-neon-pink/30 px-2 py-1 rounded hover:bg-neon-pink/20 transition" title="Görselleri Tamir Et / Yenile">
+                            ♻️ Görsel
+                        </button>
+                    </form>
+                    @endif
+
                     <a href="{{ route('admin.stories.edit', $story) }}" class="text-blue-400 hover:text-blue-300">Düzenle</a>
                     <form action="{{ route('admin.stories.destroy', $story) }}" method="POST" class="inline">
                         @csrf @method('DELETE')
