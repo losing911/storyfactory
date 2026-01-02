@@ -464,10 +464,14 @@ class AdminController extends Controller
         }
     }
 
-    public function regenerateImageChunk(Request $request, Story $story)
+    public function regenerateImageChunk(Request $request, $id)
     {
         // AJAX Method to regenerate a single image
         set_time_limit(120);
+        
+        // Find manually because Route Binding expects SLUG but we pass ID
+        $story = Story::findOrFail($id);
+
         $index = $request->input('index');
         $prompts = json_decode($story->gorsel_prompt, true);
         $prompt = $prompts[$index] ?? null;
