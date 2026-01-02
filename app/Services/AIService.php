@@ -368,16 +368,31 @@ class AIService
 
         try {
             // Use lighter model or same as story
-            $json = $this->generateRawWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+            $rawResponse = $this->generateRawWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
             
-            // Clean markdown
-            $json = str_replace(['```json', '```'], '', $json);
-            if (preg_match('/\[.*\]/s', $json, $matches)) {
-                $json = $matches[0];
+            // Log raw for debugging (optional, can be removed)
+            // Log::info("Raw Comment Response: " . $rawResponse);
+
+            $data = $this->cleanAndDecodeJson($rawResponse);
+
+            // Handle wrapped response (e.g. { "comments": [...] })
+            if (isset($data['comments']) && is_array($data['comments'])) {
+                return $data['comments'];
             }
+
+            // Handle direct array
+            if (is_array($data) && isset($data[0])) {
+                return $data;
+            }
+
+            // Fallback: If AI returned a single object instead of array
+            if (is_array($data) && isset($data['user'])) {
+                return [$data];
+            }
+
+            Log::error("Comment JSON Structure Invalid: " . json_encode($data));
+            return [];
             
-            $data = json_decode($json, true);
-            return is_array($data) ? $data : [];
         } catch (\Exception $e) {
             Log::error("Comment Generation Failed: " . $e->getMessage());
             return [];
