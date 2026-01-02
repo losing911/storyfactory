@@ -172,16 +172,44 @@ class AIService
             $text = $matches[0];
         }
         
+        // Attempt to decode
         $data = json_decode($text, true);
         
+        // Repair Strategy: If Syntax Error and looks like an array, try to salvage items
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception('Invalid JSON syntax.');
+            if (strpos(trim($text), '[') === 0) {
+                 // It's likely an array. Use regex to extract all full {...} objects
+                 preg_match_all('/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/s', $text, $matches);
+                 if (!empty($matches[0])) {
+                     $repairedJson = '[' . implode(',', $matches[0]) . ']';
+                     $data = json_decode($repairedJson, true);
+                 }
+            }
         }
 
-        // Critical Check: Ensure 'scenes' exists, otherwise trigger fallback
-        if (!isset($data['scenes']) || !is_array($data['scenes'])) {
-            throw new \Exception('JSON missing "scenes" key. Structure invalid.');
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Last Resort: Check if it was cut off at the end
+            $lastBrace = strrpos($text, '}');
+            if ($lastBrace !== false) {
+                 $cutText = substr($text, 0, $lastBrace + 1);
+                 // If it started with [, we need to close it
+                 if (strpos(trim($text), '[') === 0) {
+                     $cutText .= ']';
+                 }
+                 $data = json_decode($cutText, true);
+            }
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                  throw new \Exception('Invalid JSON syntax (' . json_last_error_msg() . '). Content: ' . substr($text, 0, 100) . '...');
+            }
         }
+
+        // Critical Check: Ensure 'scenes' exists ONLY if we expect it (context dependent)
+        // But for comments, we don't need scenes. This validation below was too strict for generic usage.
+        // We will make it conditional or just generic check.
+        // if (!isset($data['scenes']) ... ) // REMOVED THIS STRICT CHECK as it breaks generic usage
+        
+        // Pass constraints...
         
         // Pass constraints to the controller via a special key (not used by AI directly but by our app)
         if(isset($visualConstraints) && !empty($visualConstraints)) {
@@ -338,6 +366,7 @@ class AIService
                 'X-Title' => config('app.name'),
             ])->post('https://openrouter.ai/api/v1/chat/completions', [
                 'model' => $model,
+                'max_tokens' => 2500, // Ensure enough length
                 'messages' => [['role' => 'user', 'content' => $prompt]],
             ]);
 
