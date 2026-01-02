@@ -229,15 +229,19 @@ class AIService
         
         $contents = $response->body();
         
-        // Ensure directory exists
-        $directory = dirname(storage_path('app/public/' . $path));
+        // Ensure directory exists in PUBLIC folder (No Symlink needed)
+        // $path comes as "stories/2025-01-01/slug_0.jpg"
+        $fullPath = public_path($path);
+        
+        $directory = dirname($fullPath);
         if (!file_exists($directory)) {
             mkdir($directory, 0755, true);
         }
 
-        file_put_contents(storage_path('app/public/' . $path), $contents);
+        file_put_contents($fullPath, $contents);
         
-        return '/storage/' . $path;
+        // Return direct URL
+        return url($path);
     }
 
     /**
