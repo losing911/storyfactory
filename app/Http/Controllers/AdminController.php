@@ -463,4 +463,53 @@ class AdminController extends Controller
              return redirect()->back()->with('error', 'Görsel Yenileme Hatası: ' . $e->getMessage());
         }
     }
+
+    public function regenerateImageChunk(Request $request, Story $story)
+    {
+        // AJAX Method to regenerate a single image
+        set_time_limit(120);
+        $index = $request->input('index');
+        $prompts = json_decode($story->gorsel_prompt, true);
+        $prompt = $prompts[$index] ?? null;
+
+        if (!$prompt) return response()->json(['status' => 'error', 'message' => 'Prompt not found'], 404);
+
+        try {
+            // Generate
+            $remoteUrl = $this->aiService->generateImage($prompt);
+            
+            // Save
+            $dateFolder = now()->format('Y-m-d');
+            $slug = $story->slug;
+            $version = time();
+            $localPath = "stories/$dateFolder/{$slug}_{$index}_v{$version}.jpg";
+            $localUrl = $this->aiService->downloadImage($remoteUrl, $localPath);
+
+            // Update HTML (Atomic Update)
+            // We need to fetch FRESH story content because other chunks might have updated it
+            $currentStory = Story::find($story->id);
+            $updatedHtml = $currentStory->metin;
+            
+            // Regex to find the img tag for this index
+            $pattern = '/<img[^>]+alt=[\'"]Scene ' . $index . '[\'"][^>]*>/i';
+            if (preg_match($pattern, $updatedHtml, $matches)) {
+                $oldImgTag = $matches[0];
+                $newImgTag = preg_replace('/src=[\'"][^\'"]+[\'"]/i', "src='$localUrl'", $oldImgTag);
+                $updatedHtml = str_replace($oldImgTag, $newImgTag, $updatedHtml);
+            }
+
+            $currentStory->metin = $updatedHtml;
+            if ($index == 0) $currentStory->gorsel_url = $localUrl;
+            $currentStory->save();
+
+            return response()->json([
+                'status' => 'success',
+                'index' => $index,
+                'url' => $localUrl
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
 }

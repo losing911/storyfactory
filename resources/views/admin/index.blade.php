@@ -50,14 +50,11 @@
                         </form>
                     @endif
 
-                    <!-- Regenerate Images Button -->
+                    <!-- Regenerate Images Button (AJAX) -->
                     @if($story->gorsel_prompt)
-                    <form action="{{ route('admin.stories.regenerate', $story) }}" method="POST" class="inline" onsubmit="return confirm('Görseller yeniden üretilecek. Bu işlem 2-3 dakika sürebilir. Onaylıyor musunuz?')">
-                        @csrf
-                        <button type="submit" class="text-neon-pink hover:text-white border border-neon-pink/30 px-2 py-1 rounded hover:bg-neon-pink/20 transition" title="Görselleri Tamir Et / Yenile">
-                            ♻️ Görsel
-                        </button>
-                    </form>
+                    <button onclick="startRegeneration({{ $story->id }}, {{ count(json_decode($story->gorsel_prompt) ?? []) }})" class="text-neon-pink hover:text-white border border-neon-pink/30 px-2 py-1 rounded hover:bg-neon-pink/20 transition" title="Görselleri Tamir Et / Yenile">
+                        ♻️ Görsel
+                    </button>
                     @endif
 
                     <a href="{{ route('admin.stories.edit', $story) }}" class="text-blue-400 hover:text-blue-300">Düzenle</a>
@@ -75,4 +72,62 @@
 <div class="mt-4">
     {{ $stories->links() }}
 </div>
+
+<!-- Regeneration Modal -->
+<div id="regenModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50">
+    <div class="bg-gray-800 p-8 rounded-lg shadow-2xl border border-neon-pink max-w-md w-full text-center">
+        <h3 class="text-xl font-bold text-neon-pink mb-4">Görseller Yenileniyor...</h3>
+        <div class="w-full bg-gray-700 rounded-full h-4 mb-2">
+            <div id="regenBar" class="bg-neon-pink h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <p id="regenStatus" class="text-gray-400 text-sm">Başlatılıyor...</p>
+    </div>
+</div>
+
+<script>
+async function startRegeneration(storyId, totalImages) {
+    if(!confirm(totalImages + ' adet görsel yeniden üretilecek. Onaylıyor musunuz?')) return;
+
+    const modal = document.getElementById('regenModal');
+    const bar = document.getElementById('regenBar');
+    const status = document.getElementById('regenStatus');
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    let successCount = 0;
+
+    for (let i = 0; i < totalImages; i++) {
+        status.innerText = `Görsel ${i+1} / ${totalImages} işleniyor...`;
+        bar.style.width = ((i / totalImages) * 100) + '%';
+        
+        try {
+            const response = await fetch(`/admin/stories/${storyId}/regenerate-chunk`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ index: i })
+            });
+            
+            const result = await response.json();
+            if(result.status === 'success') {
+                successCount++;
+            } else {
+                console.error('Error:', result.message);
+            }
+        } catch (e) {
+            console.error('Fetch error:', e);
+        }
+        
+        // Short delay to be nice to server
+        await new Promise(r => setTimeout(r, 1000));
+    }
+
+    bar.style.width = '100%';
+    status.innerText = 'Tamamlandı! Sayfa yenileniyor...';
+    setTimeout(() => location.reload(), 1000);
+}
+</script>
 @endsection
