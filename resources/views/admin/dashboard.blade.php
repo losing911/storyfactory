@@ -78,7 +78,7 @@
                     </a>
 
                     <!-- NEW: Newsletter Shortcut -->
-                    <a href="{{ route('newsletter.index') }}" class="bg-gray-800 hover:bg-neon-pink hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition">
+                    <a href="{{ route('admin.newsletter.index') }}" class="bg-gray-800 hover:bg-neon-pink hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition">
                         Newsletter
                     </a>
             </div>
