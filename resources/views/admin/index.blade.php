@@ -106,21 +106,32 @@ async function startRegeneration(storyId, totalImages) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json' // Force JSON response if possible
                 },
                 body: JSON.stringify({ index: i })
             });
             
-            const result = await response.json();
+            const text = await response.text();
+            let result;
+            try {
+                result = JSON.parse(text);
+            } catch (e) {
+                console.error('Non-JSON Response:', text);
+                throw new Error('Sunucu JSON dışı yanıt döndürdü (Muhtemelen HTML Hata Sayfası). Konsola bak.');
+            }
+
             if(result.status === 'success') {
                 successCount++;
             } else {
                 console.error('Error:', result.message);
-                alert('Hata: ' + result.message); // Explicitly alert the user
+                alert('Hata: ' + result.message); 
             }
         } catch (e) {
             console.error('Fetch error:', e);
             alert('Bağlantı Hatası: ' + e.message);
+            // Stop loop on critical error
+            break; 
         }
         
         // Short delay to be nice to server
