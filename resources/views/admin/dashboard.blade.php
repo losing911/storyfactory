@@ -1,69 +1,95 @@
-@extends('admin.layout')
+@extends('layouts.frontend')
 
 @section('content')
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <!-- Stat Card 1 -->
-    <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-        <h3 class="text-neon-blue font-mono text-sm uppercase tracking-widest mb-2">Total Stories</h3>
-        <p class="text-4xl font-display text-white">{{ $stats['total_stories'] }}</p>
-    </div>
+<div class="min-h-screen bg-[#050505] p-6">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-display text-white mb-8 border-l-4 border-neon-blue pl-4">COMMAND CENTER</h1>
 
-    <!-- Stat Card 2 -->
-    <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-        <h3 class="text-neon-green font-mono text-sm uppercase tracking-widest mb-2">Published</h3>
-        <p class="text-4xl font-display text-white">{{ $stats['published_stories'] }}</p>
-    </div>
-
-    <!-- Stat Card 3 -->
-    <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-        <h3 class="text-neon-pink font-mono text-sm uppercase tracking-widest mb-2">Generated Images</h3>
-        <p class="text-4xl font-display text-white">{{ $stats['total_images'] }}</p>
-    </div>
-
-    <!-- Stat Card 4 -->
-    <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-        <h3 class="text-neon-purple font-mono text-sm uppercase tracking-widest mb-2">Total Comments</h3>
-        <p class="text-4xl font-display text-white">{{ $stats['total_comments'] }}</p>
-    </div>
-
-    <!-- Stat Card 5 -->
-    <div class="bg-gray-900 border border-gray-800 p-6 rounded-lg">
-        <h3 class="text-yellow-400 font-mono text-sm uppercase tracking-widest mb-2">Active Votes</h3>
-        <p class="text-4xl font-display text-white">{{ $stats['active_votes'] }}</p>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- Quick Actions -->
-    <div class="bg-gray-900 border border-gray-800 p-8 rounded-lg">
-        <h2 class="text-2xl font-display text-white mb-6">Quick Actions</h2>
-        <div class="space-y-4">
-            <a href="{{ route('admin.ai.create') }}" class="block w-full bg-neon-blue/10 border border-neon-blue text-neon-blue hover:bg-neon-blue hover:text-black py-4 px-6 text-center font-display uppercase tracking-widest transition duration-300">
-                Trigger New AI Story
-            </a>
-            <a href="{{ route('admin.stories.index') }}" class="block w-full bg-gray-800 border border-gray-700 text-gray-300 hover:border-white hover:text-white py-4 px-6 text-center font-display uppercase tracking-widest transition duration-300">
-                Manage Stories
-            </a>
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gray-900 border border-gray-800 p-6 rounded">
+                <h3 class="text-gray-500 font-mono text-sm uppercase">Total Stories</h3>
+                <p class="text-4xl text-neon-green font-display">{{ $stats['total_stories'] }}</p>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 p-6 rounded">
+                <h3 class="text-gray-500 font-mono text-sm uppercase">Total Views</h3>
+                <p class="text-4xl text-neon-blue font-display">{{ $stats['total_views'] }}</p>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 p-6 rounded">
+                <h3 class="text-gray-500 font-mono text-sm uppercase">Unique Visitors</h3>
+                <p class="text-4xl text-neon-pink font-display">{{ $stats['unique_visitors'] }}</p>
+            </div>
         </div>
-    </div>
 
-    <!-- Latest Activity -->
-    <div class="bg-gray-900 border border-gray-800 p-8 rounded-lg">
-        <h2 class="text-2xl font-display text-white mb-6">Latest Generation</h2>
-        @if($stats['last_story'])
-            <div class="flex gap-4">
-                <div class="w-1/3">
-                    <img src="{{ $stats['last_story']->gorsel_url }}" class="w-full h-auto rounded border border-gray-700">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Main Column: AI Strategy & Charts -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- AI Insight Card -->
+                <div class="bg-gray-900 border border-neon-purple/50 rounded overflow-hidden shadow-[0_0_20px_rgba(189,0,255,0.1)]">
+                    <div class="bg-gray-800/50 p-4 border-b border-gray-700 flex justify-between items-center">
+                        <h2 class="text-neon-purple font-display flex items-center gap-2">
+                             🤖 AI STRATEGY ADVISOR
+                        </h2>
+                        @if($insight)
+                            <span class="text-xs font-mono text-gray-500">{{ $insight->report_date }}</span>
+                        @else
+                            <span class="text-xs font-mono text-gray-500">NO DATA YET</span>
+                        @endif
+                    </div>
+                    <div class="p-6 prose prose-invert max-w-none prose-sm">
+                        @if($insight)
+                            {!! Str::markdown($insight->summary_text) !!}
+                        @else
+                            <p class="text-gray-400 italic">Waiting for enough data to formulate strategy. Run 'php artisan app:analyze-traffic' later.</p>
+                        @endif
+                    </div>
                 </div>
-                <div class="w-2/3">
-                    <h3 class="text-xl text-white font-bold mb-2">{{ $stats['last_story']->baslik }}</h3>
-                    <p class="text-xs text-neon-green font-mono mb-2">{{ $stats['last_story']->created_at->diffForHumans() }}</p>
-                    <a href="{{ route('story.show', $stats['last_story']) }}" target="_blank" class="text-neon-pink hover:text-white text-sm underline decoration-neon-pink">View Live ></a>
+
+                <!-- Admin Shortcuts -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <a href="{{ route('admin.stories.create') }}" class="bg-gray-800 hover:bg-neon-green hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition">
+                        New Story (Manual)
+                    </a>
+                    <a href="{{ route('admin.ai.create') }}" class="bg-gray-800 hover:bg-neon-blue hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition">
+                        New Story (AI)
+                    </a>
+                    <form action="{{ route('admin.ai.generate') }}" method="POST" class="contents">
+                        @csrf
+                        <input type="hidden" name="topic" value="Random">
+                        <button type="submit" class="bg-gray-800 hover:bg-neon-pink hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition">
+                            Trigger Daily Story
+                        </button>
+                    </form>
+                    <a href="{{ url('/telescope') }}" target="_blank" class="bg-gray-800 hover:bg-white hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition">
+                        System Logs
+                    </a>
                 </div>
             </div>
-        @else
-            <p class="text-gray-500">No stories generated yet.</p>
-        @endif
+
+            <!-- Sidebar: Live Logs -->
+            <div class="bg-gray-900 border border-gray-800 rounded p-4 h-fit">
+                <h3 class="text-white font-display text-sm mb-4 border-b border-gray-800 pb-2">LIVE FEED</h3>
+                <div class="space-y-3 font-mono text-xs">
+                    @forelse($recentLogs as $log)
+                        <div class="flex flex-col border-b border-gray-800 pb-2">
+                             <div class="flex justify-between items-center mb-1">
+                                <span class="text-neon-blue">{{ Str::limit($log->url, 20) }}</span>
+                                <span class="text-gray-600">{{ \Carbon\Carbon::parse($log->created_at)->diffForHumans() }}</span>
+                             </div>
+                             <div class="flex justify-between text-gray-500">
+                                <span>{{ $log->ip_address ?? 'Anonymous' }}</span>
+                                <span class="uppercase">{{ $log->device_type }}</span>
+                             </div>
+                        </div>
+                    @empty
+                        <span class="text-gray-600">No signals detected.</span>
+                    @endforelse
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 @endsection

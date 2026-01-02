@@ -24,6 +24,24 @@ class AdminController extends Controller
         return view('admin.index', compact('stories'));
     }
 
+    public function dashboard()
+    {
+        // Stats
+        $stats = [
+            'total_stories' => Story::count(),
+            'total_views' => \Illuminate\Support\Facades\DB::table('analytics_logs')->count(),
+            'unique_visitors' => \Illuminate\Support\Facades\DB::table('analytics_logs')->distinct('visitor_id')->count('visitor_id'),
+        ];
+
+        // Latest AI Insight
+        $insight = \Illuminate\Support\Facades\DB::table('analytics_insights')->orderBy('report_date', 'desc')->first();
+
+        // Recent Logs
+        $recentLogs = \Illuminate\Support\Facades\DB::table('analytics_logs')->latest()->take(10)->get();
+
+        return view('admin.dashboard', compact('stats', 'insight', 'recentLogs'));
+    }
+
     public function create()
     {
         return view('admin.form');
@@ -79,27 +97,7 @@ class AdminController extends Controller
         return redirect()->route('admin.stories.index')->with('success', 'Hikaye silindi.');
     }
 
-    public function dashboard()
-    {
-        $stats = [
-            'total_stories' => Story::count(),
-            'published_stories' => Story::where('durum', 'published')->count(),
-            'last_story' => Story::latest()->first(),
-            'total_images' => \Illuminate\Support\Facades\File::exists(storage_path('app/public/stories')) 
-                ? count(\Illuminate\Support\Facades\File::allFiles(storage_path('app/public/stories'))) 
-                : 0,
-            'total_comments' => \App\Models\Comment::count(),
-            'active_votes' => 0
-        ];
 
-        // Calculate votes for active poll
-        $activePoll = \App\Models\TopicPoll::whereDate('target_date', \Illuminate\Support\Carbon::tomorrow())->first();
-        if ($activePoll && is_array($activePoll->options)) {
-            $stats['active_votes'] = array_sum(array_column($activePoll->options, 'votes'));
-        }
-
-        return view('admin.dashboard', compact('stats'));
-    }
 
     public function createAI()
     {
