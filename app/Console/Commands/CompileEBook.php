@@ -65,10 +65,27 @@ class CompileEBook extends Command
             }
 
             try {
-                // Compile Partial
+                // Generate Illustration for this Part
+                $partTitle = $chunk->first()->baslik;
+                $this->info("Parça Görseli Tasarlanıyor: $partTitle");
+                
+                $imgPrompt = "Anime style illustration for cyberpunk story chapter: $partTitle. Action scene or atmospheric city shot, cel shaded, high quality, no text.";
+                $remoteImg = $aiService->generateImage($imgPrompt);
+                $localImgPath = "ebooks/vol_{$volume}_part_{$part}_" . time() . ".jpg";
+                $localImgUrl = $aiService->downloadImage($remoteImg, $localImgPath);
+                
+                // Compile Partial HTML
                 $partialHtml = $aiService->compileAnthology($chunkText, $volume, $part, $totalParts);
-                $compiledHtml .= "<div class='volume-part' id='part-{$part}'>" . $partialHtml . "</div><hr class='part-divider'>";
-                $this->info("Parça $part Tamamlandı.");
+                
+                // Construct HTML with Image
+                $finalPartHtml = "<div class='volume-part' id='part-{$part}'>";
+                $finalPartHtml .= "<div class='part-illustration' style='text-align:center; margin-bottom:2rem;'><img src='/" . $localImgPath . "' style='max-width:100%; border-radius:4px; border:1px solid #333;' alt='Chapter Art'></div>";
+                $finalPartHtml .= $partialHtml;
+                $finalPartHtml .= "</div><hr class='part-divider'>";
+                
+                $compiledHtml .= $finalPartHtml;
+                
+                $this->info("Parça $part Tamamlandı (Görsel Eklendi).");
             } catch (\Exception $e) {
                 $this->error("Parça $part Hatası: " . $e->getMessage());
                 $this->warn("Devam ediliyor...");
@@ -76,7 +93,7 @@ class CompileEBook extends Command
 
             $part++;
             // Cool down to avoid rate limits
-            sleep(3);
+            sleep(5);
         }
 
         // Extract Title from First Part
@@ -89,7 +106,7 @@ class CompileEBook extends Command
         $this->info('Kapak Görseli Tasarlanıyor...');
         $coverUrl = null;
         try {
-            $coverPrompt = "Book Cover for Cyberpunk Novel named '$cleanTitle'. High quality, textless, cinematic, 8k, darker tone, serious art, digital painting";
+            $coverPrompt = "Anime Style Book Cover for Cyberpunk Novel named '$cleanTitle'. Studio Ghibli meets Akira, detailed line art, cel shaded, no text, cinematic composition, 8k";
             $remoteCover = $aiService->generateImage($coverPrompt);
             $localPath = "ebooks/cover_vol_{$volume}_" . time() . ".jpg";
             $coverUrl = $aiService->downloadImage($remoteCover, $localPath);

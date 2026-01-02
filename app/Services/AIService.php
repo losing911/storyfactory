@@ -83,8 +83,9 @@ class AIService
         $prompt .= "7. SEO & Sosyal Medya alanlarını doldur.\n\n";
         $prompt .= "Görsel Prompt Kuralları:\n";
         $prompt .= "- Promptlar İNGİLİZCE olmalı.\n";
-        $prompt .= "- Stil belirteçleri ekle: 'cyberpunk 2077 style, photorealistic, ray tracing, unreal engine 5, detailed textures, cinematic lighting'.\n";
-        $prompt .= "- Konuşma balonu veya yazı İÇERMEMELİ ('no text, no speech bubbles').\n\n";
+        $prompt .= "- Stil belirteçleri ekle: 'anime style, studio ghibli, akira style, ghost in the shell style, cel shaded, highly detailed, 8k, vibrant colors'.\n";
+        $prompt .= "- Konuşma balonu veya yazı İÇERMEMELİ ('no text, no speech bubbles').\n";
+        $prompt .= "- Asla 'photorealistic' veya 'unreal engine' kullanma. Anime estetiğine sadık kal.\n\n";
         $prompt .= "JSON Şeması:\n";
         $prompt .= "{\n";
         $prompt .= "  \"baslik\": \"...\",\n";
@@ -193,8 +194,8 @@ class AIService
     public function generateImage(string $prompt, string $visualPrompt = null, string $refImageUrl = null): string
     {
         // Use Pollinations.ai with FLUX model (State of the Art)
-        // Updated Style: Hayao Miyazaki / Studio Ghibli Cyberpunk
-        $style = ", Hayao Miyazaki style, Studio Ghibli, cyberpunk, anime art style, vibrant colors, cel shaded, highly detailed, atmospheric, masterpiece, 8k, breathable world, hand drawn aesthetic";
+        // Updated Style: Anime / Manga / Ghibli Cyberpunk Mix
+        $style = ", anime style, studio ghibli, akira vibes, mamoru oshii style, cyberpunk, cel shaded, vibrant colors, detailed line art, 8k, atmospheric, masterpiece, no text";
         
         // 1. Inject Visual Consistency Prompt
         if ($visualPrompt) {
