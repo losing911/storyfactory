@@ -110,6 +110,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     // Lore Management
     Route::resource('lore', App\Http\Controllers\AdminLoreController::class);
+
+    // Inbox / Contact Messages
+    Route::get('/inbox', [App\Http\Controllers\AdminContactController::class, 'index'])->name('inbox.index');
+    Route::get('/inbox/{id}', [App\Http\Controllers\AdminContactController::class, 'show'])->name('inbox.show');
+    Route::delete('/inbox/{id}', [App\Http\Controllers\AdminContactController::class, 'destroy'])->name('inbox.destroy');
 });
 
 // DEBUG

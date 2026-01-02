@@ -65,7 +65,17 @@
                     <a href="{{ url('/telescope') }}" target="_blank" class="bg-gray-800 hover:bg-white hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition">
                         System Logs
                     </a>
-                </div>
+                    
+                    <!-- NEW: Inbox Shortcut -->
+                    <a href="{{ route('admin.inbox.index') }}" class="bg-gray-800 hover:bg-neon-purple hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition relative">
+                        Inbox
+                        @php
+                            $unreadCount = \App\Models\ContactMessage::where('is_read', false)->count();
+                        @endphp
+                        @if($unreadCount > 0)
+                            <span class="absolute top-2 right-2 bg-red-500 text-white text-[10px] px-1.5 rounded-full font-bold">{{ $unreadCount }}</span>
+                        @endif
+                    </a>
             </div>
 
             <!-- Sidebar: Live Logs -->
