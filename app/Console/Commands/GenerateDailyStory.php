@@ -34,6 +34,7 @@ class GenerateDailyStory extends Command
         $isDraft = $this->option('draft');
         $this->info('Günlük Cyberpunk Çizgi Roman üretimi başlıyor...' . ($isDraft ? ' (TASLAK MODU)' : ''));
         \Illuminate\Support\Facades\Log::info('Daily Story Auto-Gen Started ' . ($isDraft ? '(Draft)' : ''));
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear'); // Ensure no stale cache causes syntax errors
 
         try {
             // 1. Generate Story Structure (JSON) with Retries
