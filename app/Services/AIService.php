@@ -194,15 +194,22 @@ class AIService
     public function generateImage(string $prompt, string $visualPrompt = null, string $refImageUrl = null): string
     {
         // Use Pollinations.ai with FLUX model (State of the Art)
-        // Updated Style: Anime / Manga / Ghibli Cyberpunk Mix
-        $style = ", anime style, studio ghibli, akira vibes, mamoru oshii style, cyberpunk, cel shaded, vibrant colors, detailed line art, 2D, flat colors, 8k, atmospheric, masterpiece, no text, (anime:1.5)";
+        // Updated Style: Strong Anime / Manga (2D Flat)
+        $style = ", (anime art style:1.5), (2d:1.3), flat color, studio ghibli, akira vibes, mamoru oshii style, cyberpunk, cel shaded, vibrant colors, detailed line art, 8k, atmospheric, masterpiece, no text";
         
+        // Negative Prompt (Standard for Polli/SD)
+        // Note: Pollinations might require appending negative prompts directly or via parameter.
+        // We will append it to the URL query string if supported, OR embed it in prompt with negative syntax if model supports it.
+        // For Flux/Turbo on Pollinations, we can try '&negative='
+        $negative = "bad anatomy, extra limbs, extra fingers, 4 arms, 10 fingers, mutated hands, poorly drawn face, deformed, text, watermark, signature, blurry, low quality, 3d, realistic, photorealistic, cgi, unity render, unreal engine, ugly, worst quality";
+
         // 1. Inject Visual Consistency Prompt
         if ($visualPrompt) {
             $prompt .= ", " . $visualPrompt;
         }
 
         $encodedPrompt = urlencode($prompt . $style);
+        $encodedNegative = urlencode($negative);
         
         // 2. Inject Reference Image (Experimental Support in Pollinations/Flux)
         // If the model supports img2img via URL, we append it. For now, Pollinations uses strict text-to-image mostly.
@@ -212,7 +219,8 @@ class AIService
         
         // Added '&model=flux' for better quality (Replace turbo)
         // Added '&enhance=true' (Pollinations feature)
-        return "https://image.pollinations.ai/prompt/{$encodedPrompt}?width=1280&height=720&nologo=true&model=flux&seed=" . rand(1, 99999);
+        // Added '&negative=' parameter
+        return "https://image.pollinations.ai/prompt/{$encodedPrompt}?width=1280&height=720&nologo=true&model=flux&seed=" . rand(1, 99999) . "&negative={$encodedNegative}";
     }
 
     public function downloadImage(string $url, string $path): string
