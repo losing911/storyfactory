@@ -55,13 +55,9 @@
                     <a href="{{ route('admin.ai.create') }}" class="bg-gray-800 hover:bg-neon-blue hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition">
                         New Story (AI)
                     </a>
-                    <form action="{{ route('admin.ai.generate') }}" method="POST" class="contents">
-                        @csrf
-                        <input type="hidden" name="topic" value="Random">
-                        <button type="submit" class="bg-gray-800 hover:bg-neon-pink hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition">
-                            Trigger Daily Story
-                        </button>
-                    </form>
+                    <a href="{{ route('admin.ai.create', ['auto_start' => 1, 'topic' => 'Random']) }}" class="bg-gray-800 hover:bg-neon-pink hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition">
+                        Trigger Daily Story
+                    </a>
                     <a href="{{ url('/telescope') }}" target="_blank" class="bg-gray-800 hover:bg-white hover:text-black text-gray-300 p-4 text-center border border-gray-700 transition">
                         System Logs
                     </a>

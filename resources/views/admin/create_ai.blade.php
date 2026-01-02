@@ -44,7 +44,21 @@
 </div>
 
 <script>
-    document.querySelector('form').addEventListener('submit', async function(e) {
+    const form = document.querySelector('form');
+    
+    // Auto-Start Logic
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.get('auto_start')) {
+        const topic = urlParams.get('topic');
+        if(topic) document.querySelector('input[name="topic"]').value = topic;
+        
+        // Wait 500ms for UI to settle then trigger
+        setTimeout(() => {
+            form.dispatchEvent(new Event('submit', { cancelable: true }));
+        }, 500);
+    }
+
+    form.addEventListener('submit', async function(e) {
         e.preventDefault(); // Stop normal submission
         
         // UI Elements
