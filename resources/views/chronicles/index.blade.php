@@ -26,7 +26,7 @@
             <div class="relative z-10">
                 <h2 class="text-2xl font-display text-white mb-8 flex items-center gap-3 border-b border-gray-800 pb-4">
                     <span class="text-neon-pink text-3xl">///</span> 
-                    CANLI AKIŞ ÖZETİ (AI GENERATED)
+                    CANLI AKIŞ ÖZETİ
                 </h2>
 
                 @if(view()->exists('lore.partials.history_generated'))
