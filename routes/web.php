@@ -115,7 +115,17 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/inbox', [App\Http\Controllers\AdminContactController::class, 'index'])->name('inbox.index');
     Route::get('/inbox/{id}', [App\Http\Controllers\AdminContactController::class, 'show'])->name('inbox.show');
     Route::delete('/inbox/{id}', [App\Http\Controllers\AdminContactController::class, 'destroy'])->name('inbox.destroy');
+
+    // Newsletter Management
+    Route::resource('newsletter', App\Http\Controllers\AdminNewsletterController::class);
+    Route::post('newsletter/{id}/send', [App\Http\Controllers\AdminNewsletterController::class, 'send'])->name('newsletter.send');
+    Route::get('subscribers', [App\Http\Controllers\AdminNewsletterController::class, 'subscribers'])->name('newsletter.subscribers');
+    Route::delete('subscribers/{id}', [App\Http\Controllers\AdminNewsletterController::class, 'destroySubscriber'])->name('newsletter.subscribers.destroy');
 });
+
+// Newsletter Public Routes
+Route::post('/subscribe', [App\Http\Controllers\SubscriberController::class, 'store'])->name('subscribe.store');
+Route::get('/unsubscribe/{token}', [App\Http\Controllers\SubscriberController::class, 'unsubscribe'])->name('subscribe.unsubscribe');
 
 // DEBUG
 Route::get('/debug-locale', function() {

@@ -188,11 +188,8 @@
         <p class="text-gray-400 max-w-xl mx-auto mb-8 font-mono text-sm">
             Neo-Pera güncellemeleri, gizli lore belgeleri ve sistem uyarıları doğrudan nöral arayüzünüze iletilir.
         </p>
-        <form action="{{ route('contact.store') }}" method="POST" class="max-w-md mx-auto flex gap-2">
+        <form action="{{ route('subscribe.store') }}" method="POST" class="max-w-md mx-auto flex gap-2">
             @csrf
-            <input type="hidden" name="name" value="Abone">
-            <input type="hidden" name="subject" value="Bülten Aboneliği">
-            <input type="hidden" name="message" value="Direniş bültenine katılmak istiyorum.">
             
             <input type="email" name="email" placeholder="E-POSTA_ADRESİ_GİRİN" required class="flex-grow bg-black border border-neon-purple text-neon-purple p-3 focus:outline-none placeholder-purple-900">
             <button type="submit" class="bg-neon-purple text-black font-bold px-6 py-3 hover:bg-white transition">
