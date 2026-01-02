@@ -67,15 +67,18 @@ class CompileEBook extends Command
             try {
                 // Generate Illustration for this Part
                 $partTitle = $chunk->first()->baslik;
-                $this->info("Parça Görseli Tasarlanıyor: $partTitle");
+                $this->info("   -> [1/2] Görsel Üretiliyor: $partTitle...");
                 
                 $imgPrompt = "Anime style illustration for cyberpunk story chapter: $partTitle. Action scene or atmospheric city shot, cel shaded, high quality, no text.";
                 $remoteImg = $aiService->generateImage($imgPrompt);
                 $localImgPath = "ebooks/vol_{$volume}_part_{$part}_" . time() . ".jpg";
                 $localImgUrl = $aiService->downloadImage($remoteImg, $localImgPath);
+                $this->info("   -> Görsel Tamam: $localImgPath");
                 
                 // Compile Partial HTML
+                $this->info("   -> [2/2] Metin Kurgulanıyor (AI)...");
                 $partialHtml = $aiService->compileAnthology($chunkText, $volume, $part, $totalParts);
+                $this->info("   -> Metin Tamam.");
                 
                 // Construct HTML with Image
                 $finalPartHtml = "<div class='volume-part' id='part-{$part}'>";
