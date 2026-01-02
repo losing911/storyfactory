@@ -43,10 +43,11 @@ class AdminController extends Controller
             // Recent E-Books
             $ebooks = \App\Models\EBook::latest()->take(5)->get();
 
-            return view('admin.dashboard', compact('stats', 'insight', 'recentLogs', 'ebooks'));
+            // FORCE RENDER to catch Blade errors
+            return view('admin.dashboard', compact('stats', 'insight', 'recentLogs', 'ebooks'))->render();
             
         } catch (\Exception $e) {
-            dd("ADMIN DASHBOARD ERROR: " . $e->getMessage(), $e->getTraceAsString());
+            dd("ADMIN DASHBOARD RENDER ERROR: " . $e->getMessage(), $e->getTraceAsString());
         }
     }
 
