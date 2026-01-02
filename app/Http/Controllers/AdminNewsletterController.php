@@ -41,15 +41,14 @@ class AdminNewsletterController extends Controller
     {
         $campaign = Campaign::findOrFail($id);
         
-        // This is where we would dispatch a Queue Job
-        // For now, let's keep it simple or implement the job next
-        // dispatch(new \App\Jobs\SendCampaignJob($campaign));
+        if($campaign->status !== 'draft') {
+            return redirect()->back()->with('error', 'Bu kampanya zaten gönderildi veya gönderiliyor.');
+        }
+
+        // Dispatch Job
+        dispatch(new \App\Jobs\SendCampaignJob($campaign));
         
-        // Updating status manually since we haven't built the queue implementation fully yet
-        // In reality, the Job should handle this.
-        // For the verification step, we will verify the Queue implementation separately.
-        
-        return redirect()->back()->with('info', 'Gönderim kuyruğa eklendi (Coming Soon: Queue Implementation).');
+        return redirect()->back()->with('success', 'Kampanya gönderim kuyruğuna eklendi. Arka planda başhlatalacak.');
     }
 
     public function subscribers()
