@@ -131,6 +131,7 @@
                 <div class="hidden md:flex space-x-8">
                     <a href="{{ route('home') }}" class="font-display uppercase tracking-widest hover:text-neon-green transition">Hikayeler</a>
                     <a href="{{ route('chronicles.index') }}" class="font-display uppercase tracking-widest hover:text-white transition text-neon-blue/80">Kronikler</a>
+                    <a href="{{ route('ebooks.index') }}" class="font-display uppercase tracking-widest hover:text-white transition text-neon-yellow">Kütüphane</a>
                     <a href="{{ route('gallery.index') }}" class="font-display uppercase tracking-widest hover:text-neon-blue transition">Galeri</a>
                     <a href="{{ route('lore.index') }}" class="font-display uppercase tracking-widest hover:text-neon-pink transition">Veri Bankası</a>
                     <a href="{{ route('about') }}" class="font-display uppercase tracking-widest hover:text-neon-purple transition">Hakkında</a>
@@ -153,6 +154,7 @@
             <nav class="flex flex-col p-4 space-y-4">
                 <a href="{{ route('home') }}" class="font-display uppercase tracking-widest text-neon-green hover:text-white py-2 border-b border-gray-800">Hikayeler</a>
                 <a href="{{ route('chronicles.index') }}" class="font-display uppercase tracking-widest text-neon-blue/80 hover:text-white py-2 border-b border-gray-800">Kronikler</a>
+                <a href="{{ route('ebooks.index') }}" class="font-display uppercase tracking-widest text-neon-yellow hover:text-white py-2 border-b border-gray-800">Kütüphane</a>
                 <a href="{{ route('gallery.index') }}" class="font-display uppercase tracking-widest text-neon-blue hover:text-white py-2 border-b border-gray-800">Galeri</a>
                 <a href="{{ route('lore.index') }}" class="font-display uppercase tracking-widest text-neon-pink hover:text-white py-2 border-b border-gray-800">Veri Bankası</a>
                 <a href="{{ route('about') }}" class="font-display uppercase tracking-widest text-neon-purple hover:text-white py-2 border-b border-gray-800">Hakkında</a>

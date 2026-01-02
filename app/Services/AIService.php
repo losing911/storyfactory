@@ -371,6 +371,26 @@ class AIService
         }
     }
 
+    public function compileAnthology(string $storiesText, int $volume): string
+    {
+        $prompt = "Sen 'Neo-Pera' evreninin Baş Editörüsün. Elimizde bu evrende geçen 20 farklı hikayeden oluşan bir arşiv var. Senin görevin, bu hikayeleri YENİDEN KURGULAYARAK tek bir 'Siberpunk Romanı' (Cilt $volume) haline getirmek.\n\n";
+        $prompt .= "--- HEDEF ---\n";
+        $prompt .= "Bu sadece hikayelerin alt alta yapıştırılması DEĞİL. Olayları birbirine bağla. Kronolojik bir akış hissi ver. Gerekirse araya 'Geçiş Bölümleri' (Interludes) ekle.\n\n";
+        $prompt .= "--- FORMAT ---\n";
+        $prompt .= "HTML formatında çıktı ver. Sadece <body> içeriğini ver (html/head başlıkları olmasın).\n";
+        $prompt .= " - Roman Adı: <h1> etiketiyle büyüleyici bir isim uydur.\n";
+        $prompt .= " - Bölümler: Her hikaye bir 'Bölüm' (Chapter) olacak ama başlıklarını olay örgüsüne göre revize et. <h2> kullan.\n";
+        $prompt .= " - İçerik: Hikaye metinlerini koru ancak giriş/çıkış paragraflarını birbiriyle uyumlu hale getirmek için düzenle.\n";
+        $prompt .= " - Stil: Kitap / E-Book formatına uygun, uzun paragraflar, serif fonta yakışacak edebi bir dil.\n\n";
+        $prompt .= "--- İÇERİK (20 HİKAYE) ---\n";
+        $prompt .= $storiesText . "\n\n";
+        $prompt .= "--- SONUÇ ---\n";
+        $prompt .= "Tek parça, akıcı, HTML formatında BÜTÜNLEŞİK ROMAN metnini yaz.";
+
+        // Use DeepSeek (OpenRouter) for large context handling
+        return $this->generateRawWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+    }
+
     protected function getMockData(): array
     {
         return []; // Mock data deprecated

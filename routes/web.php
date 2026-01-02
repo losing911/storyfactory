@@ -58,6 +58,10 @@ Route::post('/contact', [App\Http\Controllers\ContactController::class, 'store']
 Route::get('/database', [App\Http\Controllers\LoreController::class, 'index'])->name('lore.index');
 Route::get('/database/{slug}', [App\Http\Controllers\LoreController::class, 'show'])->name('lore.show');
 
+// E-Books (Library)
+Route::get('/kutuphane', [App\Http\Controllers\EBookController::class, 'index'])->name('ebooks.index');
+Route::get('/kutuphane/{slug}', [App\Http\Controllers\EBookController::class, 'show'])->name('ebooks.show');
+
 // Gallery
 Route::get('/gallery', [App\Http\Controllers\GalleryController::class, 'index'])->name('gallery.index');
 Route::view('/kronikler', 'chronicles.index')->name('chronicles.index');
