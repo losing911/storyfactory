@@ -46,30 +46,44 @@ class CompileEBook extends Command
             return;
         }
 
-        // 3. Prepare Content for AI
-        $this->info('İçerik hazırlanıyor...');
-        $storiesText = "";
-        foreach ($stories as $story) {
-            // Strip tags to save tokens but keep structure
-            $text = strip_tags($story->metin);
-            $storiesText .= "### BÖLÜM: {$story->baslik} (ID: {$story->id})\n{$text}\n\n";
-        }
+        // 3. Process in Chunks (Avoid Timeouts)
+        $this->info("Toplam {$count} hikaye 5'erli paketler halinde işlenecek...");
+        
+        $chunks = $stories->chunk(5);
+        $totalParts = $chunks->count();
+        $compiledHtml = "";
+        $part = 1;
 
-        // 4. Compile via AI
-        $this->info('AI Baş Editör Romanı Kurguluyor (Bu işlem uzun sürebilir)...');
-        try {
-            $compiledHtml = $aiService->compileAnthology($storiesText, $volume);
+        foreach ($chunks as $chunk) {
+            $this->info("Parça İşleniyor: $part / $totalParts");
             
-            // Extract Title from <h1> tags using regex
-            preg_match('/<h1>(.*?)<\/h1>/s', $compiledHtml, $matches);
-            $title = $matches[1] ?? "Neo-Pera Chronicles: Volume $volume";
-            $cleanTitle = strip_tags($title);
-            $slug = \Illuminate\Support\Str::slug($cleanTitle) . "-vol-$volume";
+            // Prepare text for this chunk
+            $chunkText = "";
+            foreach ($chunk as $story) {
+                $text = strip_tags($story->metin);
+                $chunkText .= "### BÖLÜM: {$story->baslik} (ID: {$story->id})\n{$text}\n\n";
+            }
 
-        } catch (\Exception $e) {
-            $this->error("AI Hatası: " . $e->getMessage());
-            return;
+            try {
+                // Compile Partial
+                $partialHtml = $aiService->compileAnthology($chunkText, $volume, $part, $totalParts);
+                $compiledHtml .= "<div class='volume-part' id='part-{$part}'>" . $partialHtml . "</div><hr class='part-divider'>";
+                $this->info("Parça $part Tamamlandı.");
+            } catch (\Exception $e) {
+                $this->error("Parça $part Hatası: " . $e->getMessage());
+                $this->warn("Devam ediliyor...");
+            }
+
+            $part++;
+            // Cool down to avoid rate limits
+            sleep(3);
         }
+
+        // Extract Title from First Part
+        preg_match('/<h1>(.*?)<\/h1>/s', $compiledHtml, $matches);
+        $title = $matches[1] ?? "Neo-Pera Chronicles: Volume $volume";
+        $cleanTitle = strip_tags($title);
+        $slug = \Illuminate\Support\Str::slug($cleanTitle) . "-vol-$volume";
 
         // 5. Generate Cover Image
         $this->info('Kapak Görseli Tasarlanıyor...');

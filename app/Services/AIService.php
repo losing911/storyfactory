@@ -371,23 +371,28 @@ class AIService
         }
     }
 
-    public function compileAnthology(string $storiesText, int $volume): string
+    public function compileAnthology(string $storiesText, int $volume, int $part, int $totalParts): string
     {
-        $prompt = "Sen 'Neo-Pera' evreninin Baş Editörüsün. Elimizde bu evrende geçen 20 farklı hikayeden oluşan bir arşiv var. Senin görevin, bu hikayeleri YENİDEN KURGULAYARAK tek bir 'Siberpunk Romanı' (Cilt $volume) haline getirmek.\n\n";
+        $prompt = "Sen 'Neo-Pera' evreninin Baş Editörüsün. Şu an 20 hikayelik bir romanın $part. Kısmını ($part / $totalParts) düzenliyorsun. Elindeki metinleri (5 Hikaye) akıcı bir şekilde birbirine bağla.\n\n";
+        $prompt .= "--- BAĞLAM ---\n";
+        $prompt .= "Bu metinler 'Neo-Pera Chronicles: Cilt $volume' kitabının bir parçasıdır. Önceki ve sonraki parçalarla uyumlu, karanlık, siberpunk bir atmosfer yarat.\n\n";
         $prompt .= "--- HEDEF ---\n";
-        $prompt .= "Bu sadece hikayelerin alt alta yapıştırılması DEĞİL. Olayları birbirine bağla. Kronolojik bir akış hissi ver. Gerekirse araya 'Geçiş Bölümleri' (Interludes) ekle.\n\n";
-        $prompt .= "--- FORMAT ---\n";
-        $prompt .= "HTML formatında çıktı ver. Sadece <body> içeriğini ver (html/head başlıkları olmasın).\n";
-        $prompt .= " - Roman Adı: <h1> etiketiyle büyüleyici bir isim uydur.\n";
-        $prompt .= " - Bölümler: Her hikaye bir 'Bölüm' (Chapter) olacak ama başlıklarını olay örgüsüne göre revize et. <h2> kullan.\n";
-        $prompt .= " - İçerik: Hikaye metinlerini koru ancak giriş/çıkış paragraflarını birbiriyle uyumlu hale getirmek için düzenle.\n";
-        $prompt .= " - Stil: Kitap / E-Book formatına uygun, uzun paragraflar, serif fonta yakışacak edebi bir dil.\n\n";
-        $prompt .= "--- İÇERİK (20 HİKAYE) ---\n";
-        $prompt .= $storiesText . "\n\n";
-        $prompt .= "--- SONUÇ ---\n";
-        $prompt .= "Tek parça, akıcı, HTML formatında BÜTÜNLEŞİK ROMAN metnini yaz.";
+        $prompt .= "1. Hikayelerin orijinal metinlerini KORU ama aralarındaki geçişleri yumuşat. 'Bölüm X' şeklinde ayır.\n";
+        $prompt .= "2. Her hikayenin başına kısa bir 'Tarihçe/Log' notu ekle (Örn: Cycle 2077, Sector 4).\n";
+        $prompt .= "3. Sadece HTML gövdesini ver (div, p, h2 vb).\n\n";
+         
+        if($part === 1) {
+            $prompt .= "4. BAŞLANGIÇ: Roman için etkileyici bir <h1>Başlık</h1> ve etkileyici bir Önsöz (Prologue) yaz.\n";
+        }
+        if($part === $totalParts) {
+            $prompt .= "4. BİTİŞ: Romanı sonlandıran kısa bir Sonsöz (Epilogue) yaz.\n";
+        }
 
-        // Use DeepSeek (OpenRouter) for large context handling
+        $prompt .= "\n--- İÇERİK (HİKAYELER) ---\n";
+        $prompt .= $storiesText . "\n\n";
+        $prompt .= "--- ÇIKTI (TÜRKÇE HTML) ---";
+
+        // Use DeepSeek (OpenRouter)
         return $this->generateRawWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
     }
 
