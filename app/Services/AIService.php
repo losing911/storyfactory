@@ -396,8 +396,8 @@ class AIService
         $prompt .= "Output JSON format only: [{ \"user\": \"Nickname\", \"text\": \"Comment content\" }]";
 
         try {
-            // Use Gemini Flash (Free & Fast) via OpenRouter
-            $model = 'google/gemini-2.0-flash-exp:free';
+            // Reverting to DeepSeek (Free) now that we have Repair Logic + Max Tokens
+            $model = 'nex-agi/deepseek-v3.1-nex-n1:free'; 
             $rawResponse = $this->generateRawWithOpenRouter($prompt, $model);
             
             // Debug for CLI
