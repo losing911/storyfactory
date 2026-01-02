@@ -250,19 +250,19 @@ Route::get('/debug-story', function() {
 
 Route::get('/debug-smtp', function() {
     try {
-        echo '<h1>SMTP Debugger</h1>';
-        echo 'Attempting to send test email...<br>';
+        echo "<h1>SMTP Debugger</h1>";
+        echo "Attempting to send test email...<br>";
         
-        \Illuminate\Support\Facades\Mail::raw('This is a test email from Anxipunk Debugger. If you see this, SMTP is working.', function(\) {
-            \->to('anxipunk@gmail.com') // Fallback or use config
+        \Illuminate\Support\Facades\Mail::raw('This is a test email from Anxipunk Debugger. If you see this, SMTP is working.', function($msg) {
+            $msg->to('anxipunk@gmail.com') // Fallback or use config
                 ->subject('SMTP Connection Test');
         });
 
-        echo '<span style=''color:green''>SUCCESS! Email sent successfully. Check your inbox (and spam).</span>';
-        echo '<br>If you received this but not the newsletter, your Queue Worker is probably not running.';
+        echo "<span style='color:green'>SUCCESS! Email sent successfully. Check your inbox (and spam).</span>";
+        echo "<br>If you received this but not the newsletter, your Queue Worker is probably not running.";
         
-    } catch (\Exception \) {
-        echo '<span style=''color:red''>FAILURE: ' . \->getMessage() . '</span>';
-        echo '<h3>Debug Trace:</h3><pre>' . \->getTraceAsString() . '</pre>';
+    } catch (\Exception $e) {
+        echo "<span style='color:red'>FAILURE: " . $e->getMessage() . "</span>";
+        echo "<h3>Debug Trace:</h3><pre>" . $e->getTraceAsString() . "</pre>";
     }
 });
