@@ -29,15 +29,17 @@
             <button onclick="toggleLightMode()" class="hover:text-neon-yellow">[ ☀/☾ ]</button>
         </div>
 
-        <!-- Book Content -->
-        <article id="reader" class="prose prose-invert prose-xl max-w-none 
-            prose-p:leading-loose prose-p:text-justify prose-p:mb-8 text-gray-300
-            prose-headings:font-display prose-headings:text-neon-pink prose-headings:mt-16 prose-headings:mb-8
-            prose-h1:text-center prose-h1:text-6xl prose-h1:hidden
-            prose-h2:text-4xl prose-h2:border-b-2 prose-h2:border-neon-blue prose-h2:pb-4
-            drop-cap-first">
-            
-            {!! $ebook->content !!}
+        <!-- Book Details (No Reading Here) -->
+        <article class="text-center">
+             <div class="mb-12 border border-neon-blue/30 p-8 rounded bg-gray-900/50 backdrop-blur-md">
+                 <h2 class="text-2xl font-mono text-neon-green mb-4">RESTRICTED ACCESS</h2>
+                 <p class="text-gray-400 mb-6">This volume contains high-density narrative data. Direct neural interface (web reading) is disabled for safety protocol.</p>
+                 
+                 <a href="{{ route('ebooks.download', $ebook->slug) }}" class="inline-block bg-neon-blue text-black font-bold font-display text-xl px-12 py-4 rounded hover:bg-white hover:scale-105 transition duration-300 shadow-[0_0_20px_rgba(0,255,255,0.4)]">
+                     DOWNLOAD DATA PACK (.HTML)
+                 </a>
+                 <p class="mt-4 text-xs text-gray-500 font-mono">Size: {{ strlen($ebook->content) / 1024 > 1024 ? round(strlen($ebook->content) / 1024 / 1024, 2) . ' MB' : round(strlen($ebook->content) / 1024, 2) . ' KB' }}</p>
+             </div>
         </article>
 
         <!-- Footer / Navigation -->

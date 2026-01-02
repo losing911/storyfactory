@@ -23,4 +23,25 @@ class EBookController extends Controller
             
         return view('ebooks.show', compact('ebook'));
     }
+
+    public function download($slug)
+    {
+        $ebook = \App\Models\EBook::where('slug', $slug)
+            ->where('is_published', true)
+            ->firstOrFail();
+
+        // Wrap content in simple HTML structure
+        $htmlContent = "<!DOCTYPE html><html><head><title>{$ebook->title}</title><meta charset='utf-8'></head><body>";
+        $htmlContent .= "<h1 style='text-align:center'>{$ebook->title}</h1>";
+        $htmlContent .= "<p style='text-align:center'>Volume {$ebook->volume_number}</p>";
+        $htmlContent .= "<hr>";
+        $htmlContent .= $ebook->content;
+        $htmlContent .= "</body></html>";
+
+        $fileName = $ebook->slug . '.html';
+
+        return response($htmlContent)
+            ->header('Content-Type', 'text/html')
+            ->header('Content-Disposition', "attachment; filename=\"{$fileName}\"");
+    }
 }

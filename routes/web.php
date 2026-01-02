@@ -58,11 +58,12 @@ Route::post('/contact', [App\Http\Controllers\ContactController::class, 'store']
 Route::get('/database', [App\Http\Controllers\LoreController::class, 'index'])->name('lore.index');
 Route::get('/database/{slug}', [App\Http\Controllers\LoreController::class, 'show'])->name('lore.show');
 
-// E-Books (Library)
-Route::get('/kutuphane', [App\Http\Controllers\EBookController::class, 'index'])->name('ebooks.index');
-Route::get('/kutuphane/{slug}', [App\Http\Controllers\EBookController::class, 'show'])->name('ebooks.show');
-
-// Author Profiles
+// E-Books    // Library Routes
+    Route::get('/kutuphane', [App\Http\Controllers\EBookController::class, 'index'])->name('ebooks.index');
+    Route::get('/kutuphane/{slug}', [App\Http\Controllers\EBookController::class, 'show'])->name('ebooks.show');
+    Route::get('/kutuphane/{slug}/download', [App\Http\Controllers\EBookController::class, 'download'])->name('ebooks.download');
+    
+    // Author Routes
 Route::get('/author/{slug}', [App\Http\Controllers\AuthorController::class, 'show'])->name('author.show');
 
 // Gallery
@@ -96,6 +97,12 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('ai/step/story', [AdminController::class, 'generateStoryStep'])->name('ai.step.story');
     Route::post('ai/step/image', [AdminController::class, 'generateImageStep'])->name('ai.step.image');
     Route::post('ai/step/store', [AdminController::class, 'storeStoryStep'])->name('ai.step.store');
+
+    // E-Book Generator Routes
+    Route::get('ebooks/create', [AdminEBookController::class, 'create'])->name('ebooks.create');
+    Route::post('ebooks/init', [AdminEBookController::class, 'initGeneration'])->name('ebooks.init');
+    Route::post('ebooks/chunk', [AdminEBookController::class, 'processChunk'])->name('ebooks.chunk');
+    Route::post('ebooks/finalize', [AdminEBookController::class, 'finalize'])->name('ebooks.finalize');
 
     // Profile Management
     Route::get('/profile', [AdminController::class, 'editProfile'])->name('profile.edit');
