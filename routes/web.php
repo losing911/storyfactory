@@ -254,7 +254,7 @@ Route::get('/debug-smtp', function() {
         echo "Attempting to send test email...<br>";
         
         \Illuminate\Support\Facades\Mail::raw('This is a test email from Anxipunk Debugger. If you see this, SMTP is working.', function($msg) {
-            $msg->to('anxipunk@gmail.com') // Fallback or use config
+            $msg->to('shtsus@gmail.com') // User requested address
                 ->subject('SMTP Connection Test');
         });
 
