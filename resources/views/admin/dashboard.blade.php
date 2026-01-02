@@ -88,10 +88,13 @@
                     @endforelse
                 </div>
 
-                <div class="mt-8">
-                    <h3 class="text-white font-display text-sm mb-4 border-b border-gray-800 pb-2">GENERATED E-BOOKS</h3>
-                    <div class="space-y-3 font-mono text-xs">
-                        @forelse($ebooks as $ebook)
+                    <div class="mt-8">
+                        <h3 class="text-white font-display text-sm mb-4 border-b border-gray-800 pb-2">GENERATED E-BOOKS</h3>
+                        <a href="{{ route('ebooks.create') }}" class="block mb-4 bg-neon-yellow text-black text-center py-2 font-bold hover:bg-white transition text-xs font-mono">
+                            [+] COMPILE NEW VOLUME
+                        </a>
+                        <div class="space-y-3 font-mono text-xs">
+                            @forelse($ebooks as $ebook)
                             <div class="flex flex-col border border-gray-800 p-2 rounded bg-black/50">
                                  <strong class="text-white block">{{ $ebook->title }}</strong>
                                  <div class="flex justify-between mt-1 text-gray-500">

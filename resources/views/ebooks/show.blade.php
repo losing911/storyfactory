@@ -36,9 +36,11 @@
                  <p class="text-gray-400 mb-6">This volume contains high-density narrative data. Direct neural interface (web reading) is disabled for safety protocol.</p>
                  
                  <a href="{{ route('ebooks.download', $ebook->slug) }}" class="inline-block bg-neon-blue text-black font-bold font-display text-xl px-12 py-4 rounded hover:bg-white hover:scale-105 transition duration-300 shadow-[0_0_20px_rgba(0,255,255,0.4)]">
-                     DOWNLOAD DATA PACK (.HTML)
+                     DOWNLOAD E-BOOK (.PDF)
                  </a>
-                 <p class="mt-4 text-xs text-gray-500 font-mono">Size: {{ strlen($ebook->content) / 1024 > 1024 ? round(strlen($ebook->content) / 1024 / 1024, 2) . ' MB' : round(strlen($ebook->content) / 1024, 2) . ' KB' }}</p>
+                 <div class="mt-4 text-xs text-gray-500 font-mono">
+                    <p>Professional Edition // A4 Format // Optimized for e-Readers</p>
+                 </div>
              </div>
         </article>
 

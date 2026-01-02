@@ -30,18 +30,15 @@ class EBookController extends Controller
             ->where('is_published', true)
             ->firstOrFail();
 
-        // Wrap content in simple HTML structure
-        $htmlContent = "<!DOCTYPE html><html><head><title>{$ebook->title}</title><meta charset='utf-8'></head><body>";
-        $htmlContent .= "<h1 style='text-align:center'>{$ebook->title}</h1>";
-        $htmlContent .= "<p style='text-align:center'>Volume {$ebook->volume_number}</p>";
-        $htmlContent .= "<hr>";
-        $htmlContent .= $ebook->content;
-        $htmlContent .= "</body></html>";
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('ebooks.pdf', compact('ebook'));
+        
+        // Setup options for better image handling
+        $pdf->setOptions([
+            'isRemoteEnabled' => true, 
+            'defaultFont' => 'DejaVu Sans',
+            'dpi' => 150
+        ]);
 
-        $fileName = $ebook->slug . '.html';
-
-        return response($htmlContent)
-            ->header('Content-Type', 'text/html')
-            ->header('Content-Disposition', "attachment; filename=\"{$fileName}\"");
+        return $pdf->download($ebook->slug . '.pdf');
     }
 }
