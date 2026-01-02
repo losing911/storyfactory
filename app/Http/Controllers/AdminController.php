@@ -419,6 +419,9 @@ class AdminController extends Controller
             $newCoverUrl = null;
 
             foreach ($prompts as $index => $prompt) {
+                // Rate Limit Protection
+                if($index > 0) sleep(4); 
+
                 // Generate New Image
                 $remoteUrl = $this->aiService->generateImage($prompt);
                 
