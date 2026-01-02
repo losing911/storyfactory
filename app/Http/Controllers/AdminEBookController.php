@@ -25,16 +25,20 @@ class AdminEBookController extends Controller
 
     public function create()
     {
-        // Calculate potential next volume
-        $lastBook = EBook::orderBy('volume_number', 'desc')->first();
-        $startId = $lastBook ? ($lastBook->end_story_id + 1) : 1;
-        $volume = $lastBook ? ($lastBook->volume_number + 1) : 1;
-        
-        $eligibleStories = Story::where('id', '>=', $startId)
-            ->where('durum', 'published')
-            ->count();
+        try {
+            $lastBook = EBook::orderBy('volume_number', 'desc')->first();
+            $startId = $lastBook ? ($lastBook->end_story_id + 1) : 1;
+            $volume = $lastBook ? ($lastBook->volume_number + 1) : 1;
+            
+            $eligibleStories = Story::where('id', '>=', $startId)
+                ->where('durum', 'published')
+                ->count();
 
-        return view('admin.ebooks.create', compact('volume', 'startId', 'eligibleStories'));
+            // Force Render to trap errors
+            return view('admin.ebooks.create', compact('volume', 'startId', 'eligibleStories'))->render();
+        } catch (\Exception $e) {
+            dd("EBOOK CREATE ERROR: " . $e->getMessage(), $e->getTraceAsString());
+        }
     }
 
     // Step 1: Initialize & Calculate Chunks
