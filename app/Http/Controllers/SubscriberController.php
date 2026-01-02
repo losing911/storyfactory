@@ -19,14 +19,18 @@ class SubscriberController extends Controller
             return redirect()->back()->with('info', 'Zaten abonesiniz, teşekkürler!');
         }
 
-        Subscriber::create([
-            'email' => $validated['email'],
-            'unsubscribe_token' => Str::random(32),
-            'ip_address' => $request->ip(),
-            'is_active' => true
-        ]);
+        try {
+            Subscriber::create([
+                'email' => $validated['email'],
+                'unsubscribe_token' => Str::random(32),
+                'ip_address' => $request->ip(),
+                'is_active' => true
+            ]);
 
-        return redirect()->back()->with('success', 'Direnişe hoş geldiniz. İlk sinyali bekleyin.');
+            return redirect()->back()->with('success', 'Direnişe hoş geldiniz. İlk sinyali bekleyin.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Kayıt Hatası: ' . $e->getMessage());
+        }
     }
 
     public function unsubscribe($token)
