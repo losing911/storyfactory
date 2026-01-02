@@ -27,7 +27,7 @@ class SubscriberController extends Controller
                 'is_active' => true
             ]);
 
-            return redirect()->back()->with('success', 'Direnişe hoş geldiniz. İlk sinyali bekleyin.');
+            return view('pages.subscribe_success');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Kayıt Hatası: ' . $e->getMessage());
         }
