@@ -116,9 +116,11 @@ async function startRegeneration(storyId, totalImages) {
                 successCount++;
             } else {
                 console.error('Error:', result.message);
+                alert('Hata: ' + result.message); // Explicitly alert the user
             }
         } catch (e) {
             console.error('Fetch error:', e);
+            alert('Bağlantı Hatası: ' + e.message);
         }
         
         // Short delay to be nice to server
