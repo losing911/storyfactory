@@ -89,6 +89,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::post('stories/{story}/publish', [AdminController::class, 'publish'])->name('stories.publish');
     Route::resource('stories', AdminController::class);
+    Route::post('stories/{story}/regenerate-images', [AdminController::class, 'regenerateImages'])->name('stories.regenerate');
     Route::get('ai/create', [AdminController::class, 'createAI'])->name('ai.create');
     Route::get('ai/generate', function() { return redirect()->route('admin.ai.create'); });
     Route::post('ai/generate', [AdminController::class, 'generateAI'])->name('ai.generate');

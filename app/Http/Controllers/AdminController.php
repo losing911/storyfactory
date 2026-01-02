@@ -401,4 +401,63 @@ class AdminController extends Controller
 
         return back()->with('success', 'Profile updated successfully.');
     }
+
+    public function regenerateImages(Story $story)
+    {
+        set_time_limit(300); // 5 minutes
+        
+        try {
+            $prompts = json_decode($story->gorsel_prompt, true);
+            
+            if (!$prompts || !is_array($prompts)) {
+                throw new \Exception("Bu hikaye için kayıtlı görsel promtları bulunamadı. (Eski sürüm olabilir)");
+            }
+
+            $dateFolder = now()->format('Y-m-d');
+            $slug = $story->slug;
+            $updatedHtml = $story->metin;
+            $newCoverUrl = null;
+
+            foreach ($prompts as $index => $prompt) {
+                // Generate New Image
+                $remoteUrl = $this->aiService->generateImage($prompt);
+                
+                // Save with versioning to bust cache
+                $version = time();
+                $localPath = "stories/$dateFolder/{$slug}_{$index}_v{$version}.jpg";
+                $localUrl = $this->aiService->downloadImage($remoteUrl, $localPath);
+
+                // Replace in HTML
+                // Regex looks for: src='old_url' ... alt='Scene index'
+                // We construct a regex to match the img tag specifically for this index
+                // Note: The alt tag is "Scene $index"
+                
+                // Simple string replacement might be risky if duplicated, but alt='Scene X' is unique per scene.
+                // Let's use Regex to find the <img> tag with that alt.
+                
+                $pattern = '/<img[^>]+alt=[\'"]Scene ' . $index . '[\'"][^>]*>/i';
+                
+                if (preg_match($pattern, $updatedHtml, $matches)) {
+                    $oldImgTag = $matches[0];
+                    // Replace src attribute in this specific tag
+                    $newImgTag = preg_replace('/src=[\'"][^\'"]+[\'"]/i', "src='$localUrl'", $oldImgTag);
+                    $updatedHtml = str_replace($oldImgTag, $newImgTag, $updatedHtml);
+                }
+
+                if ($index === 0) {
+                    $newCoverUrl = $localUrl;
+                }
+            }
+
+            // Update Story
+            $story->metin = $updatedHtml;
+            if ($newCoverUrl) $story->gorsel_url = $newCoverUrl;
+            $story->save();
+
+            return redirect()->back()->with('success', 'Tüm görseller başarıyla yeniden üretildi ve güncellendi!');
+
+        } catch (\Exception $e) {
+             return redirect()->back()->with('error', 'Görsel Yenileme Hatası: ' . $e->getMessage());
+        }
+    }
 }
