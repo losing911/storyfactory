@@ -14,7 +14,6 @@ class AdminEBookController extends Controller
 
     public function __construct(AIService $aiService)
     {
-        // dd("CONSTRUCTOR REACHED: AdminEBookController loaded successfully.");
         $this->aiService = $aiService;
     }
 
