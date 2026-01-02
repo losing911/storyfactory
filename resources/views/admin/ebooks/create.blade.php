@@ -90,7 +90,15 @@
                     })
                 });
                 
-                const chunkResult = await chunkRes.json();
+                const chunkText = await chunkRes.text();
+                let chunkResult;
+                try {
+                    chunkResult = JSON.parse(chunkText);
+                } catch (e) {
+                    console.error("Non-JSON Response", chunkText);
+                    throw new Error("Server Error (HTML Response): " + chunkText.substring(0, 50));
+                }
+
                 if(chunkResult.status === 'error') throw new Error(chunkResult.message);
                 
                 fullHtml += chunkResult.html;
