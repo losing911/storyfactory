@@ -367,11 +367,14 @@ class AIService
         $prompt .= "Output JSON format only: [{ \"user\": \"Nickname\", \"text\": \"Comment content\" }]";
 
         try {
-            // Use lighter model or same as story
-            $rawResponse = $this->generateRawWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+            // Use Gemini Flash (Free & Fast) via OpenRouter
+            $model = 'google/gemini-2.0-flash-exp:free';
+            $rawResponse = $this->generateRawWithOpenRouter($prompt, $model);
             
-            // Log raw for debugging (optional, can be removed)
-            // Log::info("Raw Comment Response: " . $rawResponse);
+            // Debug for CLI
+            if (php_sapi_name() === 'cli') {
+                echo "\n[DEBUG] Raw AI Response:\n" . substr($rawResponse, 0, 500) . "...\n";
+            }
 
             $data = $this->cleanAndDecodeJson($rawResponse);
 
@@ -389,11 +392,18 @@ class AIService
             if (is_array($data) && isset($data['user'])) {
                 return [$data];
             }
+            
+            if (php_sapi_name() === 'cli') {
+                 echo "\n[DEBUG] JSON Structure Mismatch: " . json_encode($data) . "\n";
+            }
 
             Log::error("Comment JSON Structure Invalid: " . json_encode($data));
             return [];
             
         } catch (\Exception $e) {
+            if (php_sapi_name() === 'cli') {
+                 echo "\n[DEBUG] Exception: " . $e->getMessage() . "\n";
+            }
             Log::error("Comment Generation Failed: " . $e->getMessage());
             return [];
         }
