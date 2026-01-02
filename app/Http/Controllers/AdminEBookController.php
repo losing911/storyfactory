@@ -84,25 +84,28 @@ class AdminEBookController extends Controller
     // Step 2: Process a Single Chunk
     public function processChunk(Request $request)
     {
-        set_time_limit(120);
-        $storyIds = $request->input('story_ids');
-        $volume = $request->input('volume');
-        $part = $request->input('part');
-        $totalParts = $request->input('total_parts');
-
-        $stories = Story::whereIn('id', $storyIds)->orderBy('id', 'asc')->get();
-        if ($stories->isEmpty()) {
-             return response()->json(['status' => 'error', 'message' => 'Stories not found for this chunk.']);
-        }
-
-        // Prepare Text
-        $chunkText = "";
-        foreach ($stories as $story) {
-            $text = strip_tags($story->metin);
-            $chunkText .= "### BÖLÜM: {$story->baslik} (ID: {$story->id})\n{$text}\n\n";
-        }
+        // Increase time limit for AI/Image generation
+        set_time_limit(300);
 
         try {
+            $storyIds = $request->input('story_ids');
+            $part = $request->input('part');
+            $volume = $request->input('volume');
+            $totalParts = $request->input('total_parts'); // Keep this from original, as it's used in compileAnthology
+
+            // Fetch stories
+            $stories = Story::whereIn('id', $storyIds)->orderBy('id')->get();
+            if($stories->isEmpty()) {
+                return response()->json(['status' => 'error', 'message' => "No stories found for Chunk $part"]);
+            }
+
+            // Prepare Text (from original logic)
+            $chunkText = "";
+            foreach ($stories as $story) {
+                $text = strip_tags($story->metin);
+                $chunkText .= "### BÖLÜM: {$story->baslik} (ID: {$story->id})\n{$text}\n\n";
+            }
+
             // 1. Generate Illustration
             $partTitle = $stories->first()->baslik;
             $imgPrompt = "Anime style illustration for cyberpunk story chapter: $partTitle. Action scene or atmospheric city shot, cel shaded, high quality, no text.";
