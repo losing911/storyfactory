@@ -58,7 +58,7 @@
                             </td>
                             <td class="p-4 text-right flex justify-end gap-2">
                                 @if($campaign->status == 'draft')
-                                    <form action="{{ route('newsletter.send', $campaign->id) }}" method="POST" onsubmit="return confirm('Tüm abonelere gönderilecek. Emin misin?');">
+                                    <form action="{{ route('admin.newsletter.send', $campaign->id) }}" method="POST" onsubmit="return confirm('Tüm abonelere gönderilecek. Emin misin?');">
                                         @csrf
                                         <button type="submit" class="bg-neon-blue text-black px-3 py-1 text-xs font-bold hover:bg-white transition">
                                             SEND NOW
@@ -66,7 +66,7 @@
                                     </form>
                                 @endif
                                 
-                                <form action="{{ route('newsletter.destroy', $campaign->id) }}" method="POST" onsubmit="return confirm('Siliniyor?');">
+                                <form action="{{ route('admin.newsletter.destroy', $campaign->id) }}" method="POST" onsubmit="return confirm('Siliniyor?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-500 hover:text-white px-3 py-1 text-xs transition">DEL</button>

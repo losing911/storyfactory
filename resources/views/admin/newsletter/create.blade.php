@@ -7,13 +7,13 @@
             <h1 class="text-2xl font-display text-white">
                 NEW_TRANSMISSION <span class="text-neon-pink">/// COMPOSE</span>
             </h1>
-            <a href="{{ route('newsletter.index') }}" class="text-gray-500 hover:text-white transition text-xs flex items-center gap-2">
+            <a href="{{ route('admin.newsletter.index') }}" class="text-gray-500 hover:text-white transition text-xs flex items-center gap-2">
                 &larr; CANCEL
             </a>
         </div>
 
         <div class="bg-gray-900 border border-gray-800 rounded p-8">
-            <form action="{{ route('newsletter.store') }}" method="POST">
+            <form action="{{ route('admin.newsletter.store') }}" method="POST">
                 @csrf
                 
                 <div class="mb-6">

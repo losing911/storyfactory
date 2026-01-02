@@ -7,7 +7,7 @@
             <h1 class="text-2xl font-display text-white">
                 SUBSCRIBER_DB <span class="text-neon-blue">/// LIST</span>
             </h1>
-            <a href="{{ route('newsletter.index') }}" class="text-gray-500 hover:text-white transition text-xs flex items-center gap-2">
+            <a href="{{ route('admin.newsletter.index') }}" class="text-gray-500 hover:text-white transition text-xs flex items-center gap-2">
                 &larr; BACK_TO_CAMPAIGNS
             </a>
         </div>
@@ -31,7 +31,7 @@
                             <td class="p-4 text-gray-500 text-xs">{{ $sub->ip_address }}</td>
                             <td class="p-4 text-gray-500 text-xs">{{ $sub->created_at->format('Y-m-d') }}</td>
                             <td class="p-4 text-right">
-                                <form action="{{ route('newsletter.subscribers.destroy', $sub->id) }}" method="POST" onsubmit="return confirm('Kalc olarak siliniyor?');">
+                                <form action="{{ route('admin.newsletter.subscribers.destroy', $sub->id) }}" method="POST" onsubmit="return confirm('Kalc olarak siliniyor?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-500 hover:text-white px-2 transition text-xs font-bold">[X]</button>
