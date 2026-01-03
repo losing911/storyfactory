@@ -350,7 +350,7 @@ class AIService
          return ""; 
     }
 
-    protected function generateRawWithOpenRouter($prompt, $model) {
+    public function generateRawWithOpenRouter($prompt, $model) {
         $key = config('services.openrouter.key');
         if(!$key) throw new \Exception('OPENROUTER_KEY missing');
         
