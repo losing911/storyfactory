@@ -87,7 +87,8 @@ def post_tweet_if_finished(job_result):
         # FIX: Ensure URL is Production (Not Localhost)
         link = raw_url.replace("http://localhost/anxipunk.art", "https://anxipunk.icu") \
                       .replace("http://localhost", "https://anxipunk.icu") \
-                      .replace("http://127.0.0.1", "https://anxipunk.icu")
+                      .replace("http://127.0.0.1", "https://anxipunk.icu") \
+                      .replace("anxipunk.art", "anxipunk.icu")
                       
         if not link.startswith("https://anxipunk.icu"):
              # If it's some other weird path, force it (assuming slug is correct)
@@ -143,7 +144,7 @@ def generate_music_comfyui(prompt, duration=30):
     print(f"🎵 Connecting to ComfyUI for Music: {prompt[:50]}...")
     
     # Load Workflow
-    workflow_path = os.path.join(os.path.dirname(__file__), "workflows", "music_workflow.json")
+    workflow_path = os.path.join(os.path.dirname(__file__), "workflows", "audio_stable_audio_example.json")
     if not os.path.exists(workflow_path):
         print(f"❌ Workflow file not found: {workflow_path}")
         return None
@@ -151,26 +152,38 @@ def generate_music_comfyui(prompt, duration=30):
     with open(workflow_path, "r", encoding="utf-8") as f:
         workflow = json.load(f)
 
-    # Inject Prompt
-    # We look for MusicGenSampler (node class_type)
-    # If using my generated JSON, it's Node "4".
-    # But to be robust, let's search for inputs with 'text'.
-    prompt_set = False
-    for node_id, node in workflow.items():
-        if node["class_type"] == "MusicGenSampler" or "text" in node["inputs"]:
-            if "text" in node["inputs"]:
-                node["inputs"]["text"] = prompt
-                node["inputs"]["duration"] = duration
-                prompt_set = True
-                break
+    # Inject Prompt & Duration
+    # Strategy: Hardcode Node IDs for 'audio_stable_audio_example.json'
+    # Node 6: Positive Prompt (CLIPTextEncode)
+    # Node 11: Duration (EmptyLatentAudio, seconds)
     
-    if not prompt_set:
-        print("⚠️ Could not inject prompt into workflow. Check JSON structure.")
+    try:
+        # 1. Set Prompt
+        if "6" in workflow:
+             workflow["6"]["inputs"]["text"] = prompt
+             print(f"Updated Prompt in Node 6")
+        else:
+            print("⚠️ Node 6 (Positive Prompt) not found in workflow!")
+
+        # 2. Set Duration
+        if "11" in workflow:
+             # Ensure duration is float
+             workflow["11"]["inputs"]["seconds"] = float(duration)
+             print(f"Updated Duration in Node 11 to {duration}s")
+        else:
+             print("⚠️ Node 11 (Duration) not found in workflow!")
+
+    except Exception as e:
+        print(f"⚠️ Error injecting prompt/duration: {e}")
         return None
 
     try:
         # 1. Queue Job
         resp = queue_prompt(workflow)
+        if 'error' in resp:
+             print(f"❌ ComfyUI Queue Error: {resp['error']}")
+             return None
+             
         prompt_id = resp['prompt_id']
         print(f"ComfyUI Job Queued: {prompt_id}")
         
@@ -182,17 +195,25 @@ def generate_music_comfyui(prompt, duration=30):
                 outputs = history[prompt_id]['outputs']
                 
                 # Find Audio Output
+                # Node 19 is SaveAudioMP3 in this workflow
+                found_audio = False
                 for node_id, output_data in outputs.items():
                     if 'audio' in output_data:
-                        # Assuming one audio file
-                        audio_info = output_data['audio'][0]
-                        filename = audio_info['filename']
-                        subfolder = audio_info['subfolder']
-                        folder_type = audio_info['type']
-                        
-                        print(f"Downloading Audio: {filename}...")
-                        audio_content = get_image(filename, subfolder, folder_type) # Reusing get_image for audio
-                        return [(filename, audio_content)]
+                        # Depending on node type (SaveAudio vs SaveAudioMP3), keys might differ
+                        # Usually it is a list of objects
+                        for audio_item in output_data['audio']:
+                            filename = audio_item['filename']
+                            subfolder = audio_item['subfolder']
+                            folder_type = audio_item['type']
+                            
+                            print(f"Downloading Audio: {filename}...")
+                            audio_content = get_image(filename, subfolder, folder_type) # Reusing get_image for audio
+                            return [(filename, audio_content)]
+                        found_audio = True
+                
+                if not found_audio:
+                     print("❌ No audio output found in history.")
+                     return None
                 break
             else:
                 time.sleep(1)

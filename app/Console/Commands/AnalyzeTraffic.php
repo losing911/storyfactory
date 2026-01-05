@@ -53,7 +53,7 @@ class AnalyzeTraffic extends Command
         }
 
         // 2. Prepare Prompt for AI
-        $prompt = "Sen Dijital Strateji ve Pazarlama Uzmanısın. Aşağıdaki web sitesi trafik verilerini analiz et ve Anxipunk.art (Cyberpunk Hikaye Blogu) için strateji geliştir.\n\n";
+        $prompt = "Sen Dijital Strateji ve Pazarlama Uzmanısın. Aşağıdaki web sitesi trafik verilerini analiz et ve Anxipunk.icu (Cyberpunk Hikaye Blogu) için strateji geliştir.\n\n";
         $prompt .= "--- VERİLER (Son 24 Saat) ---\n";
         $prompt .= "- Tekil Ziyaretçi: $uniqueVisitors\n";
         $prompt .= "- Toplam Gösterim: $totalVisits\n";
