@@ -84,8 +84,9 @@ class AdminEBookController extends Controller
     // Step 2: Process a Single Chunk
     public function processChunk(Request $request)
     {
-        // Increase time limit for AI/Image generation
-        set_time_limit(300);
+        // Increase limits for Server Environment
+        set_time_limit(600); // 10 Minutes
+        ini_set('memory_limit', '512M');
 
         try {
             $storyIds = $request->input('story_ids');
@@ -109,16 +110,25 @@ class AdminEBookController extends Controller
             // 1. Generate Illustration
             $partTitle = $stories->first()->baslik;
             $imgPrompt = "Anime style illustration for cyberpunk story chapter: $partTitle. Action scene or atmospheric city shot, cel shaded, high quality, no text.";
-            $remoteImg = $this->aiService->generateImage($imgPrompt);
-            $localImgPath = "ebooks/vol_{$volume}_part_{$part}_" . time() . ".jpg";
-            $localImgUrl = $this->aiService->downloadImage($remoteImg, $localImgPath);
+            try {
+                $remoteImg = $this->aiService->generateImage($imgPrompt);
+                $localImgPath = "ebooks/vol_{$volume}_part_{$part}_" . time() . ".jpg";
+                // Ensure directory exists (handled in service, but double check handled by try catch)
+                $localImgUrl = $this->aiService->downloadImage($remoteImg, $localImgPath);
+            } catch (\Throwable $e) {
+                // If image fails, don't kill the process. Use a placeholder or skip.
+                \Log::error("E-Book Image Gen Failed: " . $e->getMessage());
+                $localImgPath = "#"; 
+            }
 
             // 2. Compass Text
             $partialHtml = $this->aiService->compileAnthology($chunkText, $volume, $part, $totalParts);
 
             // 3. Format Output
             $finalPartHtml = "<div class='volume-part' id='part-{$part}'>";
-            $finalPartHtml .= "<div class='part-illustration' style='text-align:center; margin-bottom:2rem;'><img src='/" . $localImgPath . "' style='max-width:100%; border-radius:4px; border:1px solid #333;' alt='Chapter Art'></div>";
+            if ($localImgPath !== "#") {
+                 $finalPartHtml .= "<div class='part-illustration' style='text-align:center; margin-bottom:2rem;'><img src='/" . $localImgPath . "' style='max-width:100%; border-radius:4px; border:1px solid #333;' alt='Chapter Art'></div>";
+            }
             $finalPartHtml .= $partialHtml;
             $finalPartHtml .= "</div><hr class='part-divider'>";
 
@@ -135,8 +145,12 @@ class AdminEBookController extends Controller
                 'extracted_title' => $extractedTitle
             ]);
 
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        } catch (\Throwable $e) {
+            \Log::error("E-Book Chunk Process Failed: " . $e->getMessage());
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'Exception: ' . $e->getMessage() . ' | Line: ' . $e->getLine() . ' | File: ' . basename($e->getFile())
+            ], 500);
         }
     }
 
