@@ -459,8 +459,18 @@ class AIService
         $prompt .= $storiesText . "\n\n";
         $prompt .= "--- ÇIKTI (TÜRKÇE HTML) ---";
 
-        // Use DeepSeek (OpenRouter)
-        return $this->generateRawWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+        // Use DeepSeek (OpenRouter) as Primary
+        try {
+            return $this->generateRawWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("Primary Model (DeepSeek) Failed for Anthology: " . $e->getMessage() . ". Switching to Backup (Gemini)...");
+            
+            // Backup: Gemini 2.0 Flash (Free Model on OpenRouter)
+            // Or use Google AI Studio directly if configured, but let's stick to OpenRouter for consistency if key is same
+            // Actually generateRawWithOpenRouter handles OpenRouter keys. 
+            // Let's use 'google/gemini-2.0-flash-exp:free' on OpenRouter.
+            return $this->generateRawWithOpenRouter($prompt, 'google/gemini-2.0-flash-exp:free');
+        }
     }
 
     protected function getMockData(): array
