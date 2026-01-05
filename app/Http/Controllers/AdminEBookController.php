@@ -58,8 +58,8 @@ class AdminEBookController extends Controller
             return response()->json(['status' => 'error', 'message' => 'No stories found to compile.']);
         }
 
-        // Chunk into groups of 5
-        $chunks = $stories->chunk(5);
+        // Chunk into groups of 2 (Reduced from 5 to prevent Timeouts)
+        $chunks = $stories->chunk(2);
         $totalParts = $chunks->count();
         
         // Prepare IDs for each chunk to send back to client
@@ -92,7 +92,9 @@ class AdminEBookController extends Controller
             $storyIds = $request->input('story_ids');
             $part = $request->input('part');
             $volume = $request->input('volume');
-            $totalParts = $request->input('total_parts'); // Keep this from original, as it's used in compileAnthology
+            $totalParts = $request->input('total_parts');
+
+            \Log::info("EBook: Processing Chunk $part", ['ids' => $storyIds]);
 
             // Fetch stories
             $stories = Story::whereIn('id', $storyIds)->orderBy('id')->get();
@@ -100,7 +102,7 @@ class AdminEBookController extends Controller
                 return response()->json(['status' => 'error', 'message' => "No stories found for Chunk $part"]);
             }
 
-            // Prepare Text (from original logic)
+            // Prepare Text
             $chunkText = "";
             foreach ($stories as $story) {
                 $text = strip_tags($story->metin);
@@ -108,21 +110,25 @@ class AdminEBookController extends Controller
             }
 
             // 1. Generate Illustration
+            \Log::info("EBook: Generating Image for Chunk $part");
             $partTitle = $stories->first()->baslik;
             $imgPrompt = "Anime style illustration for cyberpunk story chapter: $partTitle. Action scene or atmospheric city shot, cel shaded, high quality, no text.";
+            
+            $localImgPath = "#";
             try {
                 $remoteImg = $this->aiService->generateImage($imgPrompt);
                 $localImgPath = "ebooks/vol_{$volume}_part_{$part}_" . time() . ".jpg";
-                // Ensure directory exists (handled in service, but double check handled by try catch)
-                $localImgUrl = $this->aiService->downloadImage($remoteImg, $localImgPath);
+                $this->aiService->downloadImage($remoteImg, $localImgPath);
+                \Log::info("EBook: Image Success $localImgPath");
             } catch (\Throwable $e) {
-                // If image fails, don't kill the process. Use a placeholder or skip.
                 \Log::error("E-Book Image Gen Failed: " . $e->getMessage());
-                $localImgPath = "#"; 
+                // Continue without image
             }
 
             // 2. Compass Text
+            \Log::info("EBook: Compiling Text for Chunk $part");
             $partialHtml = $this->aiService->compileAnthology($chunkText, $volume, $part, $totalParts);
+            \Log::info("EBook: Text Success for Chunk $part");
 
             // 3. Format Output
             $finalPartHtml = "<div class='volume-part' id='part-{$part}'>";
