@@ -50,7 +50,7 @@
                     @endif
                 </div>
                 <div class="inline-block border border-gray-700 px-3 py-1 text-gray-400 font-mono text-sm tracking-widest bg-black/50 backdrop-blur-sm">
-                    {{ $story->yayin_tarihi->format('d F Y') }}
+                    {{ $story->yayin_tarihi->format('d F Y') }} <span class="text-gray-600">|</span> {{ number_format($story->views) }} OKUMA
                 </div>
                 <!-- TTS Button -->
                 <button id="ttsButton" class="border border-neon-blue/50 text-neon-blue px-3 py-1 font-mono text-sm hover:bg-neon-blue/20 transition-colors flex items-center gap-2">

@@ -12,8 +12,9 @@
     <table class="w-full text-left text-gray-400">
         <thead class="bg-gray-900 uppercase text-gray-500 text-sm">
             <tr>
-                <th class="p-4">ID</th>
+            <th class="p-4">ID</th>
                 <th class="p-4">Başlık</th>
+                <th class="p-4">Okunma</th>
                 <th class="p-4">Durum</th>
                 <th class="p-4">Yayın Tarihi</th>
                 <th class="p-4 text-right">İşlemler</th>
@@ -27,6 +28,7 @@
                     {{ $story->baslik }}
                     <a href="{{ route('story.show', $story) }}" target="_blank" class="text-xs text-gray-500 ml-2 hover:text-white">👁️ Önizle</a>
                 </td>
+                <td class="p-4 text-gray-400">{{ number_format($story->views) }}</td>
                 <td class="p-4">
                     @php
                         $statusColors = [

@@ -25,6 +25,7 @@ class Story extends Model
         'etiketler',
         'sosyal_ozet',
         'gorsel_prompt',
+        'views',
     ];
 
     protected $casts = [

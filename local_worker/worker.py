@@ -268,6 +268,85 @@ def generate_image_pollinations(prompt, model='turbo'):
         print(f"Pollinations Request Failed: {e}")
         return []
 
+# Task: Generate Image via ComfyUI (Flux Schnell Workflow)
+def generate_image_comfyui(prompt):
+    print(f"🎨 Connecting to ComfyUI (Flux Schnell) for Image: {prompt[:50]}...")
+    
+    workflow_path = os.path.join(os.path.dirname(__file__), "workflows", "flux_schnell.json")
+    if not os.path.exists(workflow_path):
+        print(f"❌ Workflow file not found: {workflow_path}")
+        return None
+
+    try:
+        with open(workflow_path, "r", encoding="utf-8") as f:
+            workflow = json.load(f)
+    except Exception as e:
+         print(f"❌ Failed to load workflow JSON: {e}")
+         return None
+
+    # Node Mapping for Flux Schnell:
+    # Node 6: Positive Prompt (CLIPTextEncode)
+    # Node 31: KSampler (Seed)
+    # Node 9: SaveImage
+    
+    try:
+        # 1. Set Prompt
+        if "6" in workflow:
+             # Enhance prompt for Flux
+             enhanced_prompt = f"{prompt}, (anime style:1.2), masterpiece, best quality, vibrant colors"
+             workflow["6"]["inputs"]["text"] = enhanced_prompt
+             print(f"Updated Prompt in Node 6")
+        else:
+            print("⚠️ Node 6 (Positive Prompt) not found in workflow!")
+
+        # 2. Set Seed
+        seed = random.randint(1, 99999999999999)
+        if "31" in workflow:
+             workflow["31"]["inputs"]["seed"] = int(seed)
+             print(f"Updated Seed in Node 31 to {seed}")
+        
+    except Exception as e:
+        print(f"⚠️ Error injecting prompt/seed: {e}")
+        return None
+
+    try:
+        # 1. Queue Job
+        resp = queue_prompt(workflow)
+        if 'error' in resp:
+             print(f"❌ ComfyUI Queue Error: {resp['error']}")
+             return None
+             
+        prompt_id = resp['prompt_id']
+        print(f"ComfyUI Image Job Queued: {prompt_id}")
+        
+        # 2. Poll Status
+        while True:
+            history = get_history(prompt_id)
+            if prompt_id in history:
+                print("Job Completed in ComfyUI.")
+                outputs = history[prompt_id]['outputs']
+                
+                # Find Image Output (Node 9 is SaveImage)
+                for node_id, output_data in outputs.items():
+                    if 'images' in output_data:
+                        for img_item in output_data['images']:
+                            filename = img_item['filename']
+                            subfolder = img_item['subfolder']
+                            folder_type = img_item['type']
+                            
+                            print(f"Downloading Image: {filename}...")
+                            img_content = get_image(filename, subfolder, folder_type)
+                            return [(filename, img_content)]
+                
+                print("❌ No image output found in history.")
+                return None
+            else:
+                time.sleep(1)
+                
+    except Exception as e:
+        print(f"ComfyUI Error: {e}")
+        return None
+
 # API: Process and Upload
 def process_job(job):
     print(f"Processing Job: {job['id']} (Type: {job['type']})")
@@ -276,21 +355,15 @@ def process_job(job):
         results = []
         
         if job['type'] == 'image_generation':
-            # Use style_preset from API or default to turbo
-            model = job.get('style_preset', 'turbo') 
-            results = generate_image_pollinations(job['prompt'], model=model)
+            # 1. Try Local ComfyUI (RTX 4060 Power!)
+            results = generate_image_comfyui(job['prompt'])
             
-            # Fallback Logic: If Turbo failed (returned empty because of size check or error)
+            # 2. Fallback to Pollinations if Local fails
             if not results:
-                print("⚠️ Turbo failed. Attempting Fallback (Default Model)...")
-                time.sleep(5)
-                results = generate_image_pollinations(job['prompt'], model=None) # Pass None to use default
-
-            # Triple Fallback: If Default also failed (502/Rate Limit), try FLUX explicitly
-            if not results:
-                print("⚠️ Default failed. Attempting Ultimate Fallback (FLUX Model)...")
-                time.sleep(5)
-                results = generate_image_pollinations(job['prompt'], model='flux')
+                print("⚠️ Local ComfyUI failed. Falling back to Pollinations Cloud...")
+                # Use style_preset from API or default to turbo
+                model = job.get('style_preset', 'flux') # Default to Flux for quality
+                results = generate_image_pollinations(job['prompt'], model=model)
         
         elif job['type'] == 'music_generation':
              results = generate_music_comfyui(job['prompt'], duration=job.get('duration', 30))
@@ -322,7 +395,7 @@ def process_job(job):
         else:
             print(f"⚠️ UPLOAD FAILED [Status {resp.status_code}]")
             return None
-
+            
     except Exception as e:
         print(f"Job Processing Failed: {e}")
         time.sleep(5)

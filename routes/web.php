@@ -30,18 +30,7 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('/story/{story}', function (App\Models\Story $story) {
-    if($story->durum !== 'published' && !auth()->check()) abort(404);
-    
-    // Fetch 3 random suggested stories (excluding current)
-    $similarStories = App\Models\Story::where('durum', 'published')
-        ->where('id', '!=', $story->id)
-        ->inRandomOrder()
-        ->take(3)
-        ->get();
-
-    return view('story.show', compact('story', 'similarStories'));
-})->name('story.show');
+Route::get('/story/{story}', [App\Http\Controllers\StoryController::class, 'show'])->name('story.show');
 
 Route::get('/about', function () {
     return view('about');
