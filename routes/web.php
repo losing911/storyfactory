@@ -53,7 +53,8 @@ Route::get('/database/{slug}', [App\Http\Controllers\LoreController::class, 'sho
     Route::get('/kutuphane/{slug}/download', [App\Http\Controllers\EBookController::class, 'download'])->name('ebooks.download');
     
     // Author Routes
-Route::get('/author/{slug}', [App\Http\Controllers\AuthorController::class, 'show'])->name('author.show');
+    Route::get('/yazarlar', [App\Http\Controllers\AuthorController::class, 'index'])->name('authors.index');
+    Route::get('/author/{slug}', [App\Http\Controllers\AuthorController::class, 'show'])->name('author.show');
 
 // Gallery
 Route::get('/gallery', [App\Http\Controllers\GalleryController::class, 'index'])->name('gallery.index');
