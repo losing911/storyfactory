@@ -100,6 +100,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/profile', [AdminController::class, 'editProfile'])->name('profile.edit');
     Route::post('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
 
+    // Author Management
+    Route::resource('authors', App\Http\Controllers\AdminAuthorController::class);
+
     // Lore Management
     Route::resource('lore', App\Http\Controllers\AdminLoreController::class);
 

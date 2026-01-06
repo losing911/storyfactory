@@ -21,13 +21,13 @@
         <!-- Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @foreach($authors as $author)
-            <a href="{{ route('author.show', $author->slug) }}" class="group relative block bg-gray-900 border border-gray-800 hover:border-neon-green transition-all duration-300 overflow-hidden rounded-lg">
+            <a href="{{ route('author.show', $author->slug) }}" class="group relative flex flex-col h-full bg-gray-900 border border-gray-800 hover:border-neon-green transition-all duration-300 overflow-hidden rounded-lg">
                 <!-- Background Glow -->
                 <div class="absolute inset-0 bg-neon-green/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                <div class="p-8 flex flex-col items-center text-center relative z-10">
+                <div class="p-8 flex flex-col items-center text-center relative z-10 flex-grow">
                     <!-- Avatar -->
-                    <div class="relative w-32 h-32 mb-6">
+                    <div class="relative w-32 h-32 mb-6 shrink-0">
                         <div class="absolute inset-0 bg-neon-green rounded-full blur-lg opacity-20 group-hover:opacity-40 transition-opacity"></div>
                         <img src="{{ $author->avatar }}" alt="{{ $author->name }}" class="w-full h-full object-cover rounded-full border-2 border-gray-700 group-hover:border-neon-green transition-colors relative z-10">
                     </div>
@@ -40,17 +40,17 @@
                         {{ $author->role }}
                     </p>
                     
-                    <p class="text-gray-400 text-sm line-clamp-2 mb-6 min-h-[2.5rem]">
+                    <p class="text-gray-400 text-sm line-clamp-3 mb-6 min-h-[3.75rem]">
                         {{ $author->bio }}
                     </p>
+                </div>
 
-                    <!-- Stats -->
-                    <div class="w-full border-t border-gray-800 pt-4 flex justify-between items-center text-xs font-mono text-gray-500">
-                        <span>ID: {{ str_pad($author->id, 4, '0', STR_PAD_LEFT) }}</span>
-                        <span class="text-neon-blue group-hover:text-white transition-colors">
-                            {{ $author->stories_count }} STORIES
-                        </span>
-                    </div>
+                <!-- Stats -->
+                <div class="w-full border-t border-gray-800 p-4 flex justify-between items-center text-xs font-mono text-gray-500 mt-auto bg-black/20">
+                    <span>ID: {{ str_pad($author->id, 4, '0', STR_PAD_LEFT) }}</span>
+                    <span class="text-neon-blue group-hover:text-white transition-colors">
+                        {{ $author->stories_count }} STORIES
+                    </span>
                 </div>
             </a>
             @endforeach

@@ -17,9 +17,6 @@
             <div class="relative group">
                 <div class="absolute -inset-1 bg-gradient-to-r from-neon-green to-neon-blue rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
                 <img src="{{ $author->avatar ?? 'https://api.dicebear.com/7.x/bottts/svg?seed='.$author->slug }}" class="relative w-40 h-40 rounded-full border-2 border-black object-cover bg-gray-900" alt="{{ $author->name }}">
-                @if($author->is_ai)
-                    <span class="absolute bottom-2 right-2 bg-neon-pink text-black text-xs font-bold px-2 py-0.5 rounded shadow-lg border border-white">AI</span>
-                @endif
             </div>
 
             <!-- Info -->
