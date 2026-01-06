@@ -30,11 +30,6 @@
                     <div class="relative w-32 h-32 mb-6">
                         <div class="absolute inset-0 bg-neon-green rounded-full blur-lg opacity-20 group-hover:opacity-40 transition-opacity"></div>
                         <img src="{{ $author->avatar }}" alt="{{ $author->name }}" class="w-full h-full object-cover rounded-full border-2 border-gray-700 group-hover:border-neon-green transition-colors relative z-10">
-                        @if($author->is_ai)
-                            <div class="absolute bottom-0 right-0 bg-black border border-neon-green text-neon-green text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">AI</div>
-                        @else
-                            <div class="absolute bottom-0 right-0 bg-black border border-neon-blue text-neon-blue text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">HUMAN</div>
-                        @endif
                     </div>
 
                     <!-- Info -->
