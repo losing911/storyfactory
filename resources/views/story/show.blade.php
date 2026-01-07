@@ -187,47 +187,71 @@
     });
 
     // 2. Text-to-Speech (TTS) Logic
+    // 2. Text-to-Speech (TTS) Logic (Server-Side Enhanced)
     const ttsBtn = document.getElementById('ttsButton');
-    const content = document.getElementById('storyContent').innerText;
-    let isSpeaking = false;
-    let utterance = null;
+    let audioObj = null;
+    let isPlaying = false;
 
-    if ('speechSynthesis' in window) {
-        ttsBtn.addEventListener('click', () => {
-            const synth = window.speechSynthesis;
+    ttsBtn.addEventListener('click', () => {
+        // Toggle Stop
+        if (isPlaying) {
+            if (audioObj) {
+                audioObj.pause();
+                audioObj.currentTime = 0; // Reset
+            }
+            isPlaying = false;
+            ttsBtn.innerHTML = '<span>▶ AUDIO_PROTOCOL</span>';
+            ttsBtn.classList.remove('bg-neon-blue', 'text-black');
+            return;
+        }
 
-            if (isSpeaking) {
-                // Stop
-                synth.cancel();
-                isSpeaking = false;
+        // Initialize / Play
+        if (!audioObj) {
+            ttsBtn.innerHTML = '<span>⌛ BUFFERING...</span>';
+            // Use the Route we defined
+            const audioUrl = "{{ route('story.audio', $story) }}";
+            
+            audioObj = new Audio(audioUrl);
+            
+            // Error Handling
+            audioObj.addEventListener('error', (e) => {
+                console.error("Audio Error:", e);
+                ttsBtn.innerHTML = '<span>❌ ERR_NETWORK</span>';
+                setTimeout(() => { ttsBtn.innerHTML = '<span>▶ AUDIO_PROTOCOL</span>'; }, 2000);
+                isPlaying = false;
+            });
+
+            // On Load/Play
+            audioObj.addEventListener('canplaythrough', () => {
+                if(isPlaying) return; // Prevent double trigger
+                audioObj.play().then(() => {
+                    isPlaying = true;
+                    ttsBtn.innerHTML = '<span>⏹ TERMINATE_AUDIO</span>';
+                    ttsBtn.classList.add('bg-neon-blue', 'text-black');
+                }).catch(err => {
+                    console.log("Auto-play blocked:", err);
+                    ttsBtn.innerHTML = '<span>▶ TAP_TO_PLAY</span>';
+                });
+            });
+
+            // On End
+            audioObj.addEventListener('ended', () => {
+                isPlaying = false;
                 ttsBtn.innerHTML = '<span>▶ AUDIO_PROTOCOL</span>';
                 ttsBtn.classList.remove('bg-neon-blue', 'text-black');
-            } else {
-                // Start
-                utterance = new SpeechSynthesisUtterance(content);
-                utterance.lang = 'tr-TR'; // Turkish
-                utterance.rate = 0.9; // Slightly slower
-                utterance.pitch = 0.8; // Deep/Robotic
-                
-                // Try to find a good voice
-                const voices = synth.getVoices();
-                // Prefer a male/deep voice if available (optional filter)
-                
-                utterance.onend = () => {
-                    isSpeaking = false;
-                    ttsBtn.innerHTML = '<span>▶ AUDIO_PROTOCOL</span>';
-                    ttsBtn.classList.remove('bg-neon-blue', 'text-black');
-                };
-
-                synth.speak(utterance);
-                isSpeaking = true;
-                ttsBtn.innerHTML = '<span>⏹ TERMINATE_AUDIO</span>';
-                ttsBtn.classList.add('bg-neon-blue', 'text-black');
-            }
-        });
-    } else {
-        ttsBtn.style.display = 'none'; // Not supported
-    }
+            });
+            
+            // Trigger Load (Preload is auto mostly, but accessing src starts it)
+            audioObj.load();
+            
+        } else {
+            // Resume if paused logic (not implemented here, we just restart or stop)
+             audioObj.play();
+             isPlaying = true;
+             ttsBtn.innerHTML = '<span>⏹ TERMINATE_AUDIO</span>';
+             ttsBtn.classList.add('bg-neon-blue', 'text-black');
+        }
+    });
 
     // 3. Parallax Hero Effect
     const heroParallax = document.getElementById('heroParallax');

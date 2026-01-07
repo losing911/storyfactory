@@ -438,6 +438,13 @@ class AIService
         }
     }
 
+    public function generateMusic(string $prompt, string $duration = "30"): string
+    {
+        // Placeholder for ComfyUI Music Generation
+        // Returns empty string to allow fallback to mood-based tracks
+        return "";
+    }
+
     public function compileAnthology(string $storiesText, int $volume, int $part, int $totalParts): string
     {
         $prompt = "Sen 'Neo-Pera' evreninin Baş Editörüsün. Şu an 20 hikayelik bir romanın $part. Kısmını ($part / $totalParts) düzenliyorsun. Elindeki metinleri (5 Hikaye) akıcı bir şekilde birbirine bağla.\n\n";

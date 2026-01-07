@@ -67,6 +67,12 @@ Route::post('/poll/vote', [App\Http\Controllers\PollController::class, 'vote']);
 // Comment System
 Route::post('/comment/store/{story}', [App\Http\Controllers\CommentController::class, 'store'])->name('comment.store');
 
+// Reaction System
+Route::post('/story/{story}/react', [App\Http\Controllers\StoryController::class, 'react'])->name('story.react');
+
+// Audio System
+Route::get('/story/{story}/audio', [App\Http\Controllers\StoryController::class, 'getAudio'])->name('story.audio');
+
 // Language Switcher
 Route::get('lang/{locale}', function ($locale) {
     if (in_array($locale, ['tr', 'en'])) {
