@@ -146,7 +146,7 @@ class Story extends Model
                 if (!$inLink && trim($token) !== '') {
                     // Apply replacements safely
                     foreach($patterns as $item) {
-                        $replacement = '<a href="/database/'.$item['slug'].'" class="text-neon-pink hover:underline border-b border-neon-pink/30" title="Veri Bankası: '.$item['title'].'">$1</a>';
+$replacement = '<a href="/database/'.$item['slug'].'" class="lore-link relative inline-block text-neon-pink hover:text-neon-green border-b border-neon-pink/30 transition-colors duration-300" data-slug="'.$item['slug'].'">$1<span class="lore-tooltip"><strong class="text-neon-green block mb-1">DATA_NODE: '.$item['title'].'</strong><span class="text-xs text-gray-400">Veritabanı kaydını incelemek için tıklayın >></span></span></a>';
                         try {
                             // Only replace first occurrence per text node to avoid chaos? 
                             // Or global? Let's use preg_replace but realize we are modifying $token repeatedly.

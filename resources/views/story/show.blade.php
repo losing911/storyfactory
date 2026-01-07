@@ -249,38 +249,52 @@
     @endif
 
     <!-- Hacker Chat -->
-    <div class="border-t-2 border-dashed border-gray-800 bg-black pt-12 pb-24 comments-section">
-        <div class="max-w-2xl mx-auto px-4">
-            <div class="bg-black border border-gray-800 p-4 md:p-6 font-mono text-sm shadow-[0_0_20px_rgba(0,0,0,0.8)]">
-                <h3 class="text-neon-green mb-4 border-b border-gray-800 pb-2">/// NETRUNNER_COMM_CHANNEL</h3>
+    <div class="border-t border-gray-900 bg-black pt-16 pb-24 comments-section relative overflow-hidden">
+        <!-- Background Grid for Terminal Feel -->
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none"></div>
+        
+        <div class="max-w-2xl mx-auto px-4 relative z-10">
+            <div class="bg-gray-900/50 backdrop-blur border border-gray-800 p-6 font-mono text-sm shadow-[0_0_30px_rgba(0,255,65,0.05)] rounded-sm">
+                <div class="flex items-center justify-between mb-6 border-b border-gray-800 pb-2">
+                    <h3 class="text-neon-green tracking-widest text-xs uppercase">/// NETRUNNER_COMM_CHANNEL_v2.4</h3>
+                    <div class="flex gap-2">
+                        <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                        <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                        <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    </div>
+                </div>
                 
-                <div id="commentList" class="space-y-4 mb-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                    @foreach($story->comments as $comment)
+                <div id="commentList" class="space-y-4 mb-6 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                    @forelse($story->comments as $comment)
                         <div class="group">
-                            <div class="flex justify-between text-[10px] text-gray-500 mb-1">
-                                <span class="text-neon-pink">user_root: {{ $comment->nickname ?? 'anonymous' }}</span>
-                                <span>{{ $comment->created_at->diffForHumans() }}</span>
+                            <div class="flex justify-between text-[10px] uppercase text-gray-500 mb-1 tracking-wider">
+                                <span class="text-neon-pink font-bold">root@user: {{ $comment->nickname ?? 'anonymous' }}</span>
+                                <span>[{{ $comment->created_at->format('H:i:s / d.m.Y') }}]</span>
                             </div>
-                            <div class="text-gray-300 text-xs pl-2 border-l border-gray-800 group-hover:border-neon-green group-hover:text-neon-green transition-colors">
-                                {{ $comment->message }}
+                            <div class="text-gray-300 text-xs md:text-sm pl-3 border-l-2 border-gray-700 group-hover:border-neon-green group-hover:text-white transition-colors py-1">
+                                > {{ $comment->message }}
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <div class="text-center text-gray-600 italic py-8 text-xs">
+                            > NO_DATA_STREAM_FOUND. BE THE FIRST TO INJECT CODE.
+                        </div>
+                    @endforelse
                 </div>
     
                 <!-- Input Form -->
-                <div class="border-t border-gray-800 pt-4">
-                    <div class="flex flex-col gap-2">
+                <div class="border-t border-gray-700/50 pt-4 mt-2">
+                    <div class="flex flex-col gap-3">
                         <div class="flex items-center gap-2">
-                            <span class="text-neon-blue text-xs">root@anxipunk:~$</span>
-                            <input type="text" id="nickInput" placeholder="Nick" class="bg-transparent border-b border-gray-800 focus:border-neon-green text-gray-300 focus:outline-none w-full py-1 text-xs">
+                            <span class="text-neon-blue text-xs font-bold whitespace-nowrap">root@anxipunk:~$</span>
+                            <input type="text" id="nickInput" placeholder="identify_yourself" class="bg-transparent border-b border-gray-700 focus:border-neon-green text-gray-300 focus:outline-none w-full py-1 text-xs font-mono tracking-wide placeholder-gray-600">
                         </div>
                         <div class="flex items-start gap-2">
-                            <span class="text-neon-blue text-xs">>></span>
-                            <textarea id="msgInput" rows="1" placeholder="Inject Message..." class="bg-transparent border-0 focus:ring-0 text-gray-300 focus:outline-none w-full py-1 resize-none text-xs"></textarea>
+                            <span class="text-neon-blue text-xs font-bold whitespace-nowrap">>></span>
+                            <textarea id="msgInput" rows="2" placeholder="inject_comment..." class="bg-transparent border border-gray-800 focus:border-neon-green p-2 text-gray-300 focus:outline-none w-full text-xs font-mono resize-none placeholder-gray-600"></textarea>
                         </div>
-                        <button id="submitComment" class="self-end border border-gray-800 hover:border-neon-green text-gray-500 hover:text-neon-green px-4 py-1 text-[10px] uppercase transition tracking-widest mt-2">
-                            [EXECUTE_SEND]
+                        <button id="submitComment" class="self-end bg-gray-900 border border-gray-700 hover:border-neon-green text-gray-400 hover:text-neon-green px-6 py-2 text-[10px] font-bold uppercase transition-all tracking-widest hover:shadow-[0_0_10px_rgba(0,255,65,0.2)]">
+                            [EXECUTE_SEND_PROTOCOL]
                         </button>
                     </div>
                 </div>

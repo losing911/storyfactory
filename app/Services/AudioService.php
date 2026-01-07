@@ -32,8 +32,11 @@ class AudioService
         $text = strip_tags($text);
         $text = mb_substr($text, 0, 4500); // Google Limit is ~5000 chars
 
-        // 2. Cache Check (Hash of text)
-        $hash = md5($text . 'tr-TR-Standard-A'); // Voice signature
+        // 2. Cache Check (Hash of text + Voice Config)
+        $voiceName = 'tr-TR-Wavenet-B'; // High quality Wavenet Male
+        $configHash = 'v2-rate1.0-pitch0'; // Versioning for settings
+        $hash = md5($text . $voiceName . $configHash); 
+        
         $fileName = "audio/tts/{$slug}_{$hash}.mp3";
         $fullPath = public_path($fileName);
 
@@ -46,13 +49,13 @@ class AudioService
                 'input' => ['text' => $text],
                 'voice' => [
                     'languageCode' => 'tr-TR',
-                    'name' => 'tr-TR-Standard-E', // Deep male voice often good for narration
+                    'name' => $voiceName,
                     'ssmlGender' => 'MALE'
                 ],
                 'audioConfig' => [
                     'audioEncoding' => 'MP3',
-                    'speakingRate' => 0.90, // Varied pace
-                    'pitch' => -1.50        // Deeper pitch for Cyberpunk vibe
+                    'speakingRate' => 1.00, // Normal speed for clarity
+                    'pitch' => 0.00         // Natural pitch
                 ]
             ]);
 
