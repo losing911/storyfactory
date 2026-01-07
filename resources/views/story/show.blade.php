@@ -14,15 +14,98 @@
     <meta name="twitter:title" content="{{ $story->seo_title }}" />
     <meta name="twitter:description" content="{{ $story->seo_description }}" />
     <meta name="twitter:image" content="{{ asset($story->gorsel_url) }}" />
+    
+    <!-- Custom Styles for Story Features -->
+    <style>
+        /* 1. Lore Tooltips */
+        .lore-link {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dashed #00ff41; /* Neon Green */
+            color: #fff;
+            transition: all 0.3s;
+        }
+        .lore-link:hover {
+            color: #00ff41;
+            text-shadow: 0 0 5px #00ff41;
+        }
+        .lore-tooltip {
+            position: absolute;
+            bottom: 140%; /* Above the text */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid #00ff41;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #ccc;
+            z-index: 100;
+            border-radius: 4px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s, bottom 0.2s;
+            pointer-events: none;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            text-align: left;
+            line-height: 1.4;
+        }
+        .lore-link:hover .lore-tooltip {
+            opacity: 1;
+            visibility: visible;
+            bottom: 150%;
+        }
+        
+        /* 2. Reaction Animations */
+        @keyframes glitch-shake {
+            0% { transform: translate(0) }
+            25% { transform: translate(-2px, 2px) }
+            50% { transform: translate(2px, -2px) }
+            75% { transform: translate(-2px, -2px) }
+            100% { transform: translate(0) }
+        }
+        .reaction-btn.active {
+            color: #fff;
+            box-shadow: 0 0 15px currentColor;
+            border-color: currentColor;
+        }
+        .reaction-btn:hover {
+            animation: glitch-shake 0.3s infinite;
+        }
+
+        /* 3. Zen Mode */
+        body.zen-mode header, 
+        body.zen-mode #readingBar,
+        body.zen-mode .share-section,
+        body.zen-mode .comments-section,
+        body.zen-mode .recommendations-section, 
+        body.zen-mode nav { /* Assuming nav exists in layout */
+            display: none !important;
+        }
+        body.zen-mode .zen-controls {
+            opacity: 0.3;
+        }
+        body.zen-mode .zen-controls:hover {
+            opacity: 1;
+        }
+    </style>
 @endsection
 
 @section('content')
-<article class="min-h-screen">
+<article class="min-h-screen pb-24 relative group">
     <!-- Reading Progress Bar -->
     <div class="fixed top-0 left-0 h-1 bg-neon-pink z-50 transition-all duration-300 shadow-[0_0_10px_rgba(255,0,255,0.7)]" id="readingBar" style="width: 0%"></div>
 
+    <!-- Zen Mode Toggle (Fixed Top Right) -->
+    <div class="fixed top-4 right-4 z-[60] zen-controls mix-blend-difference">
+        <button id="zenToggle" class="bg-black/80 border border-gray-700 text-gray-400 hover:text-white px-3 py-1 rounded-full text-xs font-mono backdrop-blur-md transition">
+            👁️ ZEN_MODE
+        </button>
+    </div>
+
     <!-- Header -->
-    <header class="relative h-[70vh] flex items-end pb-20 bg-black overflow-hidden">
+    <header class="relative h-[65vh] md:h-[75vh] flex items-end pb-12 md:pb-20 bg-black overflow-hidden">
         <div class="absolute inset-0" id="heroParallax">
              @if($story->gorsel_url)
                 <img src="{{ $story->gorsel_url }}" alt="{{ $story->baslik }}" class="w-full h-full object-cover opacity-50 scale-110">
@@ -31,146 +114,175 @@
         </div>
         
         <div class="relative z-10 max-w-4xl mx-auto px-4 text-center w-full">
-            <div class="flex justify-center items-center gap-4 mb-6">
-                <div class="flex items-center gap-3 bg-black/50 backdrop-blur-sm border border-neon-green/30 px-4 py-2 rounded-full hover:bg-black/80 transition group">
+            <div class="flex flex-wrap justify-center items-center gap-3 mb-6">
+                <!-- Author Badge -->
+                <div class="flex items-center gap-2 bg-black/50 backdrop-blur-sm border border-neon-green/30 px-3 py-1.5 rounded-full hover:bg-black/80 transition group">
                     @if($story->author)
-                        <a href="{{ route('author.show', $story->author->slug) }}" class="flex items-center gap-3">
-                            <img src="{{ $story->author->avatar }}" class="w-8 h-8 rounded-full border border-neon-green group-hover:scale-110 transition">
+                        <a href="{{ route('author.show', $story->author->slug) }}" class="flex items-center gap-2">
+                            <img src="{{ $story->author->avatar }}" class="w-6 h-6 md:w-8 md:h-8 rounded-full border border-neon-green group-hover:scale-110 transition">
                             <div class="flex flex-col text-left">
-                                <span class="text-neon-green font-mono text-xs tracking-widest leading-none group-hover:text-white transition">{{ $story->author->name }}</span>
-                                <span class="text-gray-500 text-[10px] uppercase leading-none">{{ $story->author->role }}</span>
+                                <span class="text-neon-green font-mono text-[10px] md:text-xs tracking-widest leading-none group-hover:text-white transition">{{ $story->author->name }}</span>
+                                <span class="text-gray-500 text-[8px] md:text-[10px] uppercase leading-none">{{ $story->author->role }}</span>
                             </div>
                         </a>
                     @else
                         <div class="w-8 h-8 rounded-full border border-neon-green bg-gray-800 flex items-center justify-center text-[10px]">🤖</div>
-                        <div class="flex flex-col text-left">
+                         <div class="flex flex-col text-left">
                             <span class="text-neon-green font-mono text-xs tracking-widest leading-none">ANXIPUNK_CORE</span>
-                            <span class="text-gray-500 text-[10px] uppercase leading-none">SYSTEM_GENERATED</span>
                         </div>
                     @endif
                 </div>
-                <div class="inline-block border border-gray-700 px-3 py-1 text-gray-400 font-mono text-sm tracking-widest bg-black/50 backdrop-blur-sm">
-                    {{ $story->yayin_tarihi->format('d F Y') }} <span class="text-gray-600">|</span> {{ number_format($story->views) }} OKUMA
+                
+                <!-- Date -->
+                <div class="inline-block border border-gray-700 px-3 py-1 text-gray-400 font-mono text-[10px] md:text-sm tracking-widest bg-black/50 backdrop-blur-sm">
+                    {{ $story->yayin_tarihi->format('d.m.Y') }}
                 </div>
+
                 <!-- TTS Button -->
-                <button id="ttsButton" class="border border-neon-blue/50 text-neon-blue px-3 py-1 font-mono text-sm hover:bg-neon-blue/20 transition-colors flex items-center gap-2">
-                    <span>▶ AUDIO_PROTOCOL</span>
+                <button id="ttsButton" class="border border-neon-blue/50 text-neon-blue px-3 py-1 font-mono text-[10px] md:text-sm hover:bg-neon-blue/20 transition-colors flex items-center gap-1 backdrop-blur-sm">
+                    <span>▶ AUDIO</span>
                 </button>
             </div>
 
-            <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-8 leading-tight text-glow filter drop-shadow-lg glitch-effect" data-text="{{ $story->baslik }}">
-                {{ $story->baslik }}<span class="sr-only"> - Anxipunk Cyberpunk Story Archive</span>
+            <h1 class="text-4xl md:text-7xl font-display font-black text-white mb-4 md:mb-8 leading-tight text-glow filter drop-shadow-lg glitch-effect" data-text="{{ $story->baslik }}">
+                {{ $story->baslik }}
             </h1>
             
-            <div class="flex justify-center gap-4 text-sm font-mono text-gray-400">
+            <div class="flex flex-wrap justify-center gap-2 text-xs font-mono text-gray-400">
                 @if($story->etiketler)
                     @foreach($story->etiketler as $etiket)
-                        <span class="text-neon-blue">#{{ $etiket }}</span>
+                        <span class="text-neon-blue bg-neon-blue/10 px-2 py-0.5 rounded">#{{ $etiket }}</span>
                     @endforeach
                 @endif
             </div>
         </div>
     </header>
 
-    <!-- Content -->
-    <div class="max-w-3xl mx-auto px-4 py-12 relative">
-        <!-- Sidebar Line -->
+    <!-- Main Content Area -->
+    <div class="max-w-3xl mx-auto px-4 py-8 md:py-12 relative">
+        <!-- Sidebar Line (Desktop) -->
         <div class="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-neon-pink to-transparent hidden lg:block opacity-50"></div>
 
-        <!-- SEO Intro Paragraph -->
+        <!-- SEO Intro -->
         @if($story->sosyal_ozet)
-        <div class="mb-8 p-6 bg-gray-900/30 border-l-4 border-neon-green font-sans text-lg text-gray-300 italic leading-relaxed backdrop-blur-sm">
+        <div class="mb-8 p-4 md:p-6 bg-gray-900/30 border-l-4 border-neon-green font-sans text-base md:text-lg text-gray-300 italic leading-relaxed backdrop-blur-sm">
             {{ $story->sosyal_ozet }}
         </div>
         @endif
 
-        <div class="prose prose-invert prose-lg max-w-none text-gray-300 font-sans leading-relaxed" id="storyContent">
+        <!-- Story Text -->
+        <div class="prose prose-invert prose-sm md:prose-lg max-w-none text-gray-300 font-sans leading-relaxed overflow-hidden" id="storyContent">
+             <!-- The processed_content includes user's text + Lore Links with tooltips -->
             {!! $story->processed_content !!}
         </div>
         
-        <!-- Anxipunk Universe Note -->
-        <div class="mt-8 p-4 bg-black border border-gray-800 text-xs font-mono text-gray-500 text-center">
-            > SYSTEM_NOTE: Bu hikaye Anxipunk Evreni (v2.4) dahilinde kurgulanmıştır. Karakterler ve mekanlar veritabanına kayıtlıdır.
-        </div>
+        <!-- Reaction Bar -->
+        <div class="mt-12 py-8 border-t border-b border-gray-800 share-section">
+            <h4 class="font-mono text-xs text-center text-gray-500 mb-6 tracking-[0.2em] uppercase">/// NEURAL_FEEDBACK_LOOP</h4>
+            <div class="flex justify-center gap-6 md:gap-12">
+                <!-- Overload -->
+                <button class="reaction-btn group flex flex-col items-center gap-2 text-gray-500 transition-all duration-300" data-type="overload">
+                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-full border border-gray-700 bg-gray-900 group-hover:border-neon-pink flex items-center justify-center text-2xl transition-all">
+                        ⚡
+                    </div>
+                    <span class="font-mono text-[10px] md:text-xs">OVERLOAD</span>
+                    <span class="count font-bold text-neon-pink text-sm" id="count-overload">{{ $reactions['overload'] ?? 0 }}</span>
+                </button>
 
-        <!-- Share Protocol -->
-        <div class="mt-16 pt-8 border-t border-gray-800">
-            <h4 class="font-display text-neon-blue mb-6 text-sm tracking-widest uppercase">Initiate Share Protocol</h4>
-            <div class="flex flex-wrap gap-4">
-                 <a href="https://twitter.com/intent/tweet?text={{ urlencode($story->baslik) }}&url={{ urlencode(route('story.show', $story)) }}" target="_blank" class="flex items-center gap-2 bg-gray-900 border border-gray-700 hover:border-neon-blue text-gray-300 hover:text-neon-blue px-6 py-3 transition duration-300 group">
-                    <span class="font-mono text-xs">X_COM</span>
-                 </a>
-                 <a href="https://wa.me/?text={{ urlencode($story->baslik . ' ' . route('story.show', $story)) }}" target="_blank" class="flex items-center gap-2 bg-gray-900 border border-gray-700 hover:border-neon-green text-gray-300 hover:text-neon-green px-6 py-3 transition duration-300 group">
-                    <span class="font-mono text-xs">WHATSAPP_NET</span>
-                 </a>
-                 <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('story.show', $story)) }}" target="_blank" class="flex items-center gap-2 bg-gray-900 border border-gray-700 hover:border-neon-pink text-gray-300 hover:text-neon-pink px-6 py-3 transition duration-300 group">
-                    <span class="font-mono text-xs">FACEBOOK_LNK</span>
-                 </a>
+                <!-- Link -->
+                <button class="reaction-btn group flex flex-col items-center gap-2 text-gray-500 transition-all duration-300" data-type="link">
+                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-full border border-gray-700 bg-gray-900 group-hover:border-neon-blue flex items-center justify-center text-2xl transition-all">
+                        🧬
+                    </div>
+                    <span class="font-mono text-[10px] md:text-xs">LINK</span>
+                    <span class="count font-bold text-neon-blue text-sm" id="count-link">{{ $reactions['link'] ?? 0 }}</span>
+                </button>
+
+                <!-- Flatline -->
+                <button class="reaction-btn group flex flex-col items-center gap-2 text-gray-500 transition-all duration-300" data-type="flatline">
+                    <div class="w-12 h-12 md:w-16 md:h-16 rounded-full border border-gray-700 bg-gray-900 group-hover:border-red-500 flex items-center justify-center text-2xl transition-all">
+                        💀
+                    </div>
+                    <span class="font-mono text-[10px] md:text-xs">FLATLINE</span>
+                    <span class="count font-bold text-red-500 text-sm" id="count-flatline">{{ $reactions['flatline'] ?? 0 }}</span>
+                </button>
             </div>
         </div>
-    </div>
         
-        <!-- Similar Stories (Internal Linking) -->
-        @if(isset($similarStories) && $similarStories->count() > 0)
-        <div class="mt-12 border-t border-gray-800 pt-8">
-            <h4 class="font-display text-white mb-6 text-sm tracking-widest uppercase border-l-4 border-neon-purple pl-4">/// NEURAL_RECOMMENDATIONS</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                @foreach($similarStories as $simStory)
-                <a href="{{ route('story.show', $simStory) }}" class="group block bg-gray-900 border border-gray-800 hover:border-neon-purple transition duration-300">
-                    <div class="relative h-32 overflow-hidden">
-                        @if($simStory->gorsel_url)
-                            <img src="{{ $simStory->gorsel_url }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500 opacity-60 group-hover:opacity-100">
-                        @else
-                             <div class="w-full h-full bg-gray-800 flex items-center justify-center"><span class="text-xs font-mono text-gray-600">NO_DATA</span></div>
-                        @endif
-                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
-                    </div>
-                    <div class="p-4">
-                        <h5 class="text-neon-blue font-display text-sm truncate group-hover:text-neon-pink transition">{{ $simStory->baslik }}</h5>
-                        <div class="text-xs text-gray-500 mt-2 font-mono flex justify-between">
-                            <span>{{ $simStory->yayin_tarihi->format('d.m') }}</span>
-                            <span>READ_LOG</span>
-                        </div>
-                    </div>
-                </a>
-                @endforeach
-            </div>
+        <!-- Share Links -->
+        <div class="mt-8 pt-4 share-section">
+             <h4 class="font-display text-neon-blue mb-4 text-xs tracking-widest uppercase">Initiate Share Protocol</h4>
+             <div class="flex flex-wrap gap-2 md:gap-4">
+                 <a href="https://twitter.com/intent/tweet?text={{ urlencode($story->baslik) }}&url={{ urlencode(route('story.show', $story)) }}" target="_blank" class="flex items-center gap-2 bg-gray-900 border border-gray-700 hover:border-neon-blue text-gray-300 hover:text-neon-blue px-4 py-2 text-xs font-mono transition">X_COM</a>
+                 <a href="https://wa.me/?text={{ urlencode($story->baslik . ' ' . route('story.show', $story)) }}" target="_blank" class="flex items-center gap-2 bg-gray-900 border border-gray-700 hover:border-neon-green text-gray-300 hover:text-neon-green px-4 py-2 text-xs font-mono transition">WHATSAPP</a>
+             </div>
         </div>
-        @endif
-    </div>
-    <!-- Hacker Chat (Terminal Style) -->
-    <div class="mt-20 border-t-2 border-dashed border-gray-800 pt-12 pb-24">
-        <div class="max-w-2xl mx-auto bg-black border border-gray-800 p-6 font-mono text-sm shadow-[0_0_20px_rgba(0,0,0,0.8)]">
-            <h3 class="text-neon-green mb-4 border-b border-gray-800 pb-2">/// NETRUNNER_COMM_CHANNEL</h3>
-            
-            <div id="commentList" class="space-y-4 mb-8 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
-                @foreach($story->comments as $comment)
-                    <div class="group">
-                        <div class="flex justify-between text-xs text-gray-500 mb-1">
-                            <span class="text-neon-pink">user_root: {{ $comment->nickname ?? 'anonymous' }}</span>
-                            <span>{{ $comment->created_at->diffForHumans() }}</span>
-                        </div>
-                        <div class="text-gray-300 pl-4 border-l border-gray-800 group-hover:border-neon-green group-hover:text-neon-green transition-colors">
-                            {{ $comment->message }}
-                        </div>
-                    </div>
-                @endforeach
-            </div>
 
-            <!-- Input Form -->
-            <div class="border-t border-gray-800 pt-4">
-                <div class="flex flex-col gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="text-neon-blue">root@anxipunk:~$</span>
-                        <input type="text" id="nickInput" placeholder="Enter Nickname (Optional)" class="bg-transparent border-b border-gray-800 focus:border-neon-green text-gray-300 focus:outline-none w-full py-1 text-xs">
+    </div>
+
+    <!-- Similar Stories -->
+    @if(isset($similarStories) && $similarStories->count() > 0)
+    <div class="max-w-6xl mx-auto px-4 mt-8 pb-12 recommendations-section">
+        <h4 class="font-display text-white mb-6 text-sm tracking-widest uppercase border-l-4 border-neon-purple pl-4">/// NEURAL_RECOMMENDATIONS</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            @foreach($similarStories as $simStory)
+            <a href="{{ route('story.show', $simStory) }}" class="group block bg-gray-900 border border-gray-800 hover:border-neon-purple transition duration-300">
+                <div class="relative h-32 overflow-hidden">
+                    @if($simStory->gorsel_url)
+                        <img src="{{ $simStory->gorsel_url }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500 opacity-60 group-hover:opacity-100">
+                    @else
+                         <div class="w-full h-full bg-gray-800 flex items-center justify-center"><span class="text-xs font-mono text-gray-600">NO_DATA</span></div>
+                    @endif
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+                </div>
+                <div class="p-4">
+                    <h5 class="text-neon-blue font-display text-sm truncate group-hover:text-neon-pink transition">{{ $simStory->baslik }}</h5>
+                    <div class="text-xs text-gray-500 mt-2 font-mono flex justify-between">
+                        <span>{{ $simStory->yayin_tarihi->format('d.m') }}</span>
+                        <span>READ_LOG</span>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <span class="text-neon-blue">root@anxipunk:~$</span>
-                        <textarea id="msgInput" rows="2" placeholder="Inject Message..." class="bg-transparent border-0 focus:ring-0 text-gray-300 focus:outline-none w-full py-1 resize-none"></textarea>
+                </div>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    <!-- Hacker Chat -->
+    <div class="border-t-2 border-dashed border-gray-800 bg-black pt-12 pb-24 comments-section">
+        <div class="max-w-2xl mx-auto px-4">
+            <div class="bg-black border border-gray-800 p-4 md:p-6 font-mono text-sm shadow-[0_0_20px_rgba(0,0,0,0.8)]">
+                <h3 class="text-neon-green mb-4 border-b border-gray-800 pb-2">/// NETRUNNER_COMM_CHANNEL</h3>
+                
+                <div id="commentList" class="space-y-4 mb-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                    @foreach($story->comments as $comment)
+                        <div class="group">
+                            <div class="flex justify-between text-[10px] text-gray-500 mb-1">
+                                <span class="text-neon-pink">user_root: {{ $comment->nickname ?? 'anonymous' }}</span>
+                                <span>{{ $comment->created_at->diffForHumans() }}</span>
+                            </div>
+                            <div class="text-gray-300 text-xs pl-2 border-l border-gray-800 group-hover:border-neon-green group-hover:text-neon-green transition-colors">
+                                {{ $comment->message }}
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+    
+                <!-- Input Form -->
+                <div class="border-t border-gray-800 pt-4">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-neon-blue text-xs">root@anxipunk:~$</span>
+                            <input type="text" id="nickInput" placeholder="Nick" class="bg-transparent border-b border-gray-800 focus:border-neon-green text-gray-300 focus:outline-none w-full py-1 text-xs">
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-neon-blue text-xs">>></span>
+                            <textarea id="msgInput" rows="1" placeholder="Inject Message..." class="bg-transparent border-0 focus:ring-0 text-gray-300 focus:outline-none w-full py-1 resize-none text-xs"></textarea>
+                        </div>
+                        <button id="submitComment" class="self-end border border-gray-800 hover:border-neon-green text-gray-500 hover:text-neon-green px-4 py-1 text-[10px] uppercase transition tracking-widest mt-2">
+                            [EXECUTE_SEND]
+                        </button>
                     </div>
-                    <button id="submitComment" class="self-end border border-gray-800 hover:border-neon-green text-gray-500 hover:text-neon-green px-4 py-1 text-xs uppercase transition tracking-widest mt-2">
-                        [EXECUTE_SEND]
-                    </button>
                 </div>
             </div>
         </div>
@@ -178,7 +290,7 @@
 </article>
 
 <script>
-    // 1. Reading Progress Bar Logic
+    // 1. Reading Progress Bar
     window.addEventListener('scroll', () => {
         const scrollTop = window.scrollY;
         const docHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -186,86 +298,134 @@
         document.getElementById('readingBar').style.width = scrollPercent + '%';
     });
 
-    // 2. Text-to-Speech (TTS) Logic
-    // 2. Text-to-Speech (TTS) Logic (Server-Side Enhanced)
+    // 2. Zen Mode Toggle
+    const zenBtn = document.getElementById('zenToggle');
+    let isZen = false;
+    zenBtn.addEventListener('click', () => {
+        isZen = !isZen;
+        if(isZen) {
+            document.body.classList.add('zen-mode');
+            zenBtn.innerText = '❌ DISABLE_ZEN';
+            zenBtn.classList.replace('text-gray-400', 'text-neon-pink');
+        } else {
+            document.body.classList.remove('zen-mode');
+            zenBtn.innerText = '👁️ ZEN_MODE';
+            zenBtn.classList.replace('text-neon-pink', 'text-gray-400');
+        }
+    });
+    
+    // 3. Reactions
+    const reactionBtns = document.querySelectorAll('.reaction-btn');
+    const storyId = {{ $story->id }};
+    
+    reactionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const type = btn.dataset.type;
+            const countSpan = btn.querySelector('.count');
+            
+            // Send Request
+            fetch('{{ route('story.react', $story) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ type: type })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    // Update counts
+                    for (const [rType, rCount] of Object.entries(data.counts)) {
+                        const span = document.getElementById(`count-${rType}`);
+                        if(span) span.innerText = rCount;
+                    }
+                    // Highlight Active
+                    if(data.action === 'added') btn.classList.add('active');
+                    else btn.classList.remove('active');
+                }
+            })
+            .catch(err => console.error('Reaction Error:', err));
+        });
+    });
+
+    // 4. TTS Audio (Robust)
     const ttsBtn = document.getElementById('ttsButton');
     let audioObj = null;
     let isPlaying = false;
 
     ttsBtn.addEventListener('click', () => {
-        // Toggle Stop
-        if (isPlaying) {
-            if (audioObj) {
-                audioObj.pause();
-                audioObj.currentTime = 0; // Reset
-            }
+        if(isPlaying) {
+            if(audioObj) { audioObj.pause(); audioObj.currentTime = 0; }
             isPlaying = false;
-            ttsBtn.innerHTML = '<span>▶ AUDIO_PROTOCOL</span>';
+            ttsBtn.innerHTML = '<span>▶ AUDIO</span>';
             ttsBtn.classList.remove('bg-neon-blue', 'text-black');
             return;
         }
 
-        // Initialize / Play
-        if (!audioObj) {
-            ttsBtn.innerHTML = '<span>⌛ BUFFERING...</span>';
-            // Use the Route we defined
+        if(!audioObj) {
+            ttsBtn.innerHTML = '<span>⏳ LOADING...</span>';
             const audioUrl = "{{ route('story.audio', $story) }}";
-            
             audioObj = new Audio(audioUrl);
             
-            // Error Handling
             audioObj.addEventListener('error', (e) => {
-                console.error("Audio Error:", e);
-                ttsBtn.innerHTML = '<span>❌ ERR_NETWORK</span>';
-                setTimeout(() => { ttsBtn.innerHTML = '<span>▶ AUDIO_PROTOCOL</span>'; }, 2000);
-                isPlaying = false;
+                console.error("Audio Load Error:", e);
+                // Fallback to Native Browser TTS if Server TTS fails (Network Error / No Key)
+                ttsBtn.innerHTML = '<span>⚠️ FALLBACK TTS</span>';
+                
+                // Native Browser TTS Fallback
+                const contentText = document.getElementById('storyContent').innerText;
+                const utterance = new SpeechSynthesisUtterance(contentText.substring(0, 500) + '... (Audio Preview)');
+                utterance.lang = 'tr-TR';
+                utterance.pitch = 0.8;
+                utterance.rate = 0.9;
+                
+                utterance.onend = () => {
+                     isPlaying = false;
+                     ttsBtn.innerHTML = '<span>▶ AUDIO (BROWSER)</span>';
+                     ttsBtn.classList.remove('bg-neon-blue', 'text-black');
+                };
+                
+                window.speechSynthesis.speak(utterance);
+                
+                isPlaying = true;
+                ttsBtn.innerHTML = '<span>⏹ STOP (NATIVE)</span>';
+                ttsBtn.classList.add('bg-neon-blue', 'text-black');
+                
+                // Don't use Audio Object anymore
+                audioObj = null; 
             });
 
-            // On Load/Play
             audioObj.addEventListener('canplaythrough', () => {
-                if(isPlaying) return; // Prevent double trigger
+                if(isPlaying) return;
                 audioObj.play().then(() => {
                     isPlaying = true;
-                    ttsBtn.innerHTML = '<span>⏹ TERMINATE_AUDIO</span>';
+                    ttsBtn.innerHTML = '<span>⏹ STOP AUDIO</span>';
                     ttsBtn.classList.add('bg-neon-blue', 'text-black');
                 }).catch(err => {
-                    console.log("Auto-play blocked:", err);
-                    ttsBtn.innerHTML = '<span>▶ TAP_TO_PLAY</span>';
+                    ttsBtn.innerHTML = '<span>▶ TAP TO PLAY</span>';
                 });
             });
-
-            // On End
+            
             audioObj.addEventListener('ended', () => {
                 isPlaying = false;
-                ttsBtn.innerHTML = '<span>▶ AUDIO_PROTOCOL</span>';
+                ttsBtn.innerHTML = '<span>▶ AUDIO</span>';
                 ttsBtn.classList.remove('bg-neon-blue', 'text-black');
             });
-            
-            // Trigger Load (Preload is auto mostly, but accessing src starts it)
+
             audioObj.load();
-            
         } else {
-            // Resume if paused logic (not implemented here, we just restart or stop)
-             audioObj.play();
-             isPlaying = true;
-             ttsBtn.innerHTML = '<span>⏹ TERMINATE_AUDIO</span>';
-             ttsBtn.classList.add('bg-neon-blue', 'text-black');
+            audioObj.play();
+            isPlaying = true;
+            ttsBtn.innerHTML = '<span>⏹ STOP AUDIO</span>';
+            ttsBtn.classList.add('bg-neon-blue', 'text-black');
         }
     });
 
-    // 3. Parallax Hero Effect
-    const heroParallax = document.getElementById('heroParallax');
-    if (heroParallax) {
-        window.addEventListener('scroll', () => {
-            const scrolly = window.scrollY;
-            heroParallax.style.transform = `translateY(${scrolly * 0.5}px)`;
-        });
-    }
-
-    // 4. Dynamic Soundtrack (Mood Based) -- NEURAL_LINK
+    // 5. Ambient Music (Button injection)
     const storyMood = "{{ $story->mood ?? 'mystery' }}";
-    const customTrack = "{{ $story->music_url ?? '' }}"; // New AI Generated Track
-
+    const customTrack = "{{ $story->music_url ?? '' }}"; 
+    const isCustom = customTrack && customTrack.length > 5;
     const audioTracks = {
         'action': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 
         'mystery': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3',
@@ -273,37 +433,21 @@
         'high-tech': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
         'corruption': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3'
     };
+    const finalTrack = isCustom ? customTrack : (audioTracks[storyMood] || audioTracks['mystery']);
     
-    // Use custom track if available, else mood fallback
-    const finalTrack = customTrack && customTrack.length > 5 ? customTrack : (audioTracks[storyMood] || audioTracks['mystery']);
-    const isCustom = customTrack && customTrack.length > 5;
-
-    // Create Audio Elements
     let bgAudio = new Audio(finalTrack);
     bgAudio.loop = true;
-    bgAudio.volume = 0.4;
-    
-    // UI Control
-    const metaContainer = document.querySelector('.max-w-4xl.mx-auto.text-center.mb-12'); // This selector might be fragile if HTML changes
-    // Fallback if not found: document.body
-    const targetContainer = document.querySelector('.flex.justify-center.items-center.gap-4.mb-6') || document.body;
+    bgAudio.volume = 0.3;
 
     const musicControl = document.createElement('button');
-    musicControl.className = 'border border-gray-700 px-3 py-1 font-mono text-sm hover:bg-gray-800 transition-colors flex items-center gap-2 text-gray-400';
-    
-    const label = isCustom ? "SYNTH_OST_ONLINE" : `CYBER_OST [${storyMood.toUpperCase()}]`;
+    musicControl.className = 'border border-gray-700 px-3 py-1 font-mono text-[10px] md:text-sm hover:bg-gray-800 transition-colors flex items-center gap-1 backdrop-blur-sm';
+    const label = isCustom ? "SYNTH_OST" : `OS_${storyMood.toUpperCase()}`;
     musicControl.innerHTML = `<span>🎵 ${label}</span>`;
     
-    // Insert after the TTS button
-    const ttsButton = document.getElementById('ttsButton');
-    if(ttsButton && ttsButton.parentNode) {
-        ttsButton.parentNode.insertBefore(musicControl, ttsButton.nextSibling);
-    } else {
-        // Fallback append
-        if(targetContainer) targetContainer.appendChild(musicControl);
+    const ttsButton2 = document.getElementById('ttsButton');
+    if(ttsButton2 && ttsButton2.parentNode) {
+        ttsButton2.parentNode.insertBefore(musicControl, ttsButton2.nextSibling);
     }
-
-    /* Reseting lines to match replacement logic */
 
     let isMusicPlaying = false;
     musicControl.addEventListener('click', () => {
@@ -320,51 +464,47 @@
         }
     });
 
-    // 5. Hacker Chat Logic
+    // 6. Hacker Chat Submit
     const submitBtn = document.getElementById('submitComment');
     const msgInput = document.getElementById('msgInput');
     const nickInput = document.getElementById('nickInput');
     const commentList = document.getElementById('commentList');
 
-    submitBtn.addEventListener('click', () => {
-        const msg = msgInput.value.trim();
-        const nick = nickInput.value.trim();
-        if(!msg) return;
+    if(submitBtn) {
+        submitBtn.addEventListener('click', () => {
+            const msg = msgInput.value.trim();
+            const nick = nickInput.value.trim();
+            if(!msg) return;
 
-        submitBtn.innerText = '[TRANSMITTING...]';
-        
-        fetch('{{ route('comment.store', $story) }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ message: msg, nickname: nick })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.id) {
-                // Add to list
-                const html = `
-                    <div class="group animate-pulse">
-                        <div class="flex justify-between text-xs text-gray-500 mb-1">
-                            <span class="text-neon-pink">user_root: ${data.nickname}</span>
-                            <span>Just now</span>
-                        </div>
-                        <div class="text-gray-300 pl-4 border-l border-gray-800 group-hover:border-neon-green group-hover:text-neon-green transition-colors">
-                            ${data.message}
-                        </div>
-                    </div>
-                `;
-                commentList.insertAdjacentHTML('afterbegin', html);
-                msgInput.value = '';
-                submitBtn.innerText = '[EXECUTE_SEND]';
-            }
-        })
-        .catch(err => {
-            alert('TRANSMISSION FAILED');
-            submitBtn.innerText = '[ERROR]';
+            submitBtn.innerText = '[...]';
+            
+            fetch('{{ route('comment.store', $story) }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ message: msg, nickname: nick })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.id) {
+                    const html = `
+                        <div class="group animate-pulse">
+                            <div class="flex justify-between text-[10px] text-gray-500 mb-1">
+                                <span class="text-neon-pink">user_root: ${data.nickname}</span>
+                                <span>Just now</span>
+                            </div>
+                            <div class="text-gray-300 text-xs pl-2 border-l border-gray-800 group-hover:border-neon-green group-hover:text-neon-green transition-colors">
+                                ${data.message}
+                            </div>
+                        </div>`;
+                    commentList.insertAdjacentHTML('afterbegin', html);
+                    msgInput.value = '';
+                    submitBtn.innerText = '[EXECUTE_SEND]';
+                }
+            })
+            .catch(err => {
+                submitBtn.innerText = '[ERR]';
+            });
         });
-    });
+    }
 </script>
 @endsection
