@@ -43,7 +43,46 @@ class AdminController extends Controller
             // Recent E-Books
             $ebooks = \App\Models\EBook::latest()->take(5)->get();
 
-            return view('admin.dashboard', compact('stats', 'insight', 'recentLogs', 'ebooks'));
+            // Traffic Sources Analysis
+            $logs = \Illuminate\Support\Facades\DB::table('analytics_logs')
+                ->select('referrer')
+                ->whereNotNull('referrer')
+                ->get();
+
+            $trafficSources = [
+                'Search' => 0,
+                'Social' => 0,
+                'Direct' => 0,
+                'Other' => 0
+            ];
+
+            foreach ($logs as $log) {
+                $ref = strtolower($log->referrer);
+                $host = parse_url($ref, PHP_URL_HOST);
+                
+                if (empty($ref)) {
+                    $trafficSources['Direct']++;
+                } elseif (str_contains($ref, 'google.') || str_contains($ref, 'bing.') || str_contains($ref, 'yahoo.') || str_contains($ref, 'duckduckgo.')) {
+                    $trafficSources['Search']++;
+                } elseif (str_contains($ref, 'facebook.') || str_contains($ref, 'twitter.') || str_contains($ref, 't.co') || str_contains($ref, 'instagram.') || str_contains($ref, 'reddit.') || str_contains($ref, 'linkedin.') || str_contains($ref, 'youtube.')) {
+                    $trafficSources['Social']++;
+                } else {
+                    $trafficSources['Other']++;
+                }
+            }
+
+            // Calculate Percentages
+            $totalTraffic = array_sum($trafficSources);
+            $trafficPercentages = [];
+            if ($totalTraffic > 0) {
+                foreach($trafficSources as $key => $val) {
+                    $trafficPercentages[$key] = round(($val / $totalTraffic) * 100, 1);
+                }
+            } else {
+                 $trafficPercentages = ['Search' => 0, 'Social' => 0, 'Direct' => 0, 'Other' => 0];
+            }
+
+            return view('admin.dashboard', compact('stats', 'insight', 'recentLogs', 'ebooks', 'trafficSources', 'trafficPercentages'));
         } catch (\Exception $e) {
             return response()->make("
                 <div style='background:#000; color:#ff0000; padding:20px; font-family:monospace; border:1px solid #ff0000; margin:20px;'>

@@ -46,6 +46,24 @@
                         @endif
                     </div>
                 </div>
+                
+                <!-- Traffic Sources Card -->
+                <div class="bg-gray-900 border border-gray-800 rounded p-6">
+                    <h3 class="text-white font-display text-sm mb-6 border-b border-gray-800 pb-2">TRAFFIC SOURCES</h3>
+                    <div class="space-y-4">
+                        @foreach($trafficPercentages as $source => $percent)
+                            <div>
+                                <div class="flex justify-between text-xs font-mono text-gray-400 mb-1">
+                                    <span>{{ $source }}</span>
+                                    <span>{{ $percent }}% ({{ $trafficSources[$source] }})</span>
+                                </div>
+                                <div class="w-full bg-gray-800 rounded-full h-2">
+                                    <div class="bg-neon-blue h-2 rounded-full" style="width: {{ $percent }}%"></div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
 
                 <!-- Admin Shortcuts -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
