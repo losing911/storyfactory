@@ -45,29 +45,66 @@ class AdminController extends Controller
 
             // Traffic Sources Analysis
             $logs = \Illuminate\Support\Facades\DB::table('analytics_logs')
-                ->select('referrer')
-                ->whereNotNull('referrer')
+                ->select('referrer', 'is_new_visitor', 'utm_source', 'utm_medium')
                 ->get();
 
-            $trafficSources = [
-                'Search' => 0,
-                'Social' => 0,
-                'Direct' => 0,
-                'Other' => 0
+            $trafficSources = ['Search' => 0, 'Social' => 0, 'Direct' => 0, 'Other' => 0];
+            $trafficDetails = ['Search' => [], 'Social' => [], 'Other' => []];
+            
+            // Visitor Stats
+            $visitorStats = [
+                'new' => $logs->where('is_new_visitor', 1)->count(),
+                'returning' => $logs->where('is_new_visitor', 0)->count(),
             ];
 
             foreach ($logs as $log) {
                 $ref = strtolower($log->referrer);
                 $host = parse_url($ref, PHP_URL_HOST);
                 
+                // 1. Check UTM (Priority Attribution)
+                if ($log->utm_source) {
+                    $source = 'Other'; // Default bucket for campaigns unless matched otherwise
+                    // You could add a 'Campaign' category, but let's stick to base 4 for now.
+                    // Or map UTM sources to Social/Search if they match known keywords
+                }
+
                 if (empty($ref)) {
                     $trafficSources['Direct']++;
                 } elseif (str_contains($ref, 'google.') || str_contains($ref, 'bing.') || str_contains($ref, 'yahoo.') || str_contains($ref, 'duckduckgo.')) {
                     $trafficSources['Search']++;
+                    
+                    // Detailed Search Analysis (Engine + Keyword attempt)
+                    $engine = 'Google';
+                    if (str_contains($ref, 'bing.')) $engine = 'Bing';
+                    elseif (str_contains($ref, 'yahoo.')) $engine = 'Yahoo';
+                    elseif (str_contains($ref, 'duckduckgo.')) $engine = 'DuckDuckGo';
+
+                    parse_str(parse_url($ref, PHP_URL_QUERY), $query);
+                    $keyword = $query['q'] ?? ($query['p'] ?? ($query['query'] ?? null));
+                    
+                    $key = $keyword ? "$engine ($keyword)" : $engine;
+                    $trafficDetails['Search'][$key] = ($trafficDetails['Search'][$key] ?? 0) + 1;
+
                 } elseif (str_contains($ref, 'facebook.') || str_contains($ref, 'twitter.') || str_contains($ref, 't.co') || str_contains($ref, 'instagram.') || str_contains($ref, 'reddit.') || str_contains($ref, 'linkedin.') || str_contains($ref, 'youtube.')) {
                     $trafficSources['Social']++;
+
+                    // Detailed Social Analysis
+                    $platform = 'Social';
+                    if (str_contains($ref, 'facebook.')) $platform = 'Facebook';
+                    elseif (str_contains($ref, 'twitter.') || str_contains($ref, 't.co')) $platform = 'Twitter';
+                    elseif (str_contains($ref, 'instagram.')) $platform = 'Instagram';
+                    elseif (str_contains($ref, 'reddit.')) $platform = 'Reddit';
+                    elseif (str_contains($ref, 'linkedin.')) $platform = 'LinkedIn';
+                    elseif (str_contains($ref, 'youtube.')) $platform = 'YouTube';
+
+                    $trafficDetails['Social'][$platform] = ($trafficDetails['Social'][$platform] ?? 0) + 1;
+
                 } else {
                     $trafficSources['Other']++;
+                    // Detailed Other Analysis (Domain)
+                    if ($host) {
+                        $trafficDetails['Other'][$host] = ($trafficDetails['Other'][$host] ?? 0) + 1;
+                    }
                 }
             }
 
@@ -81,8 +118,13 @@ class AdminController extends Controller
             } else {
                  $trafficPercentages = ['Search' => 0, 'Social' => 0, 'Direct' => 0, 'Other' => 0];
             }
+            
+            // Sort Details by Count DESC
+            arsort($trafficDetails['Search']);
+            arsort($trafficDetails['Social']);
+            arsort($trafficDetails['Other']);
 
-            return view('admin.dashboard', compact('stats', 'insight', 'recentLogs', 'ebooks', 'trafficSources', 'trafficPercentages'));
+            return view('admin.dashboard', compact('stats', 'insight', 'recentLogs', 'ebooks', 'trafficSources', 'trafficPercentages', 'trafficDetails', 'visitorStats'));
         } catch (\Exception $e) {
             return response()->make("
                 <div style='background:#000; color:#ff0000; padding:20px; font-family:monospace; border:1px solid #ff0000; margin:20px;'>
