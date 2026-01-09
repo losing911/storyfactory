@@ -59,11 +59,12 @@ class EBookController extends Controller
                      // Normalize slashes for file_exists
                      $checkPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
                      if (file_exists($checkPath)) {
-                         return 'src="' . $checkPath . '"';
+                         // DOMPDF on Linux requires file:// protocol for absolute paths
+                         return 'src="file://' . $checkPath . '"';
                      }
                 }
                 
-                // Fallback: Return the first candidate even if not found
+                // Fallback
                 return 'src="' . $candidates[0] . '"';
             }, 
             $content

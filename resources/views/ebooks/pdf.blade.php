@@ -71,88 +71,99 @@
             color: #888;
         }
 
-        /* --- Interior Pages --- */
+        /* --- Interior Pages (Comic/Light Novel Style) --- */
         .content-wrapper {
-            margin: 2.5cm 2cm;
-            font-size: 11pt;
-            text-align: justify;
+            margin: 1cm;
+            font-size: 12pt;
+            line-height: 1.5;
         }
         
-        /* Force DejaVu Sans for Turkish Support on EVERYTHING */
+        /* Force DejaVu Sans */
         * {
             font-family: 'DejaVu Sans', sans-serif !important;
         }
         
-        /* Headers */
+        /* Comic Panel Images */
+        .part-illustration {
+            text-align: center;
+            margin: 20px 0;
+            page-break-inside: avoid;
+            background-color: #000;
+            padding: 2px; /* Inner border for frame */
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.2);
+            transform: rotate(-1deg); /* Slight organic feel */
+        }
+        .part-illustration img {
+            border: 3px solid #fff;
+            display: block;
+            width: 100%;
+        }
+
+        /* Action Headers */
         h1 {
             color: #000;
-            font-size: 24pt;
+            font-size: 28pt;
+            font-weight: 900;
+            font-style: italic;
             text-transform: uppercase;
-            border-bottom: 3px solid #000;
-            padding-bottom: 10px;
-            margin-top: 50px; /* Space before chapter start */
-            margin-bottom: 30px;
+            border-bottom: 5px solid #000;
+            padding-bottom: 5px;
+            margin-top: 60px;
+            margin-bottom: 40px;
             page-break-before: always;
-            text-align: left;
+            text-shadow: 2px 2px 0px #ccc;
         }
-        /* Style the ID within titles if present */
+        /* Style the ID within titles */
         h1 span.id-marker {
+            display: block;
             font-size: 10pt;
-            color: #666;
-            float: right;
-            margin-top: 15px;
+            font-weight: normal;
+            font-style: normal;
+            color: #555;
+            text-shadow: none;
+            margin-top: 5px;
+            border-top: 1px solid #ccc;
+            padding-top: 5px;
         }
 
         h2, h3 {
-            color: #333;
-            margin-top: 20px;
+            font-weight: bold;
+            border-left: 5px solid #000;
+            padding-left: 10px;
+            margin-top: 25px;
+            text-transform: uppercase;
         }
 
+        /* Dialog/Text Style */
         p {
             margin-bottom: 15px;
-            text-indent: 20px;
+            text-indent: 0;
+            padding-left: 10px;
+            border-left: 1px solid #eee; /* Subtle reading guide */
         }
 
-        /* Images */
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-        .part-illustration {
-            text-align: center;
-            margin: 30px 0;
-            page-break-inside: avoid;
-        }
-        .part-illustration img {
-            border: 2px solid #000;
-            box-shadow: 5px 5px 0px #ccc;
-        }
-
-        /* Footer / Page Numbers */
+        /* Footer / Page Numbers (Comic Style) */
         .page-footer {
             position: fixed;
-            bottom: 30px;
-            left: 0;
-            right: 0;
-            height: 30px;
-            text-align: center;
-            font-size: 9pt;
-            color: #666;
-            border-top: 1px solid #ddd;
-            margin: 0 2cm;
-            padding-top: 10px;
+            bottom: 15px;
+            right: 15px; /* Corner page numbers */
+            text-align: right;
+            font-size: 12pt;
+            font-weight: bold;
+            color: #000;
+            background: #fff;
+            padding: 5px 10px;
+            border: 2px solid #000;
         }
         .page-number:after {
             content: counter(page);
         }
 
-        /* Anxipunk Special Formatting */
         hr.part-divider {
             border: 0;
-            height: 1px;
-            background: #333;
-            background-image: linear-gradient(to right, #ccc, #333, #ccc);
-            margin: 40px 0;
+            height: 3px;
+            background: #000;
+            margin: 50px 0;
         }
         
         /* Info Page styling */
@@ -160,13 +171,14 @@
             page-break-after: always;
             display: table;
             width: 100%;
-            height: 800px; /* Approximation of full page height context */
+            height: 800px; 
         }
         .info-content {
             display: table-cell;
             vertical-align: middle;
             text-align: center;
             padding: 0 50px;
+            border: 5px double #000;
         }
     </style>
 </head>
