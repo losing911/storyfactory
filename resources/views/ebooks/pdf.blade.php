@@ -5,113 +5,220 @@
     <title>{{ $ebook->title }}</title>
     <style>
         @page {
-            margin: 0cm 0cm;
+            margin: 0;
         }
         body {
-            font-family: 'DejaVu Sans', serif; /* UTF-8 support */
-            margin-top: 50px;
-            margin-bottom: 50px;
-            margin-left: 50px;
-            margin-right: 50px;
-            color: #1a1a1a;
+            font-family: 'DejaVu Sans', sans-serif;
+            color: #111;
             line-height: 1.6;
-            font-size: 12pt;
         }
-        /* Cover Page */
+        
+        /* --- Cover Page --- */
         .cover-page {
             position: relative;
             width: 100%;
             height: 100%;
-            text-align: center;
-            page-break-after: always;
-            background-color: #000;
+            background-color: #050505;
             color: #fff;
-            padding-top: 300px;
+            text-align: center;
+            overflow: hidden;
         }
-        .cover-image {
+        .cover-bg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: -1;
-            opacity: 0.6;
+            opacity: 0.4;
+            z-index: 1;
+        }
+        .cover-content {
+            position: relative;
+            z-index: 2;
+            padding-top: 30%;
+        }
+        .brand-logo {
+            font-size: 14pt;
+            letter-spacing: 5px;
+            color: #00ffff;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
         }
         .cover-title {
-            font-size: 48pt;
+            font-size: 42pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px #00ffff;
-        }
-        .cover-subtitle {
-            font-size: 18pt;
-            letter-spacing: 4px;
-            color: #00ffff;
-        }
-        
-        /* Content */
-        h1 {
-            color: #000;
-            border-bottom: 2px solid #000;
+            line-height: 1.2;
+            margin: 0 50px 20px 50px;
+            font-family: sans-serif;
+            text-shadow: 2px 2px 0px #ff00ff;
+            border-bottom: 4px solid #00ffff;
+            display: inline-block;
             padding-bottom: 10px;
-            margin-top: 50px;
-            page-break-before: always;
         }
-        h2 {
-            border-bottom: 1px solid #ccc;
+        .cover-volume {
+            font-size: 24pt;
+            letter-spacing: 8px;
+            color: #ff00ff;
+            margin-bottom: 50px;
         }
-        p {
-            margin-bottom: 15px;
+        .cover-footer {
+            position: absolute;
+            bottom: 50px;
+            width: 100%;
+            font-size: 10pt;
+            color: #888;
+        }
+
+        /* --- Interior Pages --- */
+        .content-wrapper {
+            margin: 2.5cm 2cm;
+            font-size: 11pt;
             text-align: justify;
         }
-        .part-illustration img {
+        
+        /* Headers */
+        h1 {
+            color: #000;
+            font-size: 24pt;
+            text-transform: uppercase;
+            border-bottom: 3px solid #000;
+            padding-bottom: 10px;
+            margin-top: 50px; /* Space before chapter start */
+            margin-bottom: 30px;
+            page-break-before: always;
+            text-align: left;
+        }
+        /* Style the ID within titles if present */
+        h1 span.id-marker {
+            font-size: 10pt;
+            color: #666;
+            float: right;
+            margin-top: 15px;
+        }
+
+        h2, h3 {
+            color: #333;
+            margin-top: 20px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-indent: 20px;
+        }
+
+        /* Images */
+        img {
             max-width: 100%;
             height: auto;
-            display: block;
-            margin: 20px auto;
-            border: 1px solid #000;
         }
-        .page-break {
-            page-break-after: always;
+        .part-illustration {
+            text-align: center;
+            margin: 30px 0;
+            page-break-inside: avoid;
         }
-        .footer {
+        .part-illustration img {
+            border: 2px solid #000;
+            box-shadow: 5px 5px 0px #ccc;
+        }
+
+        /* Footer / Page Numbers */
+        .page-footer {
             position: fixed;
-            bottom: 20px;
+            bottom: 30px;
             left: 0;
             right: 0;
+            height: 30px;
             text-align: center;
-            font-size: 10pt;
-            color: #777;
+            font-size: 9pt;
+            color: #666;
+            border-top: 1px solid #ddd;
+            margin: 0 2cm;
+            padding-top: 10px;
+        }
+        .page-number:after {
+            content: counter(page);
+        }
+
+        /* Anxipunk Special Formatting */
+        hr.part-divider {
+            border: 0;
+            height: 1px;
+            background: #333;
+            background-image: linear-gradient(to right, #ccc, #333, #ccc);
+            margin: 40px 0;
+        }
+        
+        /* Info Page styling */
+        .info-page {
+            page-break-after: always;
+            display: table;
+            width: 100%;
+            height: 800px; /* Approximation of full page height context */
+        }
+        .info-content {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 50px;
         }
     </style>
 </head>
 <body>
-    
-    <!-- Cover -->
+
+    <!-- Cover Page -->
     <div class="cover-page">
         @if($ebook->cover_image_url)
-            <img src="{{ public_path($ebook->cover_image_url) }}" class="cover-image">
+            <img src="{{ public_path($ebook->cover_image_url) }}" class="cover-bg">
         @endif
-        <div class="cover-title">{{ $ebook->title }}</div>
-        <div class="cover-subtitle">VOLUME {{ str_pad($ebook->volume_number, 2, '0', STR_PAD_LEFT) }}</div>
+        
+        <div class="cover-content">
+            <div class="brand-logo">/// ANXIPUNK ARCHIVES</div>
+            <div class="cover-title">{{ $ebook->title }}</div>
+            <div class="cover-volume">VOL. {{ str_pad($ebook->volume_number, 2, '0', STR_PAD_LEFT) }}</div>
+        </div>
+
+        <div class="cover-footer">
+            A COLLECTION OF CYBERPUNK CHRONICLES<br>
+            GENERATED BY ANXIPUNK.ICU
+        </div>
     </div>
 
-    <!-- Info Page -->
-    <div style="page-break-after: always; padding-top: 200px; text-align: center;">
-        <h2>ANXIPUNK ARCHIVES</h2>
-        <p>This document is a collection of digitally preserved memories from Neo-Pera.</p>
-        <p><strong>Volume:</strong> {{ $ebook->volume_number }}</p>
-        <p><strong>Generated:</strong> {{ $ebook->created_at->format('Y-m-d H:i') }}</p>
-        <p><strong>Source:</strong> anxipunk.icu</p>
-        <br><br>
-        <p style="font-size: 8pt; color: #999;">NOT FOR COMMERCIAL REDISTRIBUTION WITHOUT AUTHORIZATION.</p>
+    <!-- Copyright / Info Page -->
+    <div class="info-page">
+        <div class="info-content">
+            <h2 style="font-size:16pt; margin-bottom: 20px;">SYSTEM METADATA</h2>
+            <p style="text-indent:0; text-align:center;">
+                <strong>Volume ID:</strong> {{ $ebook->slug }}<br>
+                <strong>Compile Date:</strong> {{ $ebook->created_at->format('Y-m-d H:i:s') }}<br>
+                <strong>Source Node:</strong> Anxipunk.icu
+            </p>
+            <br>
+            <p style="text-indent:0; text-align:center; font-size: 10pt; color: #555; max-width: 400px; margin: 0 auto;">
+                This document contains authorized recollections from the Neo-Pera sector. 
+                Unauthorized modification of this data stream is a violation of the 
+                Information Preservation Act of 2084.
+            </p>
+        </div>
     </div>
 
-    <!-- Content -->
-    <div class="content">
-        {!! $ebook->content !!}
+    <!-- Footer for content pages -->
+    <script type="text/php">
+        if (isset($pdf)) {
+            $text = "ANXIPUNK // VOL {{ $ebook->volume_number }} // PAGE {PAGE_NUM}";
+            $font = $fontMetrics->get_font("DejaVu Sans", "normal");
+            $size = 9;
+            $color = array(0.4, 0.4, 0.4);
+            $y = $pdf->get_height() - 40;
+            $x = $pdf->get_width() / 2 - ($fontMetrics->get_text_width($text, $font, $size) / 2);
+            $pdf->page_text($x, $y, $text, $font, $size, $color);
+        }
+    </script>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        {!! $content !!}
     </div>
 
 </body>
