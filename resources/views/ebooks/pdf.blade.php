@@ -15,13 +15,18 @@
         
         /* --- Cover Page --- */
         .cover-page {
-            position: relative;
+            position: absolute; /* Force full page coverage */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             width: 100%;
             height: 100%;
             background-color: #050505;
             color: #fff;
             text-align: center;
             overflow: hidden;
+            z-index: -1;
         }
         .cover-bg {
             position: absolute;
@@ -137,22 +142,24 @@
            font-weight: bold;
         }
 
-        /* Comic Panel Images */
+        /* Comic Panel Images (REVISED: Full Page / White BG) */
         .part-illustration {
             text-align: center;
-            margin: 30px auto; 
+            margin: 10px 0; 
             page-break-inside: avoid;
-            background-color: #000;
-            padding: 5px; 
-            box-shadow: 8px 8px 0px rgba(0,0,0,0.5); /* Darker shadow */
-            max-width: 90%; 
+            background-color: transparent; /* White/Transparent BG */
+            padding: 0; 
+            box-shadow: none; 
+            width: 100%; /* Full width */
         }
         .part-illustration img {
-            border: 2px solid #fff;
+            border: none;
             display: block;
             width: 100%;
             height: auto; 
+            max-height: 900px; /* Prevent spanning too many pages */
             object-fit: contain;
+            margin: 0 auto;
         }
 
         /* Action Headers */
