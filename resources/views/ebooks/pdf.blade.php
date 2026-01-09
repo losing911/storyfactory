@@ -86,32 +86,37 @@
         /* Comic Panel Images */
         .part-illustration {
             text-align: center;
-            margin: 20px 0;
+            margin: 20px auto; /* Center horizontally */
             page-break-inside: avoid;
             background-color: #000;
-            padding: 2px; /* Inner border for frame */
-            box-shadow: 8px 8px 0px rgba(0,0,0,0.2);
-            transform: rotate(-1deg); /* Slight organic feel */
+            padding: 5px; /* Thicker inner frame */
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
+            /* Removed rotation to fix layout issues */
+            /* transform: rotate(-1deg); */ 
+            max-width: 90%; /* Prevent overflowing page margins */
         }
         .part-illustration img {
-            border: 3px solid #fff;
+            border: 2px solid #fff;
             display: block;
             width: 100%;
+            height: auto; /* CRITICAL: Maintain aspect ratio */
+            object-fit: contain;
         }
 
         /* Action Headers */
         h1 {
             color: #000;
-            font-size: 28pt;
+            font-size: 24pt; /* Slightly smaller to fit better */
             font-weight: 900;
             font-style: italic;
             text-transform: uppercase;
             border-bottom: 5px solid #000;
             padding-bottom: 5px;
-            margin-top: 60px;
-            margin-bottom: 40px;
+            margin-top: 40px;
+            margin-bottom: 30px;
             page-break-before: always;
             text-shadow: 2px 2px 0px #ccc;
+            line-height: 1.2;
         }
         /* Style the ID within titles */
         h1 span.id-marker {

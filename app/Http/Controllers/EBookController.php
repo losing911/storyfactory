@@ -33,6 +33,9 @@ class EBookController extends Controller
         // Fix Image Paths for DOMPDF (Needs absolute system paths)
         $content = $ebook->content;
         
+        // CLEANUP ARTIFACTS: Remove markdown code blocks if present in DB
+        $content = str_replace(['```html', '```'], '', $content);
+        
         // Define the physical path to the public directory
         $publicDir = rtrim(public_path(), '/\\'); 
         
