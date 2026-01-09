@@ -248,6 +248,32 @@ Route::get('/debug-story', function() {
 });
 
 
+
+Route::get('/debug-pdf-html', function() {
+    $ebook = App\Models\EBook::where('is_published', true)->latest()->first();
+    if (!$ebook) return "No EBook found.";
+
+    // Logic from Controller
+    $content = $ebook->content;
+    $basePath = public_path('ebooks') . '/';
+    
+    // Debug info
+    echo "<h1>Debug Info</h1>";
+    echo "Base Path: " . $basePath . "<br>";
+    echo "Original Length: " . strlen($content) . "<br>";
+    
+    // Replace
+    $content = str_replace("src='/ebooks/", "src='" . $basePath, $content);
+    $content = str_replace('src="/ebooks/', 'src="' . $basePath, $content);
+    
+    echo "Modified Length: " . strlen($content) . "<br>";
+    echo "Check match: " . (strpos($content, $basePath) !== false ? "FOUND ABSOLUTE PATH" : "NOT FOUND") . "<br>";
+    
+    echo "<hr><h1>View Render:</h1>";
+    
+    return view('ebooks.pdf', compact('ebook', 'content'));
+});
+
 Route::get('/debug-smtp', function() {
     try {
         echo "<h1>SMTP Debugger</h1>";
