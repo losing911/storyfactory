@@ -56,11 +56,14 @@ class EBookController extends Controller
                 ];
 
                 foreach ($candidates as $path) {
-                     // Normalize slashes for file_exists
                      $checkPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
                      if (file_exists($checkPath)) {
-                         // DOMPDF on Linux requires file:// protocol for absolute paths
-                         return 'src="file://' . $checkPath . '"';
+                         // Get image type for data URI
+                         $type = pathinfo($checkPath, PATHINFO_EXTENSION);
+                         $data = file_get_contents($checkPath);
+                         $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                         
+                         return 'src="' . $base64 . '"';
                      }
                 }
                 
@@ -84,14 +87,22 @@ class EBookController extends Controller
         $coverPath = null;
         if($ebook->cover_image_url) {
              $coverFilename = basename($ebook->cover_image_url);
-             // Check if it's in ebooks or storage
-             if(strpos($ebook->cover_image_url, 'ebooks/') !== false) {
-                 $coverPath = $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $coverFilename;
-             } elseif(strpos($ebook->cover_image_url, 'storage/') !== false) {
-                 $coverPath = $publicDir . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . $coverFilename;
-             } else {
-                 // Fallback
-                 $coverPath = public_path($ebook->cover_image_url);
+             
+             // Candidates for cover
+             $coverCandidates = [
+                 $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $coverFilename,
+                 $publicDir . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . $coverFilename,
+                 str_replace('/public', '', $publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $coverFilename,
+             ];
+             
+             foreach($coverCandidates as $cPath) {
+                 $cPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $cPath);
+                 if(file_exists($cPath)) {
+                     $type = pathinfo($cPath, PATHINFO_EXTENSION);
+                     $data = file_get_contents($cPath);
+                     $coverPath = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                     break;
+                 }
              }
         }
         
