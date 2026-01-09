@@ -22,7 +22,7 @@
             background: #0a0a0a;
             color: #e0e0e0;
             line-height: 1.8;
-            font-size: 13px;
+            font-size: 16px;
             position: relative;
         }
 
@@ -181,7 +181,7 @@
         }
 
         h1 {
-            font-size: 32px;
+            font-size: 36px;
             color: #FFFFFF;
             background: linear-gradient(90deg, #FF00FF 0%, transparent 100%);
             border-left: 6px solid #00FFFF;
@@ -194,7 +194,7 @@
         }
 
         h2 {
-            font-size: 24px;
+            font-size: 28px;
             color: #00FFFF;
             border-left: 4px solid #FF00FF;
             text-shadow: 0 0 8px #00FFFF;
@@ -202,7 +202,7 @@
         }
 
         h3 {
-            font-size: 18px;
+            font-size: 22px;
             color: #FF00FF;
             border-bottom: 2px solid #FF00FF;
             padding-bottom: 10px;
@@ -225,23 +225,15 @@
         /* === IMAGES (COMIC PANEL STYLE) === */
         img {
             display: block;
-            width: calc(100% - 120px);
-            max-width: 100%;
+            width: 90%;
+            max-width: 90%;
             height: auto;
             margin: 40px auto;
             border: 5px solid #FFFFFF;
-            box-shadow: 
-                0 0 20px #00FFFF,
-                0 0 40px rgba(0, 255, 255, 0.3),
-                inset 0 0 20px rgba(255, 255, 255, 0.1);
-            transform: rotate(-0.5deg);
+            box-shadow: 0 0 20px #00FFFF;
             page-break-inside: avoid;
             background: #000;
             padding: 8px;
-        }
-
-        img:nth-of-type(even) {
-            transform: rotate(0.5deg);
         }
 
         /* === DIVIDERS === */
