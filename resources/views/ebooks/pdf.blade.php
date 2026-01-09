@@ -169,8 +169,10 @@
 
     <!-- Cover Page -->
     <div class="cover-page">
-        @if($ebook->cover_image_url)
-            <img src="{{ public_path($ebook->cover_image_url) }}" class="cover-bg">
+        @if(isset($coverPath) && $coverPath)
+            <img src="{{ $coverPath }}" class="cover-bg">
+        @elseif($ebook->cover_image_url) <!-- Fallback just in case -->
+             <img src="{{ public_path($ebook->cover_image_url) }}" class="cover-bg">
         @endif
         
         <div class="cover-content">
