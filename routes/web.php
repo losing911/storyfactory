@@ -257,6 +257,20 @@ Route::get('/debug-pdf-html', function() {
     $content = $ebook->content;
     $publicDir = rtrim(public_path(), '/\\'); 
     
+    // CLEANUP ARTIFACTS: SUPER NUCLEAR OPTION (Synced with Controller)
+    // 1. Remove artifacts wrapped in P tags
+    $content = preg_replace('/<p>\s*(```|\'\'\'|&#96;&#96;&#96;|&#39;&#39;&#39;)(?:html)?\s*<\/p>/iu', '', $content);
+    // 2. Remove artifacts that are part of text lines
+    $content = preg_replace('/(```|\'\'\'|&#96;&#96;&#96;|&#39;&#39;&#39;)(?:html)?/iu', '', $content);
+    // 3. Specific manual kill list
+    $content = str_replace([
+        "'''html", "'''", "```html", "```", 
+        "&#39;&#39;&#39;html", "&#39;&#39;&#39;",
+        "&amp;#39;&amp;#39;&amp;#39;html",
+    ], '', $content);
+    // 4. Clean up empty paragraphs
+    $content = preg_replace('/<p>\s*<\/p>/', '', $content);
+
     // Debug info
     echo "<h1>Debug Info (Regex Mode)</h1>";
     echo "Public Dir: " . $publicDir . "<br>";
