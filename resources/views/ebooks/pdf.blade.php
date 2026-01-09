@@ -9,8 +9,13 @@
         }
         body {
             font-family: 'DejaVu Sans', sans-serif;
-            color: #111;
+            color: #000;
             line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+            width: 100%;
+            height: 100%;
         }
         
         /* --- Cover Page --- */

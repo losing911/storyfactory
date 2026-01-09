@@ -274,8 +274,13 @@ Route::get('/debug-pdf-html', function() {
             foreach ($candidates as $index => $path) {
                  $checkPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
                  if (file_exists($checkPath)) {
+                     // Get image type for data URI
+                     $type = pathinfo($checkPath, PATHINFO_EXTENSION);
+                     $data = file_get_contents($checkPath);
+                     $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                     
                      echo "Match Found (Candidate $index): " . $checkPath . "<br>";
-                     return 'src="file://' . $checkPath . '"';
+                     return 'src="' . $base64 . '"';
                  }
             }
             // Fallback if no file is found among candidates
@@ -287,7 +292,22 @@ Route::get('/debug-pdf-html', function() {
     // Add dummy cover path for debug view if needed, or null
     $coverPath = null;
     if($ebook->cover_image_url) {
-         $coverPath = $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . basename($ebook->cover_image_url);
+         $coverFilename = basename($ebook->cover_image_url);
+         $coverCandidates = [
+             $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $coverFilename,
+             $publicDir . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . $coverFilename,
+             str_replace('/public', '', $publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $coverFilename,
+         ];
+         
+         foreach($coverCandidates as $cPath) {
+             $cPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $cPath);
+             if(file_exists($cPath)) {
+                 $type = pathinfo($cPath, PATHINFO_EXTENSION);
+                 $data = file_get_contents($cPath);
+                 $coverPath = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                 break;
+             }
+         }
     }
     
     echo "<hr><h1>View Render:</h1>";
