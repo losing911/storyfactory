@@ -271,9 +271,15 @@ Route::get('/debug-pdf-html', function() {
                 str_replace('/public', '', $publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
                 str_replace('/public_html/public', '/public_html', $publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
             ];
-            $localPath = $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $matches[3];
-            echo "Found Image: " . $matches[3] . " -> Converted to: " . $localPath . "<br>";
-            return 'src="' . $localPath . '"';
+            foreach ($candidates as $index => $path) {
+                 $checkPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+                 if (file_exists($checkPath)) {
+                     echo "Match Found (Candidate $index): " . $checkPath . "<br>";
+                     return 'src="file://' . $checkPath . '"';
+                 }
+            }
+            // Fallback if no file is found among candidates
+            return $matches[0]; // Return original match if no file path is resolved
         }, 
         $content
     );
