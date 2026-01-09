@@ -157,6 +157,7 @@
             <div class="cover-content-inner">
                 <h1 class="cover-title">{{ $ebook->title }}</h1>
                 <p class="cover-author">Anxipunk Chronicles</p>
+                <div style="font-size: 10px; color: #ccc; margin-top: 20px;">v3.0 (Clean Layout)</div>
             </div>
         </div>
     </div>

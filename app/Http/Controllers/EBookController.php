@@ -151,6 +151,10 @@ class EBookController extends Controller
             'chroot' => public_path(), // Security: Allow access to public folder
         ]);
 
-        return $pdf->download($ebook->slug . '.pdf');
+        return $pdf->download($ebook->slug . '.pdf')->withHeaders([
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
     }
 }
