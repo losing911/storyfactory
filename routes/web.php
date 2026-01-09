@@ -253,21 +253,24 @@ Route::get('/debug-pdf-html', function() {
     $ebook = App\Models\EBook::where('is_published', true)->latest()->first();
     if (!$ebook) return "No EBook found.";
 
-    // Logic from Controller
+    // Logic from Controller (Regex)
     $content = $ebook->content;
-    $basePath = public_path('ebooks') . '/';
+    $publicDir = rtrim(public_path(), '/\\'); 
     
     // Debug info
-    echo "<h1>Debug Info</h1>";
-    echo "Base Path: " . $basePath . "<br>";
-    echo "Original Length: " . strlen($content) . "<br>";
+    echo "<h1>Debug Info (Regex Mode)</h1>";
+    echo "Public Dir: " . $publicDir . "<br>";
     
-    // Replace
-    $content = str_replace("src='/ebooks/", "src='" . $basePath, $content);
-    $content = str_replace('src="/ebooks/', 'src="' . $basePath, $content);
-    
-    echo "Modified Length: " . strlen($content) . "<br>";
-    echo "Check match: " . (strpos($content, $basePath) !== false ? "FOUND ABSOLUTE PATH" : "NOT FOUND") . "<br>";
+    // Regex for Ebooks
+    $content = preg_replace_callback(
+        '/(src=["\'])(.*?\/ebooks\/)(.*?)(["\'])/i', 
+        function($matches) use ($publicDir) {
+            $localPath = $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $matches[3];
+            echo "Found Image: " . $matches[3] . " -> Converted to: " . $localPath . "<br>";
+            return 'src="' . $localPath . '"';
+        }, 
+        $content
+    );
     
     echo "<hr><h1>View Render:</h1>";
     
