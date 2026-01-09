@@ -30,6 +30,12 @@
                     <label class="block text-neon-blue font-mono text-xs mb-2">KONU_BAŞLIĞI</label>
                     <input type="text" name="subject" required class="w-full bg-black/50 border border-gray-700 text-white p-3 focus:border-neon-pink focus:outline-none transition">
                 </div>
+                <!-- Honeypot Field (Bot Trap) -->
+                <div style="opacity: 0; position: absolute; top: 0; left: 0; height: 0; width: 0; z-index: -1;">
+                    <label for="website_url">Website</label>
+                    <input type="text" name="website_url" id="website_url" tabindex="-1" autocomplete="off">
+                </div>
+
                 <div>
                     <label class="block text-neon-blue font-mono text-xs mb-2">VERİ_PAKETİ (MESAJINIZ)</label>
                     <textarea name="message" rows="5" required class="w-full bg-black/50 border border-gray-700 text-white p-3 focus:border-neon-pink focus:outline-none transition"></textarea>
