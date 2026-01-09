@@ -34,7 +34,8 @@ class EBookController extends Controller
         $content = $ebook->content;
         
         // CLEANUP ARTIFACTS: Remove markdown code blocks if present in DB
-        $content = str_replace(['```html', '```'], '', $content);
+        // Matches ```html, ```, '''html, ''' (and other languages) case insensitive
+        $content = preg_replace('/(```|\'\'\')(?:\s*\w+)?/u', '', $content);
         
         // VISUALS: Inject Drop Caps
         // Find paragraphs that follow headers (h2,h3) or the start of a chapter div
