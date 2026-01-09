@@ -71,11 +71,14 @@ class EBookController extends Controller
         $publicDir = rtrim(public_path(), '/\\'); 
         
         // Use Regex to find image sources and replace them cleanly
-        // Matches src=".../ebooks/..." or src='.../ebooks/...'
+        // Matches BOTH:
+        // - src="/ebooks/..." (absolute path from root)
+        // - src="http://domain.com/ebooks/..." (full URL)
         $content = preg_replace_callback(
-            '/(src=["\'])(.*?\/ebooks\/)(.*?)(["\'])/i', 
+            '/(src=["\']\/?)((?:https?:\/\/[^\/]+)?)(\/ebooks\/|ebooks\/)(.*?)(["\'])/i', 
             function($matches) use ($publicDir) {
-                $filename = $matches[3];
+                // $matches[4] = filename
+                $filename = $matches[4];
                 
                 // Potential paths to check
                 $candidates = [
@@ -87,6 +90,9 @@ class EBookController extends Controller
                     
                     // 3. Explicit /public_html/ check (fixing potential double-public issue)
                     str_replace('/public_html/public', '/public_html', $publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
+                    
+                    // 4. Direct path (if already under public_html)
+                    dirname($publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
                 ];
 
                 foreach ($candidates as $path) {
@@ -101,8 +107,8 @@ class EBookController extends Controller
                      }
                 }
                 
-                // Fallback
-                return 'src="' . $candidates[0] . '"';
+                // Fallback: Return original if no file found
+                return $matches[0];
             }, 
             $content
         );
