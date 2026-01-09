@@ -33,9 +33,19 @@ class EBookController extends Controller
         // Fix Image Paths for DOMPDF (Needs absolute system paths)
         $content = $ebook->content;
         
-        // CLEANUP ARTIFACTS: Remove markdown code blocks if present in DB
-        // Matches ```html, ```, '''html, ''' (and other languages) case insensitive
-        $content = preg_replace('/(```|\'\'\')(?:\s*\w+)?/u', '', $content);
+        // CLEANUP ARTIFACTS: Nuclear Option
+        // Remove known markdown artifacts (plain text and HTML entities)
+        $artifacts = [
+            '```html', '```', 
+            "'''html", "'''",
+            '&#96;&#96;&#96;html', '&#96;&#96;&#96;', // HTML entity for backtick
+            '&#39;&#39;&#39;html', '&#39;&#39;&#39;', // HTML entity for single quote
+            '&quot;&quot;&quot;html', '&quot;&quot;&quot;', // Triple double quotes just in case
+        ];
+        $content = str_replace($artifacts, '', $content);
+        
+        // Regex catch-all for variations with whitespace or mixed encoding
+        $content = preg_replace('/(```|\'\'\'|&#96;{3}|&#39;{3})(?:\s*\w+)?/u', '', $content);
         
         // VISUALS: Inject Drop Caps
         // Find paragraphs that follow headers (h2,h3) or the start of a chapter div
