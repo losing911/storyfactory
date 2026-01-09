@@ -271,24 +271,22 @@ Route::get('/debug-pdf-html', function() {
                 str_replace('/public', '', $publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
                 str_replace('/public_html/public', '/public_html', $publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
             ];
-
-            foreach ($candidates as $index => $path) {
-                 $checkPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
-                 if (file_exists($checkPath)) {
-                     echo "Match Found (Candidate $index): " . $checkPath . "<br>";
-                     return 'src="' . $checkPath . '"';
-                 }
-            }
-            
-            echo "NO FILE FOUND! Tried: <br>" . implode("<br>", $candidates) . "<br>";
-            return 'src="' . $candidates[0] . '"';
+            $localPath = $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $matches[3];
+            echo "Found Image: " . $matches[3] . " -> Converted to: " . $localPath . "<br>";
+            return 'src="' . $localPath . '"';
         }, 
         $content
     );
     
+    // Add dummy cover path for debug view if needed, or null
+    $coverPath = null;
+    if($ebook->cover_image_url) {
+         $coverPath = $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . basename($ebook->cover_image_url);
+    }
+    
     echo "<hr><h1>View Render:</h1>";
     
-    return view('ebooks.pdf', compact('ebook', 'content'));
+    return view('ebooks.pdf', compact('ebook', 'content', 'coverPath'));
 });
 
 Route::get('/debug-smtp', function() {
