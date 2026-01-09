@@ -271,6 +271,18 @@ Route::get('/debug-pdf-html', function() {
     // 4. Clean up empty paragraphs
     $content = preg_replace('/<p>\s*<\/p>/', '', $content);
 
+    // VISUALS: Inject Drop Caps (Synced with Controller)
+    $content = preg_replace_callback(
+        '/((?:<\/h[1-6]>|<\/div>))\s*<p>\s*(.)/u',
+        function($matches) {
+            if (preg_match('/[\w\p{L}]/u', $matches[2])) {
+                return $matches[1] . '<p><span class="drop-cap">' . $matches[2] . '</span>';
+            }
+            return $matches[0];
+        },
+        $content
+    );
+
     // Debug info
     echo "<h1>Debug Info (Regex Mode)</h1>";
     echo "Public Dir: " . $publicDir . "<br>";
