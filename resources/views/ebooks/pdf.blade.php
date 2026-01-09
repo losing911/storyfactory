@@ -8,6 +8,7 @@
         /* CYBERPUNK ANIME/MANGA STYLE PDF LAYOUT */
         
         @page {
+            size: A4;
             margin: 0px;
         }
 
@@ -225,8 +226,8 @@
         /* === IMAGES (COMIC PANEL STYLE) === */
         img {
             display: block;
-            width: 90%;
-            max-width: 90%;
+            width: 80%;
+            max-width: 800px;
             height: auto;
             margin: 40px auto;
             border: 5px solid #FFFFFF;
