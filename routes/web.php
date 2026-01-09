@@ -265,9 +265,23 @@ Route::get('/debug-pdf-html', function() {
     $content = preg_replace_callback(
         '/(src=["\'])(.*?\/ebooks\/)(.*?)(["\'])/i', 
         function($matches) use ($publicDir) {
-            $localPath = $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $matches[3];
-            echo "Found Image: " . $matches[3] . " -> Converted to: " . $localPath . "<br>";
-            return 'src="' . $localPath . '"';
+            $filename = $matches[3];
+            $candidates = [
+                $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
+                str_replace('/public', '', $publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
+                str_replace('/public_html/public', '/public_html', $publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
+            ];
+
+            foreach ($candidates as $index => $path) {
+                 $checkPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+                 if (file_exists($checkPath)) {
+                     echo "Match Found (Candidate $index): " . $checkPath . "<br>";
+                     return 'src="' . $checkPath . '"';
+                 }
+            }
+            
+            echo "NO FILE FOUND! Tried: <br>" . implode("<br>", $candidates) . "<br>";
+            return 'src="' . $candidates[0] . '"';
         }, 
         $content
     );

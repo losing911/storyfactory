@@ -41,16 +41,30 @@ class EBookController extends Controller
         $content = preg_replace_callback(
             '/(src=["\'])(.*?\/ebooks\/)(.*?)(["\'])/i', 
             function($matches) use ($publicDir) {
-                // $matches[1] = src="
-                // $matches[2] = anything before filename (e.g. /ebooks/ or http://.../ebooks/)
-                // $matches[3] = filename (e.g. image.jpg)
-                // $matches[4] = closing quote "
+                $filename = $matches[3];
                 
-                // Construct clean local path
-                $localPath = $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $matches[3];
+                // Potential paths to check
+                $candidates = [
+                    // 1. Standard public_path()
+                    $publicDir . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
+                    
+                    // 2. cPanel Common: public_html IS public (remove /public suffix if present)
+                    str_replace('/public', '', $publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
+                    
+                    // 3. Explicit /public_html/ check (fixing potential double-public issue)
+                    str_replace('/public_html/public', '/public_html', $publicDir) . DIRECTORY_SEPARATOR . 'ebooks' . DIRECTORY_SEPARATOR . $filename,
+                ];
+
+                foreach ($candidates as $path) {
+                     // Normalize slashes for file_exists
+                     $checkPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+                     if (file_exists($checkPath)) {
+                         return 'src="' . $checkPath . '"';
+                     }
+                }
                 
-                // Return new src
-                return 'src="' . $localPath . '"';
+                // Fallback: Return the first candidate even if not found
+                return 'src="' . $candidates[0] . '"';
             }, 
             $content
         );
