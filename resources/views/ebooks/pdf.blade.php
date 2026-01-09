@@ -232,19 +232,26 @@
             content: counter(page);
         }
         
-        /* Info Page styling */
+        /* Info Page styling (SIMPLIFIED for Stability) */
         .info-page {
             page-break-after: always;
-            display: table;
             width: 100%;
-            height: 800px; 
+            /* Removed display:table to prevent overlap issues */
+            text-align: center;
+            padding-top: 150px; 
+            box-sizing: border-box;
         }
         .info-content {
-            display: table-cell;
-            vertical-align: middle;
-            text-align: center;
-            padding: 0 50px;
-            border: 8px solid #000; /* Thicker for info page */
+            width: 80%;
+            margin: 0 auto;
+            border: 8px solid #000;
+            padding: 40px;
+            background: #fff;
+        }
+        /* Spacing for Info Page paragraphs */
+        .info-content p {
+            margin-bottom: 25px;
+            line-height: 1.8;
         }
     </style>
 </head>
