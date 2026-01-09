@@ -33,19 +33,22 @@ class EBookController extends Controller
         // Fix Image Paths for DOMPDF (Needs absolute system paths)
         $content = $ebook->content;
         
-        // CLEANUP ARTIFACTS: Nuclear Option
-        // Remove known markdown artifacts (plain text and HTML entities)
-        $artifacts = [
-            '```html', '```', 
-            "'''html", "'''",
-            '&#96;&#96;&#96;html', '&#96;&#96;&#96;', // HTML entity for backtick
-            '&#39;&#39;&#39;html', '&#39;&#39;&#39;', // HTML entity for single quote
-            '&quot;&quot;&quot;html', '&quot;&quot;&quot;', // Triple double quotes just in case
-        ];
-        $content = str_replace($artifacts, '', $content);
+        // CLEANUP ARTIFACTS: SUPER NUCLEAR OPTION
+        // 1. Remove artifacts wrapped in P tags (common in WYSIWYG/Markdown parsers)
+        $content = preg_replace('/<p>\s*(```|\'\'\'|&#96;&#96;&#96;|&#39;&#39;&#39;)(?:html)?\s*<\/p>/iu', '', $content);
         
-        // Regex catch-all for variations with whitespace or mixed encoding
-        $content = preg_replace('/(```|\'\'\'|&#96;{3}|&#39;{3})(?:\s*\w+)?/u', '', $content);
+        // 2. Remove artifacts that are part of text lines
+        $content = preg_replace('/(```|\'\'\'|&#96;&#96;&#96;|&#39;&#39;&#39;)(?:html)?/iu', '', $content);
+        
+        // 3. Specific manual kill list for things that might escape Regex
+        $content = str_replace([
+            "'''html", "'''", "```html", "```", 
+            "&#39;&#39;&#39;html", "&#39;&#39;&#39;",
+            "&amp;#39;&amp;#39;&amp;#39;html", // Double encoded
+        ], '', $content);
+
+        // 4. Clean up empty paragraphs left behind
+        $content = preg_replace('/<p>\s*<\/p>/', '', $content);
         
         // VISUALS: Inject Drop Caps
         // Find paragraphs that follow headers (h2,h3) or the start of a chapter div
