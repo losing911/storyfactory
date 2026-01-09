@@ -83,30 +83,82 @@
             font-family: 'DejaVu Sans', sans-serif !important;
         }
         
+        /* --- Cyberpunk Visuals --- */
+        
+        /* Drop Cap (First Letter) */
+        .drop-cap {
+            float: left;
+            font-size: 38pt;
+            line-height: 0.8;
+            font-weight: 900;
+            color: #000;
+            margin-right: 8px;
+            margin-bottom: -5px;
+            font-family: 'DejaVu Sans', sans-serif;
+            text-shadow: 2px 2px 0px #ccc;
+        }
+
+        /* Cyberpunk Divider */
+        hr.part-divider {
+            border: 0;
+            height: 10px;
+            background-color: #000;
+            border-bottom: 2px solid #fff; /* Stripe effect */
+            border-top: 2px solid #fff;
+            margin: 60px 20px;
+            position: relative;
+        }
+        /* Page Frame / Corner Elements */
+        .page-frame-top-left {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-top: 5px solid #000;
+            border-left: 5px solid #000;
+        }
+        .page-frame-bottom-right {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-bottom: 5px solid #000;
+            border-right: 5px solid #000;
+        }
+        .page-frame-top-right {
+           position: fixed;
+           top: 20px;
+           right: 20px;
+           content: "/// NET-2084";
+           font-size: 8pt;
+           color: #666;
+           font-weight: bold;
+        }
+
         /* Comic Panel Images */
         .part-illustration {
             text-align: center;
-            margin: 20px auto; /* Center horizontally */
+            margin: 30px auto; 
             page-break-inside: avoid;
             background-color: #000;
-            padding: 5px; /* Thicker inner frame */
-            box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
-            /* Removed rotation to fix layout issues */
-            /* transform: rotate(-1deg); */ 
-            max-width: 90%; /* Prevent overflowing page margins */
+            padding: 5px; 
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.5); /* Darker shadow */
+            max-width: 90%; 
         }
         .part-illustration img {
             border: 2px solid #fff;
             display: block;
             width: 100%;
-            height: auto; /* CRITICAL: Maintain aspect ratio */
+            height: auto; 
             object-fit: contain;
         }
 
         /* Action Headers */
         h1 {
             color: #000;
-            font-size: 24pt; /* Slightly smaller to fit better */
+            font-size: 24pt; 
             font-weight: 900;
             font-style: italic;
             text-transform: uppercase;
@@ -115,60 +167,57 @@
             margin-top: 40px;
             margin-bottom: 30px;
             page-break-before: always;
-            text-shadow: 2px 2px 0px #ccc;
+            text-shadow: 3px 3px 0px #ccc; /* Pop */
             line-height: 1.2;
         }
         /* Style the ID within titles */
         h1 span.id-marker {
             display: block;
-            font-size: 10pt;
+            font-size: 9pt;
             font-weight: normal;
             font-style: normal;
             color: #555;
-            text-shadow: none;
+            text-align: right;
+            border-top: 1px dashed #000;
+            padding-top: 2px;
             margin-top: 5px;
-            border-top: 1px solid #ccc;
-            padding-top: 5px;
         }
 
         h2, h3 {
-            font-weight: bold;
-            border-left: 5px solid #000;
-            padding-left: 10px;
-            margin-top: 25px;
+            font-weight: 900;
+            background: #000; /* Inverted header */
+            color: #fff;
+            padding: 5px 10px;
+            margin-top: 40px;
+            margin-bottom: 20px;
             text-transform: uppercase;
+            display: inline-block;
+            transform: skew(-10deg); /* Cyberpunk skew */
         }
 
         /* Dialog/Text Style */
         p {
             margin-bottom: 15px;
             text-indent: 0;
-            padding-left: 10px;
-            border-left: 1px solid #eee; /* Subtle reading guide */
+            padding-left: 0;
+            text-align: justify;
         }
 
         /* Footer / Page Numbers (Comic Style) */
         .page-footer {
             position: fixed;
-            bottom: 15px;
-            right: 15px; /* Corner page numbers */
+            bottom: 20px;
+            right: 20px; /* Corner page numbers */
             text-align: right;
-            font-size: 12pt;
+            font-size: 10pt;
             font-weight: bold;
-            color: #000;
-            background: #fff;
-            padding: 5px 10px;
-            border: 2px solid #000;
+            color: #fff;
+            background: #000;
+            padding: 2px 8px;
+            transform: skew(-10deg);
         }
         .page-number:after {
             content: counter(page);
-        }
-
-        hr.part-divider {
-            border: 0;
-            height: 3px;
-            background: #000;
-            margin: 50px 0;
         }
         
         /* Info Page styling */
@@ -183,11 +232,15 @@
             vertical-align: middle;
             text-align: center;
             padding: 0 50px;
-            border: 5px double #000;
+            border: 8px solid #000; /* Thicker for info page */
         }
     </style>
 </head>
 <body>
+    <!-- Page Frame Elements (Repeats on every page due to fixed pos) -->
+    <div class="page-frame-top-left"></div>
+    <div class="page-frame-bottom-right"></div>
+    <div class="page-frame-top-right"></div>
 
     <!-- Cover Page -->
     <div class="cover-page">

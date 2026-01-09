@@ -36,6 +36,23 @@ class EBookController extends Controller
         // CLEANUP ARTIFACTS: Remove markdown code blocks if present in DB
         $content = str_replace(['```html', '```'], '', $content);
         
+        // VISUALS: Inject Drop Caps
+        // Find paragraphs that follow headers (h2,h3) or the start of a chapter div
+        // Pattern: (tag closing) + whitespace + <p> + (first char)
+        $content = preg_replace_callback(
+            '/((?:<\/h[1-6]>|<\/div>))\s*<p>\s*(.)/u',
+            function($matches) {
+                // $matches[1] = closing tag (e.g. </h3>)
+                // $matches[2] = First letter
+                // Check if it's a valid letter/number (to avoid wrapping quotes or spacing)
+                if (preg_match('/[\w\p{L}]/u', $matches[2])) {
+                    return $matches[1] . '<p><span class="drop-cap">' . $matches[2] . '</span>';
+                }
+                return $matches[0];
+            },
+            $content
+        );
+        
         // Define the physical path to the public directory
         $publicDir = rtrim(public_path(), '/\\'); 
         
