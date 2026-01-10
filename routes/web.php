@@ -5,9 +5,14 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminEBookController;
 use App\Http\Controllers\LoginController;
 
-// Ezoic ads.txt redirect
+// Ezoic ads.txt - serve content directly (not redirect, crawlers need actual content)
 Route::get('/ads.txt', function () {
-    return redirect()->away('https://srv.adstxtmanager.com/19390/anxipunk.icu', 301);
+    try {
+        $content = file_get_contents('https://srv.adstxtmanager.com/19390/anxipunk.icu');
+        return response($content, 200)->header('Content-Type', 'text/plain');
+    } catch (\Exception $e) {
+        return response('# ads.txt temporarily unavailable', 503)->header('Content-Type', 'text/plain');
+    }
 });
 
 Route::get('/', function () {
