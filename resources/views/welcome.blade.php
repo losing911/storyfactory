@@ -85,7 +85,7 @@
         </div>
 
         <!-- Sidebar (Right 1 col) -->
-        <div class="hidden lg:block space-y-8">
+        <div class="hidden lg:block space-y-6">
             <!-- Lore Spotlight -->
             @if($spotlightLore)
             <div class="bg-gray-900 border border-gray-800 p-1 relative group">
@@ -99,10 +99,58 @@
             </div>
             @endif
 
-            <!-- Ad / Banner Placeholder -->
-            <div class="border border-dashed border-gray-800 p-8 text-center text-gray-600 font-mono text-xs">
-                {{ __('ui.ads_space') }}
-                <br>{{ __('ui.contact_marketing') }}
+            <!-- Interactive Terminal Widget -->
+            <div class="bg-black border border-neon-green/30 rounded overflow-hidden">
+                <div class="bg-gray-900 px-3 py-1 flex items-center gap-2 border-b border-gray-800">
+                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span class="text-[10px] text-gray-500 font-mono ml-2">terminal_v2.4</span>
+                </div>
+                <div class="p-3 font-mono text-[11px] text-neon-green h-32 overflow-hidden" id="terminal-output">
+                    <div class="terminal-line">> system_boot...</div>
+                    <div class="terminal-line">> loading neo-pera_core...</div>
+                    <div class="terminal-line text-gray-500">> [OK] connection_established</div>
+                </div>
+                <div class="border-t border-gray-800 p-2 flex items-center gap-2">
+                    <span class="text-neon-green text-xs">></span>
+                    <input type="text" id="terminal-input" placeholder="type 'help'" class="bg-transparent border-none text-neon-green text-xs font-mono flex-grow focus:outline-none placeholder-gray-700">
+                </div>
+            </div>
+
+            <!-- Decrypt Challenge Game -->
+            <div class="bg-gray-900/80 border border-neon-pink/30 p-4 rounded relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-neon-pink/5 to-transparent"></div>
+                <h4 class="text-neon-pink font-mono text-[10px] uppercase tracking-widest mb-3 relative z-10">🔐 DECRYPT_CHALLENGE</h4>
+                <div class="relative z-10">
+                    <div class="text-center mb-3">
+                        <span id="cipher-text" class="font-mono text-lg text-gray-300 tracking-[0.3em] select-none cursor-pointer hover:text-neon-pink transition" title="Tıkla ve çöz!">█▓▒░ ? ░▒▓█</span>
+                    </div>
+                    <input type="text" id="decrypt-input" placeholder="cevabı_yaz..." class="w-full bg-black/50 border border-gray-700 text-white text-xs font-mono p-2 focus:outline-none focus:border-neon-pink rounded">
+                    <div id="decrypt-result" class="text-[10px] font-mono mt-2 text-center h-4"></div>
+                </div>
+            </div>
+
+            <!-- Live Stats Widget -->
+            <div class="bg-gray-900/50 border border-gray-800 p-4 rounded">
+                <h4 class="text-gray-500 font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-neon-green animate-pulse"></span>
+                    LIVE_FEED
+                </h4>
+                <div class="space-y-2 text-xs font-mono">
+                    <div class="flex justify-between text-gray-400">
+                        <span>Aktif Bağlantı:</span>
+                        <span class="text-neon-blue" id="live-connections">--</span>
+                    </div>
+                    <div class="flex justify-between text-gray-400">
+                        <span>Bugün Okunma:</span>
+                        <span class="text-neon-green" id="live-reads">--</span>
+                    </div>
+                    <div class="flex justify-between text-gray-400">
+                        <span>Son Yorum:</span>
+                        <span class="text-neon-pink truncate max-w-[100px]" id="live-comment">--</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -275,5 +323,143 @@
             });
         }
     });
+
+    // === INTERACTIVE TERMINAL ===
+    (function() {
+        const input = document.getElementById('terminal-input');
+        const output = document.getElementById('terminal-output');
+        if(!input || !output) return;
+
+        const commands = {
+            help: '> commands: help, status, whoami, hack, matrix, clear',
+            status: '> system: ONLINE | threat_level: ELEVATED | users: ' + Math.floor(Math.random() * 50 + 10),
+            whoami: '> guest@neo-pera.net | access_level: RESTRICTED',
+            hack: '> [ACCESS DENIED] :: nice try, netrunner. 🔒',
+            matrix: '> initiating_matrix_mode...',
+            clear: 'CLEAR'
+        };
+
+        input.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') {
+                const cmd = input.value.toLowerCase().trim();
+                input.value = '';
+                
+                if(cmd === 'clear') {
+                    output.innerHTML = '<div class="text-gray-500">> terminal_cleared</div>';
+                    return;
+                }
+
+                const response = commands[cmd] || `> [ERR] unknown_command: "${cmd}"`;
+                const line = document.createElement('div');
+                line.className = 'terminal-line';
+                line.innerHTML = `<span class="text-gray-500">> ${cmd}</span><br>${response}`;
+                output.appendChild(line);
+                output.scrollTop = output.scrollHeight;
+
+                // Easter egg: matrix command triggers visual effect
+                if(cmd === 'matrix') {
+                    document.body.classList.add('matrix-mode');
+                    setTimeout(() => document.body.classList.remove('matrix-mode'), 3000);
+                }
+            }
+        });
+    })();
+
+    // === DECRYPT CHALLENGE GAME ===
+    (function() {
+        const challenges = [
+            { cipher: 'QFSBQFSB', answer: 'NEOPERA', hint: 'shift+1' },
+            { cipher: '01000001 01001001', answer: 'AI', hint: 'binary' },
+            { cipher: '4E 45 4F', answer: 'NEO', hint: 'hex' },
+            { cipher: 'KHOOR', answer: 'HELLO', hint: 'caesar-3' },
+            { cipher: '.-. . ... .. ... -', answer: 'RESIST', hint: 'morse' }
+        ];
+        
+        const challenge = challenges[Math.floor(Math.random() * challenges.length)];
+        const cipherEl = document.getElementById('cipher-text');
+        const inputEl = document.getElementById('decrypt-input');
+        const resultEl = document.getElementById('decrypt-result');
+        
+        if(!cipherEl || !inputEl) return;
+        
+        cipherEl.textContent = challenge.cipher;
+        cipherEl.title = `İpucu: ${challenge.hint}`;
+
+        inputEl.addEventListener('input', () => {
+            const guess = inputEl.value.toUpperCase().trim();
+            if(guess === challenge.answer) {
+                resultEl.innerHTML = '<span class="text-neon-green">✓ DECRYPTED! Welcome, netrunner.</span>';
+                inputEl.classList.add('border-neon-green');
+                cipherEl.classList.add('text-neon-green');
+            } else if(guess.length >= challenge.answer.length) {
+                resultEl.innerHTML = '<span class="text-red-400">✗ Invalid key</span>';
+            } else {
+                resultEl.innerHTML = '';
+            }
+        });
+
+        cipherEl.addEventListener('click', () => {
+            cipherEl.classList.add('animate-pulse');
+            setTimeout(() => cipherEl.classList.remove('animate-pulse'), 500);
+        });
+    })();
+
+    // === LIVE STATS SIMULATION ===
+    (function() {
+        const connEl = document.getElementById('live-connections');
+        const readsEl = document.getElementById('live-reads');
+        const commentEl = document.getElementById('live-comment');
+        if(!connEl) return;
+
+        const comments = ['harika!', 'matrix vibes', 'daha fazla', 'woow', 'cyberpunk <3', 'aksiyon!'];
+        
+        function updateStats() {
+            connEl.textContent = Math.floor(Math.random() * 30 + 5);
+            readsEl.textContent = Math.floor(Math.random() * 200 + 50);
+            commentEl.textContent = comments[Math.floor(Math.random() * comments.length)];
+        }
+        
+        updateStats();
+        setInterval(updateStats, 5000);
+    })();
 </script>
+
+<!-- Matrix Mode CSS -->
+<style>
+    @keyframes matrix-rain {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 100vh; }
+    }
+    body.matrix-mode::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 255, 65, 0.03) 2px,
+            rgba(0, 255, 65, 0.03) 4px
+        );
+        pointer-events: none;
+        z-index: 9999;
+        animation: matrix-rain 0.5s linear infinite;
+    }
+    body.matrix-mode {
+        filter: hue-rotate(90deg) saturate(1.5);
+        transition: filter 0.3s;
+    }
+    .terminal-line {
+        margin-bottom: 4px;
+        opacity: 0;
+        animation: typeIn 0.3s forwards;
+    }
+    @keyframes typeIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+</style>
 @endsection
