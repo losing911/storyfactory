@@ -112,7 +112,7 @@ class AIService
             \Illuminate\Support\Facades\Log::warning("Gemini Failed: " . $e->getMessage() . ". Trying OpenRouter (DeepSeek)...");
             
             // Priority 2: OpenRouter (DeepSeek Free)
-            return $this->generateWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+            return $this->generateWithOpenRouter($prompt, 'tngtech/deepseek-r1t2-chimera:free');
         }
     }
 
@@ -288,12 +288,12 @@ class AIService
         try {
             // 1. Translate Title
             $titlePrompt = "Translate the following title from Turkish to {$targetLang}. Output ONLY the translated title, no quotes, no explanations.\nText: {$title}";
-            $transTitle = $this->generateRawWithOpenRouter($titlePrompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+            $transTitle = $this->generateRawWithOpenRouter($titlePrompt, 'tngtech/deepseek-r1t2-chimera:free');
             $transTitle = trim($transTitle, " \"'\n\r\t\v\0");
 
             // 2. Translate Summary
             $summaryPrompt = "Translate the following summary from Turkish to {$targetLang}. Output ONLY the translated text.\nText: {$summary}";
-            $transSummary = $this->generateRawWithOpenRouter($summaryPrompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+            $transSummary = $this->generateRawWithOpenRouter($summaryPrompt, 'tngtech/deepseek-r1t2-chimera:free');
 
             // 3. Translate Content (HTML aware)
              preg_match_all('/<p>(.*?)<\/p>/s', $content, $matches);
@@ -301,7 +301,7 @@ class AIService
              
              if (count($paragraphs) < 2) {
                  $contentPrompt = "Translate this HTML content from Turkish to {$targetLang}. Keep HTML tags (like <div>, <p>, <img>) EXACTLY as they are. Translate only the text.\n\nContent:\n{$content}";
-                 $transContent = $this->generateRawWithOpenRouter($contentPrompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+                 $transContent = $this->generateRawWithOpenRouter($contentPrompt, 'tngtech/deepseek-r1t2-chimera:free');
              } else {
                  $transContent = $content;
                  $chunks = array_chunk($paragraphs, 5);
@@ -311,7 +311,7 @@ class AIService
                      $chunkPrompt = "Translate the following text blocks from Turkish to {$targetLang}. The blocks are separated by '|||'. Keep the separator in output. Output ONLY the translated blocks.\n\n{$textBlock}";
                      
                      try {
-                         $response = $this->generateRawWithOpenRouter($chunkPrompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+                         $response = $this->generateRawWithOpenRouter($chunkPrompt, 'tngtech/deepseek-r1t2-chimera:free');
                          $transBlocks = explode("|||", $response);
                          
                          foreach ($chunk as $index => $original) {
@@ -397,7 +397,7 @@ class AIService
 
         try {
             // Reverting to DeepSeek (Free) now that we have Repair Logic + Max Tokens
-            $model = 'nex-agi/deepseek-v3.1-nex-n1:free'; 
+            $model = 'tngtech/deepseek-r1t2-chimera:free'; 
             $rawResponse = $this->generateRawWithOpenRouter($prompt, $model);
             
             // Debug for CLI
@@ -468,7 +468,7 @@ class AIService
 
         // Use DeepSeek (OpenRouter) as Primary
         try {
-            return $this->generateRawWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+            return $this->generateRawWithOpenRouter($prompt, 'tngtech/deepseek-r1t2-chimera:free');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning("Primary Model (DeepSeek) Failed for Anthology: " . $e->getMessage() . ". Switching to Backup (Gemini)...");
             
