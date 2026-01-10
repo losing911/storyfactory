@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr" class="dark">
 <head>
+    <script src="https://quge5.com/88/tag.min.js" data-zone="200618" async data-cfasync="false"></script>
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
