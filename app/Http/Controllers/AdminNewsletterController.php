@@ -45,10 +45,16 @@ class AdminNewsletterController extends Controller
             return redirect()->back()->with('error', 'Bu kampanya zaten gönderildi veya gönderiliyor.');
         }
 
-        // Dispatch Job
-        dispatch(new \App\Jobs\SendCampaignJob($campaign));
-        
-        return redirect()->back()->with('success', 'Kampanya gönderim kuyruğuna eklendi. Arka planda başhlatalacak.');
+        // Send synchronously (no queue worker needed)
+        // For large lists, consider using queue in production
+        try {
+            $job = new \App\Jobs\SendCampaignJob($campaign);
+            $job->handle(); // Run directly without queue
+            
+            return redirect()->back()->with('success', 'Kampanya başarıyla gönderildi! ' . $campaign->sent_count . ' alıcıya ulaştı.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Mail gönderimi sırasında hata: ' . $e->getMessage());
+        }
     }
 
     public function subscribers()
