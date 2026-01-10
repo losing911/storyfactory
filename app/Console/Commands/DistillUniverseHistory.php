@@ -74,7 +74,7 @@ class DistillUniverseHistory extends Command
         
         $this->info("Synthesizing History...");
         try {
-            $historyHtml = $method->invokeArgs($ai, [$prompt, 'nex-agi/deepseek-v3.1-nex-n1:free']);
+            $historyHtml = $method->invokeArgs($ai, [$prompt, 'tngtech/deepseek-r1t2-chimera:free']);
             
             // 5. Update Lore Entry
             // We look for a special Lore Entry with slug 'universe-history' or update the hardcoded view

@@ -74,7 +74,7 @@ class AnalyzeTraffic extends Command
         
         // Use DeepSeek (OpenRouter)
         try {
-            $insight = $aiService->generateRawWithOpenRouter($prompt, 'nex-agi/deepseek-v3.1-nex-n1:free');
+            $insight = $aiService->generateRawWithOpenRouter($prompt, 'tngtech/deepseek-r1t2-chimera:free');
             
             // 3. Save to DB
             DB::table('analytics_insights')->updateOrInsert(
