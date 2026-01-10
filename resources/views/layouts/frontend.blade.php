@@ -199,6 +199,7 @@
                 <a href="{{ route('contact') }}" class="text-gray-500 hover:text-neon-green transition text-sm tracking-widest uppercase">İletişim</a>
                 <a href="https://x.com/AnxlPunk" target="_blank" class="text-gray-500 hover:text-white transition text-sm tracking-widest uppercase border-l border-gray-800 pl-4">X / Twitter</a>
             </div>
+            <div id="ezoic-accreditation-container" class="mb-6"></div>
             <p class="font-display text-gray-600 tracking-widest">© 2025 ANXIPUNK // <span class="text-neon-green">SYSTEM_ONLINE</span></p>
         </div>
     </footer>
