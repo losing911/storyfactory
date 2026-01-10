@@ -3,18 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Models\Story;
+use App\Services\BotDetector;
 use Illuminate\Http\Request;
 
 class StoryController extends Controller
 {
-    public function show(Story $story)
+    protected BotDetector $botDetector;
+
+    public function __construct(BotDetector $botDetector)
+    {
+        $this->botDetector = $botDetector;
+    }
+
+    public function show(Request $request, Story $story)
     {
         if ($story->durum !== 'published' && !auth()->check()) {
             abort(404);
         }
 
-        // Increment view count
-        $story->increment('views');
+        // Only increment view count for REAL visitors (not bots)
+        $userAgent = $request->header('User-Agent');
+        if (!$this->botDetector->isBot($userAgent)) {
+            $story->increment('views');
+        }
 
         // Fetch 3 random suggested stories (excluding current)
         $similarStories = Story::where('durum', 'published')

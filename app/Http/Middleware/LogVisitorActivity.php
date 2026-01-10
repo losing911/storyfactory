@@ -8,22 +8,28 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cookie;
+use App\Services\BotDetector;
 
 class LogVisitorActivity
 {
+    protected BotDetector $botDetector;
+
+    public function __construct(BotDetector $botDetector)
+    {
+        $this->botDetector = $botDetector;
+    }
+
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            // 1. Exclude Bots/Crawlers (Simple Check)
-            $userAgent = $request->header('User-Agent');
-            if (Str::contains(strtolower($userAgent), ['bot', 'crawler', 'spider', 'uptime', 'monitor'])) {
-                return $next($request);
-            }
-
-            // 2. Exclude Asset/Admin Routes
+            // 1. Exclude Asset/Admin Routes (but NOT bots - we want to track them)
             if ($request->is('admin*', 'api*', 'storage*', '*.png', '*.jpg', '*.css', '*.js', 'favicon.ico')) {
                 return $next($request);
             }
+
+            // 2. Detect Bot
+            $userAgent = $request->header('User-Agent');
+            $botInfo = $this->botDetector->detect($userAgent);
 
             // 3. Get or Set Visitor ID (Identify New vs Returning)
             $visitorId = $request->cookie('netrunner_id');
@@ -69,6 +75,8 @@ class LogVisitorActivity
 
             DB::table('analytics_logs')->insert([
                 'visitor_id' => $visitorId,
+                'is_bot' => $botInfo['is_bot'],
+                'bot_name' => $botInfo['bot_name'],
                 'is_new_visitor' => $isNewVisitor,
                 'ip_address' => $request->ip(),
                 'url' => $request->path(),

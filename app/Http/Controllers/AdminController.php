@@ -27,31 +27,54 @@ class AdminController extends Controller
     public function dashboard()
     {
         try {
-            // Stats
+            // Stats - Separate Real vs Bot Traffic
+            $allLogs = \Illuminate\Support\Facades\DB::table('analytics_logs');
+            $realLogs = \Illuminate\Support\Facades\DB::table('analytics_logs')->where('is_bot', false);
+            $botLogs = \Illuminate\Support\Facades\DB::table('analytics_logs')->where('is_bot', true);
+
             $stats = [
                 'total_stories' => Story::count(),
-                'total_views' => \Illuminate\Support\Facades\DB::table('analytics_logs')->count(),
-                'unique_visitors' => \Illuminate\Support\Facades\DB::table('analytics_logs')->distinct('visitor_id')->count('visitor_id'),
+                // Real visitor stats (what matters)
+                'total_views' => (clone $realLogs)->count(),
+                'unique_visitors' => (clone $realLogs)->distinct('visitor_id')->count('visitor_id'),
+                // Bot stats (for transparency)
+                'bot_views' => (clone $botLogs)->count(),
+                'unique_bots' => (clone $botLogs)->distinct('bot_name')->count('bot_name'),
             ];
+
+            // Top Bots Detected
+            $topBots = \Illuminate\Support\Facades\DB::table('analytics_logs')
+                ->select('bot_name', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+                ->where('is_bot', true)
+                ->whereNotNull('bot_name')
+                ->groupBy('bot_name')
+                ->orderByDesc('count')
+                ->limit(10)
+                ->get();
 
             // Latest AI Insight
             $insight = \Illuminate\Support\Facades\DB::table('analytics_insights')->orderBy('report_date', 'desc')->first();
 
-            // Recent Logs
-            $recentLogs = \Illuminate\Support\Facades\DB::table('analytics_logs')->latest()->take(10)->get();
+            // Recent Logs (only real visitors)
+            $recentLogs = \Illuminate\Support\Facades\DB::table('analytics_logs')
+                ->where('is_bot', false)
+                ->latest()
+                ->take(10)
+                ->get();
 
             // Recent E-Books
             $ebooks = \App\Models\EBook::latest()->take(5)->get();
 
-            // Traffic Sources Analysis
+            // Traffic Sources Analysis (only real visitors)
             $logs = \Illuminate\Support\Facades\DB::table('analytics_logs')
+                ->where('is_bot', false)
                 ->select('referrer', 'is_new_visitor', 'utm_source', 'utm_medium')
                 ->get();
 
             $trafficSources = ['Search' => 0, 'Social' => 0, 'Direct' => 0, 'Other' => 0];
             $trafficDetails = ['Search' => [], 'Social' => [], 'Other' => []];
             
-            // Visitor Stats
+            // Visitor Stats (only real visitors)
             $visitorStats = [
                 'new' => $logs->where('is_new_visitor', 1)->count(),
                 'returning' => $logs->where('is_new_visitor', 0)->count(),
@@ -124,7 +147,7 @@ class AdminController extends Controller
             arsort($trafficDetails['Social']);
             arsort($trafficDetails['Other']);
 
-            return view('admin.dashboard', compact('stats', 'insight', 'recentLogs', 'ebooks', 'trafficSources', 'trafficPercentages', 'trafficDetails', 'visitorStats'));
+            return view('admin.dashboard', compact('stats', 'insight', 'recentLogs', 'ebooks', 'trafficSources', 'trafficPercentages', 'trafficDetails', 'visitorStats', 'topBots'));
         } catch (\Exception $e) {
             return response()->make("
                 <div style='background:#000; color:#ff0000; padding:20px; font-family:monospace; border:1px solid #ff0000; margin:20px;'>

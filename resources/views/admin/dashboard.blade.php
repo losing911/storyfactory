@@ -5,21 +5,47 @@
     <div class="max-w-7xl mx-auto">
         <h1 class="text-3xl font-display text-white mb-8 border-l-4 border-neon-blue pl-4">COMMAND CENTER</h1>
 
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Stats Grid - REAL VISITORS (Primary Focus) -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <div class="bg-gray-900 border border-gray-800 p-6 rounded">
                 <h3 class="text-gray-500 font-mono text-sm uppercase">Total Stories</h3>
                 <p class="text-4xl text-neon-green font-display">{{ $stats['total_stories'] }}</p>
             </div>
-            <div class="bg-gray-900 border border-gray-800 p-6 rounded">
-                <h3 class="text-gray-500 font-mono text-sm uppercase">Total Views</h3>
-                <p class="text-4xl text-neon-blue font-display">{{ $stats['total_views'] }}</p>
+            <div class="bg-gray-900 border border-neon-green/50 p-6 rounded relative">
+                <span class="absolute top-2 right-2 text-[10px] font-mono px-2 py-0.5 bg-neon-green/20 text-neon-green rounded">GERÇEK</span>
+                <h3 class="text-gray-500 font-mono text-sm uppercase">Gerçek Görüntülenme</h3>
+                <p class="text-4xl text-neon-green font-display">{{ $stats['total_views'] }}</p>
             </div>
-            <div class="bg-gray-900 border border-gray-800 p-6 rounded">
-                <h3 class="text-gray-500 font-mono text-sm uppercase">Unique Visitors</h3>
-                <p class="text-4xl text-neon-pink font-display">{{ $stats['unique_visitors'] }}</p>
+            <div class="bg-gray-900 border border-neon-blue/50 p-6 rounded relative">
+                <span class="absolute top-2 right-2 text-[10px] font-mono px-2 py-0.5 bg-neon-blue/20 text-neon-blue rounded">GERÇEK</span>
+                <h3 class="text-gray-500 font-mono text-sm uppercase">Gerçek Ziyaretçi</h3>
+                <p class="text-4xl text-neon-blue font-display">{{ $stats['unique_visitors'] }}</p>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 p-6 rounded relative">
+                <span class="absolute top-2 right-2 text-[10px] font-mono px-2 py-0.5 bg-red-500/20 text-red-400 rounded">BOT</span>
+                <h3 class="text-gray-500 font-mono text-sm uppercase">Bot Trafik</h3>
+                <p class="text-4xl text-red-400 font-display">{{ $stats['bot_views'] ?? 0 }}</p>
+                <span class="text-xs text-gray-600 font-mono">{{ $stats['unique_bots'] ?? 0 }} farklı bot</span>
             </div>
         </div>
+
+        <!-- Detected Bots List (Collapsible) -->
+        @if(isset($topBots) && count($topBots) > 0)
+        <details class="mb-8 bg-gray-900 border border-gray-800 rounded">
+            <summary class="p-4 cursor-pointer hover:bg-gray-800/50 transition font-mono text-sm text-gray-400 flex items-center gap-2">
+                <span class="text-red-400">🤖</span> TESPİT EDİLEN BOTLAR ({{ count($topBots) }})
+                <span class="ml-auto text-[10px] text-gray-600">Detay için tıkla</span>
+            </summary>
+            <div class="p-4 border-t border-gray-800 grid grid-cols-2 md:grid-cols-5 gap-3">
+                @foreach($topBots as $bot)
+                    <div class="bg-black/50 border border-red-900/30 p-2 rounded text-center">
+                        <div class="text-red-400 font-mono text-xs truncate" title="{{ $bot->bot_name }}">{{ $bot->bot_name }}</div>
+                        <div class="text-gray-500 text-[10px]">{{ $bot->count }} hit</div>
+                    </div>
+                @endforeach
+            </div>
+        </details>
+        @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
