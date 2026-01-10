@@ -178,9 +178,17 @@
         </div>
     </header>
 
+    <!-- Ezoic - under_page_title - under_page_title -->
+    <div id="ezoic-pub-ad-placeholder-102" class="max-w-7xl mx-auto px-4 my-4"></div>
+    <!-- End Ezoic - under_page_title - under_page_title -->
+
     <main class="flex-grow">
         @yield('content')
     </main>
+
+    <!-- Ezoic - bottom_of_page - bottom_of_page -->
+    <div id="ezoic-pub-ad-placeholder-103" class="max-w-7xl mx-auto px-4 my-8"></div>
+    <!-- End Ezoic - bottom_of_page - bottom_of_page -->
 
     <footer class="border-t border-gray-800 bg-black py-12 mt-20">
         <div class="max-w-7xl mx-auto px-4 text-center">
@@ -287,6 +295,13 @@
             gainNode.connect(audioCtx.destination);
             noise.start();
         }
+    </script>
+
+    <!-- Ezoic Ads Activation -->
+    <script>
+        ezstandalone.cmd.push(function() {
+            ezstandalone.showAds();
+        });
     </script>
 </body>
 </html>
