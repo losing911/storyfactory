@@ -301,6 +301,16 @@
             </div>
         </div>
     </div>
+
+    <!-- Emote Comments Section -->
+    <div class="max-w-3xl mx-auto px-4 py-12 comments-section">
+        <h3 class="font-display text-neon-purple text-lg mb-6 tracking-wider uppercase flex items-center gap-3">
+            <span class="w-3 h-3 bg-neon-purple rounded-full animate-pulse"></span>
+            /// COMMUNITY_FEEDBACK
+        </h3>
+        <script defer src="https://i.emote.com/js/emote.js"></script>
+        <div id="emote_com"></div>
+    </div>
 </article>
 
 <script>
