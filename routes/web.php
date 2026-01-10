@@ -5,6 +5,11 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminEBookController;
 use App\Http\Controllers\LoginController;
 
+// Ezoic ads.txt redirect
+Route::get('/ads.txt', function () {
+    return redirect()->away('https://srv.adstxtmanager.com/19390/anxipunk.icu', 301);
+});
+
 Route::get('/', function () {
     $stories = App\Models\Story::where('durum', 'published')->latest()->paginate(9);
     $latestStory = App\Models\Story::where('durum', 'published')->latest()->first();
