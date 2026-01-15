@@ -22,7 +22,7 @@ class FillLoreImages extends Command
             
             try {
                 // Construct Prompt
-                $prompt = "Cyberpunk 2077 concept art, " . $entry->type . ", " . $entry->title . ", " . ($entry->visual_prompt ?? $entry->description);
+                $prompt = "sgbl artstyle, Cyberpunk 2077 concept art, " . $entry->type . ", " . $entry->title . ", " . ($entry->visual_prompt ?? $entry->description);
                 $prompt = substr($prompt, 0, 400); // Limit length
 
                 // Generate (Synchronous Pollinations)

@@ -83,7 +83,7 @@ class AIService
         $prompt .= "7. SEO & Sosyal Medya alanlarını doldur.\n\n";
         $prompt .= "Görsel Prompt Kuralları:\n";
         $prompt .= "- Promptlar İNGİLİZCE olmalı.\n";
-        $prompt .= "- Stil belirteçleri ekle: 'anime style, studio ghibli, akira style, ghost in the shell style, cel shaded, highly detailed, 8k, vibrant colors'.\n";
+        $prompt .= "- Stil belirteçleri ekle: 'sgbl artstyle, anime style, studio ghibli, akira style, ghost in the shell style, cel shaded, highly detailed, 8k, vibrant colors'.\n";
         $prompt .= "- Konuşma balonu veya yazı İÇERMEMELİ ('no text, no speech bubbles').\n";
         $prompt .= "- Asla 'photorealistic' veya 'unreal engine' kullanma. Anime estetiğine sadık kal.\n\n";
         $prompt .= "JSON Şeması:\n";
@@ -236,7 +236,7 @@ class AIService
             $prompt .= ", " . $visualPrompt;
         }
 
-        $encodedPrompt = urlencode($prompt . $style);
+        $encodedPrompt = urlencode("sgbl artstyle, " . $prompt . $style);
         $encodedNegative = urlencode($negative);
         
         // 2. Inject Reference Image (Experimental Support in Pollinations/Flux)

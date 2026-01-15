@@ -230,7 +230,7 @@ def generate_image_pollinations(prompt, model='turbo'):
     style = ", anime masterpiece, Makoto Shinkai style, Ufotable animation, vivid cyberpunk colors, highly detailed, perfect lighting, lens flare, cinematic angle, 8k, digital illustration, trending on artstation"
     clean_prompt = prompt.replace("photorealistic", "").replace("realistic", "") # Simple cleaning
     
-    final_prompt = clean_prompt + style
+    final_prompt = "sgbl artstyle, " + clean_prompt + style
     encoded_prompt = urllib.parse.quote(final_prompt)
     
     seed = random.randint(1, 99999)
@@ -293,7 +293,7 @@ def generate_image_comfyui(prompt):
         # 1. Set Prompt
         if "6" in workflow:
              # Enhance prompt for Flux
-             enhanced_prompt = f"{prompt}, (anime style:1.2), masterpiece, best quality, vibrant colors"
+             enhanced_prompt = f"sgbl artstyle, {prompt}, (anime style:1.2), masterpiece, best quality, vibrant colors"
              workflow["6"]["inputs"]["text"] = enhanced_prompt
              print(f"Updated Prompt in Node 6")
         else:

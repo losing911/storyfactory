@@ -41,11 +41,11 @@ class GenerateLoreImages extends Command
 
                 // Construct Prompt
                 $visualDesc = $lore->visual_prompt ?? $lore->description;
-                $prompt = "Portrait of {$lore->title}, a cyberpunk {$lore->type}, {$visualDesc}, detailed, 8k, cinematic lighting, neon atmosphere";
+                $prompt = "sgbl artstyle, Portrait of {$lore->title}, a cyberpunk {$lore->type}, {$visualDesc}, detailed, 8k, cinematic lighting, neon atmosphere";
                 
                 // Enhance prompt based on type
                 if ($lore->type === 'city' || $lore->type === 'location') {
-                    $prompt = "Cyberpunk city location, {$lore->title}, {$visualDesc}, futuristic architecture, neon signs, rainy streets, detailed environment";
+                    $prompt = "sgbl artstyle, Cyberpunk city location, {$lore->title}, {$visualDesc}, futuristic architecture, neon signs, rainy streets, detailed environment";
                 }
 
                 // Generate
