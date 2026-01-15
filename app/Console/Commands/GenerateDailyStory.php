@@ -173,7 +173,7 @@ class GenerateDailyStory extends Command
 
                             // Generate Image for Lore
                             try {
-                                $lorePrompt = "Portrait of " . $loreItem['title'] . ", " . ($loreItem['visual_prompt'] ?? $loreItem['description']) . ", cyberpunk 2077 style, detailed, 8k";
+                                $lorePrompt = "sgbl artstyle, Portrait of " . $loreItem['title'] . ", " . ($loreItem['visual_prompt'] ?? $loreItem['description']) . ", cyberpunk 2077 style, detailed, 8k";
                                 $remoteLoreUrl = $aiService->generateImage($lorePrompt);
                                 $localLorePath = "lore/" . $loreSlug . "_" . now()->timestamp . ".jpg";
                                 $loreImageUrl = $aiService->downloadImage($remoteLoreUrl, $localLorePath);
