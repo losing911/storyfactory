@@ -236,7 +236,10 @@ class AIService
             $prompt .= ", " . $visualPrompt;
         }
 
-        $encodedPrompt = urlencode("sgbl artstyle, " . $prompt . $style);
+        if (!str_starts_with(strtolower($prompt), "sgbl artstyle")) {
+            $prompt = "sgbl artstyle, " . $prompt;
+        }
+        $encodedPrompt = urlencode($prompt . $style);
         $encodedNegative = urlencode($negative);
         
         // 2. Inject Reference Image (Experimental Support in Pollinations/Flux)
