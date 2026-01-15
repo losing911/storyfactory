@@ -2,7 +2,7 @@ import worker
 import time
 
 print("🧪 Starting Image Generation Test (Local ComfyUI)...")
-prompt = "cyberpunk city street at night, neon lights, rain, detailed, anime style"
+prompt = "sgbl artstyle, cyberpunk city street at night, neon lights, rain, detailed, anime style"
 
 # Directly call gen function
 print(f"Subject: {prompt}")
