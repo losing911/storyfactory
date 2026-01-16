@@ -227,7 +227,7 @@ def generate_music_comfyui(prompt, duration=30):
 # Task: Generate via Pollinations.ai
 def generate_image_pollinations(prompt, model='turbo'):
     # Style Injection: Vibrant High-End Anime (Makoto Shinkai, Ufotable, Cyberpunk)
-    style = ", anime masterpiece, Makoto Shinkai style, Ufotable animation, vivid cyberpunk colors, highly detailed, perfect lighting, lens flare, cinematic angle, 8k, digital illustration, trending on artstation"
+    style = ", vivid cyberpunk colors, highly detailed, perfect lighting, lens flare, cinematic angle, 8k, digital illustration, trending on artstation"
     clean_prompt = prompt.replace("photorealistic", "").replace("realistic", "") # Simple cleaning
     
     if not clean_prompt.lower().startswith("sgbl artstyle"):
@@ -297,9 +297,9 @@ def generate_image_comfyui(prompt):
         if "6" in workflow:
              # Enhance prompt for Flux
              if not prompt.lower().startswith("sgbl artstyle"):
-                 enhanced_prompt = f"sgbl artstyle, {prompt}, (anime style:1.2), masterpiece, best quality, vibrant colors"
+                 enhanced_prompt = f"sgbl artstyle, {prompt}, masterpiece, best quality, vibrant colors"
              else:
-                 enhanced_prompt = f"{prompt}, (anime style:1.2), masterpiece, best quality, vibrant colors"
+                 enhanced_prompt = f"{prompt}, masterpiece, best quality, vibrant colors"
              workflow["6"]["inputs"]["text"] = enhanced_prompt
              print(f"Updated Prompt in Node 6")
         else:

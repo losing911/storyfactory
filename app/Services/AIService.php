@@ -223,7 +223,7 @@ class AIService
     {
         // Use Pollinations.ai with FLUX model (State of the Art)
         // Updated Style: Strong Anime / Manga (2D Flat)
-        $style = ", (anime art style:1.5), (2d:1.3), flat color, studio ghibli, akira vibes, mamoru oshii style, cyberpunk, cel shaded, vibrant colors, detailed line art, 8k, atmospheric, masterpiece, no text";
+        $style = ", cyberpunk, vibrant colors, detailed line art, 8k, atmospheric, masterpiece, no text";
         
         // Negative Prompt (Standard for Polli/SD)
         // Note: Pollinations might require appending negative prompts directly or via parameter.
