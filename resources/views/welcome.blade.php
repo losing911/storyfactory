@@ -61,39 +61,45 @@
         <!-- Story Grid (Left 3 cols) -->
         <div class="lg:col-span-3 grid md:grid-cols-2 gap-8">
             @foreach($stories as $story)
-            <a href="{{ route('story.show', $story) }}" class="group block relative bg-gray-900 border border-gray-800 hover:border-neon-pink transition duration-300 overflow-hidden rounded-sm hover:shadow-neon-pink h-full flex flex-col">
-                <div class="h-48 bg-gray-800 overflow-hidden relative">
-                    @if($story->gorsel_url)
-                        <img src="{{ $story->gorsel_url }}" alt="{{ $story->baslik }}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700 opacity-80 group-hover:opacity-100">
-                    @else
-                        <div class="w-full h-full flex items-center justify-center bg-gray-900 text-gray-700 font-display">{{ __('ui.no_signal') }}</div>
-                    @endif
-                    <div class="absolute top-2 right-2 bg-black/80 text-neon-green text-[10px] font-mono px-2 py-1 border border-neon-green/30">
-                        {{ $story->mood ?? __('ui.data') }}
+            <div class="group relative bg-gray-900 border border-gray-800 hover:border-neon-pink transition duration-300 overflow-hidden rounded-sm hover:shadow-neon-pink h-full flex flex-col">
+                <a href="{{ route('story.show', $story) }}" class="block flex-grow">
+                    <div class="h-48 bg-gray-800 overflow-hidden relative">
+                        @if($story->gorsel_url)
+                            <img src="{{ $story->gorsel_url }}" alt="{{ $story->baslik }}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700 opacity-80 group-hover:opacity-100">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center bg-gray-900 text-gray-700 font-display">{{ __('ui.no_signal') }}</div>
+                        @endif
+                        <div class="absolute top-2 right-2 bg-black/80 text-neon-green text-[10px] font-mono px-2 py-1 border border-neon-green/30">
+                            {{ $story->mood ?? __('ui.data') }}
+                        </div>
                     </div>
-                </div>
-                <div class="p-6 flex-grow flex flex-col">
-                     <h3 class="text-xl font-display font-bold text-white mb-2 group-hover:text-neon-pink transition duration-300 leading-tight">{{ $story->getTitle(app()->getLocale()) }}</h3>
-                     <p class="text-gray-500 text-sm line-clamp-3 mb-4 flex-grow">{{ Str::limit(strip_tags($story->getText(app()->getLocale())), 200) }}</p>
+                    <div class="p-6 pb-2">
+                         <h3 class="text-xl font-display font-bold text-white mb-2 group-hover:text-neon-pink transition duration-300 leading-tight">{{ $story->getTitle(app()->getLocale()) }}</h3>
+                         <p class="text-gray-500 text-sm line-clamp-3 mb-4">{{ Str::limit(strip_tags($story->getText(app()->getLocale())), 200) }}</p>
+                    </div>
+                </a>
+                
+                <!-- Footer (Separate from Link) -->
+                <div class="px-6 pb-6 pt-2 mt-auto">
                      <div class="text-xs font-mono text-gray-600 pt-4 border-t border-gray-800 flex justify-between items-center">
                         <span>// {{ $story->yayin_tarihi->format('Y.m.d') }}</span>
                         
-                        <div class="flex gap-3">
-                            <!-- Likes / Resonance -->
-                            <div class="flex items-center gap-1 group-hover:text-neon-pink transition" title="Likes">
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                <span>{{ $story->reactions_count }}</span>
-                            </div>
+                        <div class="flex gap-4">
+                            <!-- Like Button (AJAX) -->
+                            <button onclick="toggleLike(this, {{ $story->id }})" class="flex items-center gap-1 hover:text-neon-pink transition text-gray-500 z-20" title="Resonance Link">
+                                <svg class="w-4 h-4 fill-current transition-transform active:scale-125" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                <span class="count">{{ $story->reactions_count }}</span>
+                            </button>
 
-                            <!-- Comments -->
-                            <div class="flex items-center gap-1 group-hover:text-neon-blue transition" title="Comments">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                            <!-- Comments (Link to Story) -->
+                            <a href="{{ route('story.show', $story) }}#comments" class="flex items-center gap-1 hover:text-neon-blue transition text-gray-500 z-20" title="Comments">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                                 <span>{{ $story->comments_count }}</span>
-                            </div>
+                            </a>
                         </div>
                      </div>
                 </div>
-            </a>
+            </div>
             @endforeach
         </div>
 
@@ -439,6 +445,55 @@
         updateStats();
         setInterval(updateStats, 5000);
     })();
+
+    // === GLOBAL LIKE FUNCTION ===
+    window.toggleLike = function(btn, storyId) {
+        // Prevent default if mapped
+        if(!btn) return;
+
+        // Visual Feedback Immediate
+        const countSpan = btn.querySelector('.count');
+        const icon = btn.querySelector('svg');
+        const originalColor = btn.classList.contains('text-neon-pink') ? 'text-neon-pink' : 'text-gray-500';
+        
+        // Optimistic UI update
+        // We don't know if we are adding or removing without state, but let's try to infer or just wait?
+        // Let's just animate spinner or pulse
+        icon.classList.add('animate-ping');
+
+        fetch(`/story/${storyId}/react`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ type: 'link' }) // Default to 'link' (Resonance/Heart)
+        })
+        .then(res => res.json())
+        .then(data => {
+            icon.classList.remove('animate-ping');
+            if(data.status === 'success') {
+                // Update Count (Aggregate sum of all, or just this type? Controller returns broken down array)
+                // Let's assume we want total interactions or specific?
+                // The controller returns { reaction_type: count, ... }
+                // Use total of 'link' type
+                const newCount = data.counts['link'] || 0;
+                countSpan.innerText = newCount;
+                
+                if(data.action === 'added') {
+                    btn.classList.remove('text-gray-500');
+                    btn.classList.add('text-neon-pink');
+                } else {
+                    btn.classList.remove('text-neon-pink');
+                    btn.classList.add('text-gray-500');
+                }
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            icon.classList.remove('animate-ping');
+        });
+    };
 </script>
 
 <!-- Matrix Mode CSS -->
