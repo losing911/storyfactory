@@ -86,7 +86,7 @@
                         
                         <div class="flex gap-4">
                             <!-- Like Button (AJAX) -->
-                            <button onclick="toggleLike(event, this, {{ $story->id }})" class="flex items-center gap-1 hover:text-neon-pink transition text-gray-500 z-20 focus:outline-none" title="Resonance Link">
+                            <button onclick="toggleLike(event, this, '{{ route('story.react', $story) }}')" class="flex items-center gap-1 hover:text-neon-pink transition text-gray-500 z-20 focus:outline-none" title="Resonance Link">
                                 <svg class="w-4 h-4 fill-current transition-transform active:scale-125 pointer-events-none" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                                 <span class="count pointer-events-none">{{ $story->reactions_count }}</span>
                             </button>
@@ -447,11 +447,11 @@
     })();
 
     // === GLOBAL LIKE FUNCTION (DEBUGGED) ===
-    window.toggleLike = function(event, btn, storyId) {
+    window.toggleLike = function(event, btn, reqUrl) {
         event.preventDefault();
         event.stopPropagation();
         
-        console.log('[LIKE] Triggered for Story ' + storyId);
+        console.log('[LIKE] Triggered for URL: ' + reqUrl);
 
         if(!btn) return;
 
@@ -463,7 +463,7 @@
         // Optimistic UI update
         icon.classList.add('animate-ping');
 
-        fetch(`/story/${storyId}/react`, {
+        fetch(reqUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
