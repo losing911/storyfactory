@@ -43,6 +43,11 @@ class Story extends Model
         return $this->hasMany(Comment::class)->latest();
     }
 
+    public function reactions()
+    {
+        return $this->hasMany(StoryReaction::class); // Assuming StoryReaction model exists, or just use table if no model
+    }
+
     public function translations()
     {
         return $this->hasMany(StoryTranslation::class);

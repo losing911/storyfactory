@@ -16,7 +16,7 @@ Route::get('/ads.txt', function () {
 });
 
 Route::get('/', function () {
-    $stories = App\Models\Story::where('durum', 'published')->latest()->paginate(9);
+    $stories = App\Models\Story::where('durum', 'published')->withCount(['comments', 'reactions'])->latest()->paginate(9);
     $latestStory = App\Models\Story::where('durum', 'published')->latest()->first();
     $spotlightLore = App\Models\LoreEntry::where('is_active', true)->inRandomOrder()->first();
     
