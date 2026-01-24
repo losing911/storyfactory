@@ -106,13 +106,21 @@ class AIService
         $prompt .= "\nÖNEMLİ: Eğer hikayede YENİ ve ÖNEMLİ bir karakter, mekan veya çete uydurduysan, 'new_lore' listesine ekle. Yoksa boş dizi bırak.\n";
         
         try {
-            // Priority 1: Google Gemini
+            // Priority 1: Google Gemini (Direct)
             return $this->generateWithGemini($prompt);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning("Gemini Failed: " . $e->getMessage() . ". Trying OpenRouter (DeepSeek)...");
+            \Illuminate\Support\Facades\Log::warning("Primary (Gemini Direct) Failed: " . $e->getMessage() . ". Switching to OpenRouter...");
             
-            // Priority 2: OpenRouter (DeepSeek Free)
-            return $this->generateWithOpenRouter($prompt, 'tngtech/deepseek-r1t2-chimera:free');
+            try {
+                // Priority 2: OpenRouter (DeepSeek Chimera - Free & Smart)
+                return $this->generateWithOpenRouter($prompt, 'tngtech/deepseek-r1t2-chimera:free');
+            } catch (\Exception $e2) {
+                 \Illuminate\Support\Facades\Log::warning("Backup 1 (DeepSeek) Failed: " . $e2->getMessage() . ". Switching to Gemini Free Tier via OpenRouter...");
+
+                 // Priority 3: OpenRouter (Gemini 2.0 Flash - Free)
+                 // This uses OpenRouter's pool, which might override the direct Google 429 limit
+                 return $this->generateWithOpenRouter($prompt, 'google/gemini-2.0-flash-exp:free');
+            }
         }
     }
 
@@ -142,8 +150,8 @@ class AIService
             throw new \Exception('OPENROUTER_API_KEY is missing.');
         }
 
-        // Increased to 300s (5 mins) for DeepSeek/OpenRouter
-        $response = Http::timeout(300)->withHeaders([
+        // Increased to 600s (10 mins) for DeepSeek/OpenRouter to prevent timeouts
+        $response = Http::timeout(600)->withHeaders([
             'Authorization' => 'Bearer ' . $openRouterKey,
             'HTTP-Referer' => config('app.url'),
             'X-Title' => config('app.name'),
