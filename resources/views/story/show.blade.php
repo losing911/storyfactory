@@ -138,6 +138,12 @@
                     {{ $story->yayin_tarihi->format('d.m.Y') }}
                 </div>
 
+                <!-- Like Button (Header) -->
+                <button id="headerLikeBtn" class="flex items-center gap-2 bg-black/50 backdrop-blur-sm border border-gray-700 hover:border-neon-pink px-3 py-1.5 rounded-full transition group" title="Like / Resonance">
+                    <svg class="w-4 h-4 text-gray-500 group-hover:text-neon-pink transition fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    <span class="text-xs font-mono text-gray-400 group-hover:text-white transition" id="headerLikeCount">{{ $reactions['link'] ?? 0 }}</span>
+                </button>
+
                 <!-- TTS Button -->
                 <button id="ttsButton" class="border border-neon-blue/50 text-neon-blue px-3 py-1 font-mono text-[10px] md:text-sm hover:bg-neon-blue/20 transition-colors flex items-center gap-1 backdrop-blur-sm">
                     <span>▶ AUDIO</span>
@@ -372,6 +378,49 @@
             .catch(err => console.error('Reaction Error:', err));
         });
     });
+
+    // 3.5 Header Like Button Logic
+    const headerLikeBtn = document.getElementById('headerLikeBtn');
+    if(headerLikeBtn) {
+        headerLikeBtn.addEventListener('click', () => {
+            // Trigger the existing 'link' reaction button logic if possible, or duplicate fetch
+            // Let's reuse the fetch for consistency
+            const icon = headerLikeBtn.querySelector('svg');
+            icon.classList.add('animate-ping');
+            
+            fetch('{{ route('story.react', $story) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ type: 'link' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                icon.classList.remove('animate-ping');
+                if(data.status === 'success') {
+                    // Update Header Count
+                    document.getElementById('headerLikeCount').innerText = data.counts['link'] || 0;
+                    
+                    // Update Footer Count (Sync)
+                    const footerLinkCount = document.getElementById('count-link');
+                    if(footerLinkCount) footerLinkCount.innerText = data.counts['link'] || 0;
+
+                    // Update Style
+                    if(data.action === 'added') {
+                        icon.classList.replace('text-gray-500', 'text-neon-pink');
+                    } else {
+                        icon.classList.replace('text-neon-pink', 'text-gray-500');
+                    }
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                icon.classList.remove('animate-ping');
+            });
+        });
+    }
 
     // 4. TTS Audio (Robust)
     const ttsBtn = document.getElementById('ttsButton');

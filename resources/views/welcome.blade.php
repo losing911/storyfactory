@@ -86,9 +86,9 @@
                         
                         <div class="flex gap-4">
                             <!-- Like Button (AJAX) -->
-                            <button onclick="toggleLike(this, {{ $story->id }})" class="flex items-center gap-1 hover:text-neon-pink transition text-gray-500 z-20" title="Resonance Link">
-                                <svg class="w-4 h-4 fill-current transition-transform active:scale-125" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                <span class="count">{{ $story->reactions_count }}</span>
+                            <button onclick="toggleLike(event, this, {{ $story->id }})" class="flex items-center gap-1 hover:text-neon-pink transition text-gray-500 z-20 focus:outline-none" title="Resonance Link">
+                                <svg class="w-4 h-4 fill-current transition-transform active:scale-125 pointer-events-none" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                <span class="count pointer-events-none">{{ $story->reactions_count }}</span>
                             </button>
 
                             <!-- Comments (Link to Story) -->
@@ -100,6 +100,408 @@
                      </div>
                 </div>
             </div>
+            @endforeach
+        </div>
+
+        <!-- Sidebar (Right 1 col) -->
+        <div class="hidden lg:block space-y-6">
+            <!-- Lore Spotlight -->
+            @if($spotlightLore)
+            <div class="bg-gray-900 border border-gray-800 p-1 relative group">
+                <div class="absolute -top-3 -left-3 bg-neon-purple text-black font-bold font-mono text-xs px-2 py-1 transform -rotate-12 z-10 shadow-neon-purple">{{ __('ui.db_spotlight') }}</div>
+                @include('lore.card', ['entry' => $spotlightLore])
+                <div class="mt-2 text-center">
+                    <a href="{{ route('lore.show', $spotlightLore->slug) }}" class="block w-full bg-gray-800 hover:bg-neon-purple hover:text-black text-gray-400 text-xs font-mono py-2 transition uppercase">
+                        {{ __('ui.access_file') }}
+                    </a>
+                </div>
+            </div>
+            @endif
+
+            <!-- Interactive Terminal Widget -->
+            <div class="bg-black border border-neon-green/30 rounded overflow-hidden">
+                <div class="bg-gray-900 px-3 py-1 flex items-center gap-2 border-b border-gray-800">
+                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span class="text-[10px] text-gray-500 font-mono ml-2">terminal_v2.4</span>
+                </div>
+                <div class="p-3 font-mono text-[11px] text-neon-green h-32 overflow-hidden" id="terminal-output">
+                    <div class="terminal-line">> system_boot...</div>
+                    <div class="terminal-line">> loading neo-pera_core...</div>
+                    <div class="terminal-line text-gray-500">> [OK] connection_established</div>
+                </div>
+                <div class="border-t border-gray-800 p-2 flex items-center gap-2">
+                    <span class="text-neon-green text-xs">></span>
+                    <input type="text" id="terminal-input" placeholder="type 'help'" class="bg-transparent border-none text-neon-green text-xs font-mono flex-grow focus:outline-none placeholder-gray-700">
+                </div>
+            </div>
+
+            <!-- Decrypt Challenge Game -->
+            <div class="bg-gray-900/80 border border-neon-pink/30 p-4 rounded relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-neon-pink/5 to-transparent"></div>
+                <h4 class="text-neon-pink font-mono text-[10px] uppercase tracking-widest mb-3 relative z-10">🔐 DECRYPT_CHALLENGE</h4>
+                <div class="relative z-10">
+                    <div class="text-center mb-3">
+                        <span id="cipher-text" class="font-mono text-lg text-gray-300 tracking-[0.3em] select-none cursor-pointer hover:text-neon-pink transition" title="Tıkla ve çöz!">█▓▒░ ? ░▒▓█</span>
+                    </div>
+                    <input type="text" id="decrypt-input" placeholder="cevabı_yaz..." class="w-full bg-black/50 border border-gray-700 text-white text-xs font-mono p-2 focus:outline-none focus:border-neon-pink rounded">
+                    <div id="decrypt-result" class="text-[10px] font-mono mt-2 text-center h-4"></div>
+                </div>
+            </div>
+
+            <!-- Live Stats Widget -->
+            <div class="bg-gray-900/50 border border-gray-800 p-4 rounded">
+                <h4 class="text-gray-500 font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-neon-green animate-pulse"></span>
+                    LIVE_FEED
+                </h4>
+                <div class="space-y-2 text-xs font-mono">
+                    <div class="flex justify-between text-gray-400">
+                        <span>Aktif Bağlantı:</span>
+                        <span class="text-neon-blue" id="live-connections">--</span>
+                    </div>
+                    <div class="flex justify-between text-gray-400">
+                        <span>Bugün Okunma:</span>
+                        <span class="text-neon-green" id="live-reads">--</span>
+                    </div>
+                    <div class="flex justify-between text-gray-400">
+                        <span>Son Yorum:</span>
+                        <span class="text-neon-pink truncate max-w-[100px]" id="live-comment">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ezoic - sidebar - sidebar -->
+            <div id="ezoic-pub-ad-placeholder-104"></div>
+            <!-- End Ezoic - sidebar - sidebar -->
+        </div>
+    </div>
+    
+    <!-- Mobile Pagination -->
+    <div class="mt-12">
+        {{ $stories->links() }}
+    </div>
+
+    <!-- NEW: KNOWLEDGE BASE (What is Cyberpunk?) -->
+    <div class="mt-24 grid lg:grid-cols-2 gap-16 items-center border-t border-gray-800 pt-16">
+        <div class="space-y-6">
+            <h2 class="text-3xl md:text-5xl font-display text-white leading-tight">
+                <span class="text-neon-pink">HIGH TECH.</span><br>
+                <span class="text-neon-blue">LOW LIFE.</span>
+            </h2>
+            <div class="prose prose-invert text-gray-400">
+                <p>
+                    <strong>Cyberpunk nedir?</strong> Sadece neon ışıklar ve robot kollar değildir. Çöküşün eşiğindeki bir toplumda, teknolojinin insanlığı nasıl hem yükselttiğini hem de hiç ettiği anlatır.
+                </p>
+                <p>
+                    Devasa şirketlerin devletlerin yerini aldığı, verinin petrolden değerli olduğu ve insan bedeninin sadece bir "donanım" (meatbag) olarak görüldüğü distopik bir gelecektir. Anxipunk, bu evrenin İstanbul (Neo-Pera) simülasyonudur.
+                </p>
+            </div>
+            <a href="{{ route('about') }}" class="inline-block border border-gray-600 text-gray-400 px-6 py-2 hover:border-white hover:text-white transition uppercase font-mono text-xs">
+                > MANIFESTO_OKU
+            </a>
+        </div>
+        <div class="relative group">
+            <div class="absolute -inset-1 bg-gradient-to-r from-neon-pink to-neon-blue opacity-30 group-hover:opacity-75 blur transition duration-1000"></div>
+            <div class="relative bg-black border border-gray-800 p-8 grid grid-cols-2 gap-4">
+                <!-- Info Cards -->
+                <div class="col-span-2 text-center border-b border-gray-800 pb-4 mb-4">
+                    <h3 class="font-display text-white text-xl">/// THE PIONEERS</h3>
+                </div>
+                
+                <div class="bg-gray-900/50 p-4 border border-gray-800 hover:border-neon-pink transition">
+                    <h4 class="text-neon-pink font-bold font-mono text-xs mb-1">WILLIAM GIBSON</h4>
+                    <p class="text-gray-500 text-[10px]">Neuromancer (1984). "Siberuzay" kelimesinin mucidi. Matrix'in babası.</p>
+                </div>
+
+                <div class="bg-gray-900/50 p-4 border border-gray-800 hover:border-neon-blue transition">
+                    <h4 class="text-neon-blue font-bold font-mono text-xs mb-1">BLADE RUNNER</h4>
+                    <p class="text-gray-500 text-[10px]">Ridley Scott (1982). Philip K. Dick'in eserinden uyarlama. Görsel estetiği belirledi.</p>
+                </div>
+
+                <div class="bg-gray-900/50 p-4 border border-gray-800 hover:border-neon-green transition">
+                    <h4 class="text-neon-green font-bold font-mono text-xs mb-1">GHOST IN THE SHELL</h4>
+                    <p class="text-gray-500 text-[10px]">Masamune Shirow (1989). İnsan ve makine arasındaki o ince çizgi.</p>
+                </div>
+
+                <div class="bg-gray-900/50 p-4 border border-gray-800 hover:border-neon-purple transition">
+                    <h4 class="text-neon-purple font-bold font-mono text-xs mb-1">CYBERPUNK 2077</h4>
+                    <p class="text-gray-500 text-[10px]">CD Projekt Red. Türü modern kitlelere tanıtan açık dünya RPG şaheseri.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Neural Art Gallery Strip -->
+    <div class="mt-20 border-t border-gray-800 pt-16">
+        <h2 class="text-3xl font-display text-white mb-8 flex items-center justify-between">
+            <span>/// NÖRAL_SANAT_GALERİSİ</span>
+            <a href="{{ route('gallery.index') }}" class="text-xs text-neon-blue hover:underline whitespace-nowrap">TÜMÜNÜ_GÖR >></a>
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            @php
+                // Fetch random images for visuals
+                $galleryImages = \App\Models\Story::whereNotNull('gorsel_url')->inRandomOrder()->take(4)->get();
+            @endphp
+            @foreach($galleryImages as $img)
+                <a href="{{ route('story.show', $img) }}" class="group relative aspect-square overflow-hidden border border-gray-800 hover:border-neon-green transition">
+                    <img src="{{ $img->gorsel_url }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500 filter grayscale group-hover:grayscale-0">
+                    <div class="absolute inset-0 bg-black/50 group-hover:opacity-0 transition"></div>
+                </a>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- NEW: Subscribe / Join Resistance -->
+    <div class="mt-20 bg-neon-purple/5 border-y border-neon-purple/30 py-16 text-center">
+        <h2 class="text-4xl font-display text-white mb-4 glitch-text" data-text="DİRENİŞE KATIL">DİRENİŞE KATIL</h2>
+        <p class="text-gray-400 max-w-xl mx-auto mb-8 font-mono text-sm">
+            Neo-Pera güncellemeleri, gizli lore belgeleri ve sistem uyarıları doğrudan nöral arayüzünüze iletilir.
+        </p>
+        <form action="{{ route('subscribe.store') }}" method="POST" class="max-w-md mx-auto flex gap-2">
+            @csrf
+            
+            <input type="email" name="email" placeholder="E-POSTA_ADRESİ_GİRİN" required class="flex-grow bg-black border border-neon-purple text-neon-purple p-3 focus:outline-none placeholder-purple-900">
+            <button type="submit" class="bg-neon-purple text-black font-bold px-6 py-3 hover:bg-white transition">
+                BAŞLAT
+            </button>
+        </form>
+    </div>
+
+    <!-- Community Voting Section -->
+    <div class="mt-24 border-t border-gray-800 py-16 bg-gradient-to-b from-transparent to-gray-900/20">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-display text-neon-purple mb-8 text-glow">/// {{ __('ui.tomorrows_chronicle') }}</h2>
+            <p class="text-gray-400 mb-8 font-mono text-sm">{{ __('ui.vote_desc') }}</p>
+            
+            <div id="loadingPoll" class="text-neon-blue animate-pulse">{{ __('ui.connecting') }}</div>
+            
+            <div id="pollOptions" class="grid md:grid-cols-1 gap-4 max-w-2xl mx-auto hidden">
+                <!-- Options injected by JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const pollContainer = document.getElementById('pollOptions');
+        const loading = document.getElementById('loadingPoll');
+        let pollId = null;
+
+        // Fetch Active Poll
+        fetch('/poll/active')
+            .then(res => res.json())
+            .then(data => {
+                loading.classList.add('hidden');
+                pollContainer.classList.remove('hidden');
+                pollId = data.id;
+                renderOptions(data.options);
+            })
+            .catch(err => {
+                loading.innerText = 'CONNECTION ERROR: ' + err.message;
+                loading.classList.remove('animate-pulse');
+                loading.classList.add('text-red-500');
+            });
+
+        function renderOptions(options) {
+            pollContainer.innerHTML = '';
+            const totalVotes = options.reduce((sum, opt) => sum + parseInt(opt.votes), 0) || 1; // Avoid div by zero
+
+            options.forEach(opt => {
+                const percent = Math.round((opt.votes / totalVotes) * 100);
+                
+                const btn = document.createElement('div');
+                btn.className = 'bg-gray-900 border border-gray-700 p-4 rounded hover:border-neon-purple transition cursor-pointer relative overflow-hidden group';
+                btn.onclick = () => vote(opt.id);
+
+                btn.innerHTML = `
+                    <div class="absolute top-0 left-0 bottom-0 bg-neon-purple/10 transition-all duration-500" style="width: ${percent}%"></div>
+                    <div class="relative flex justify-between items-center z-10">
+                        <span class="font-mono text-gray-300 group-hover:text-white transition">${opt.text}</span>
+                        <span class="font-display text-neon-purple text-xl">${opt.votes}</span>
+                    </div>
+                `;
+                pollContainer.appendChild(btn);
+            });
+        }
+
+        function vote(optionId) {
+            fetch('/poll/vote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ poll_id: pollId, option_id: optionId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.error) {
+                    alert('ACCESS DENIED: ' + data.error);
+                } else {
+                    renderOptions(data.options);
+                }
+            });
+        }
+    });
+
+    // === INTERACTIVE TERMINAL ===
+    (function() {
+        const input = document.getElementById('terminal-input');
+        const output = document.getElementById('terminal-output');
+        if(!input || !output) return;
+
+        const commands = {
+            help: '> commands: help, status, whoami, hack, matrix, clear',
+            status: '> system: ONLINE | threat_level: ELEVATED | users: ' + Math.floor(Math.random() * 50 + 10),
+            whoami: '> guest@neo-pera.net | access_level: RESTRICTED',
+            hack: '> [ACCESS DENIED] :: nice try, netrunner. 🔒',
+            matrix: '> initiating_matrix_mode...',
+            clear: 'CLEAR'
+        };
+
+        input.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') {
+                const cmd = input.value.toLowerCase().trim();
+                input.value = '';
+                
+                if(cmd === 'clear') {
+                    output.innerHTML = '<div class="text-gray-500">> terminal_cleared</div>';
+                    return;
+                }
+
+                const response = commands[cmd] || `> [ERR] unknown_command: "${cmd}"`;
+                const line = document.createElement('div');
+                line.className = 'terminal-line';
+                line.innerHTML = `<span class="text-gray-500">> ${cmd}</span><br>${response}`;
+                output.appendChild(line);
+                output.scrollTop = output.scrollHeight;
+
+                // Easter egg: matrix command triggers visual effect
+                if(cmd === 'matrix') {
+                    document.body.classList.add('matrix-mode');
+                    setTimeout(() => document.body.classList.remove('matrix-mode'), 3000);
+                }
+            }
+        });
+    })();
+
+    // === DECRYPT CHALLENGE GAME ===
+    (function() {
+        const challenges = [
+            { cipher: 'QFSBQFSB', answer: 'NEOPERA', hint: 'shift+1' },
+            { cipher: '01000001 01001001', answer: 'AI', hint: 'binary' },
+            { cipher: '4E 45 4F', answer: 'NEO', hint: 'hex' },
+            { cipher: 'KHOOR', answer: 'HELLO', hint: 'caesar-3' },
+            { cipher: '.-. . ... .. ... -', answer: 'RESIST', hint: 'morse' }
+        ];
+        
+        const challenge = challenges[Math.floor(Math.random() * challenges.length)];
+        const cipherEl = document.getElementById('cipher-text');
+        const inputEl = document.getElementById('decrypt-input');
+        const resultEl = document.getElementById('decrypt-result');
+        
+        if(!cipherEl || !inputEl) return;
+        
+        cipherEl.textContent = challenge.cipher;
+        cipherEl.title = `İpucu: ${challenge.hint}`;
+
+        inputEl.addEventListener('input', () => {
+            const guess = inputEl.value.toUpperCase().trim();
+            if(guess === challenge.answer) {
+                resultEl.innerHTML = '<span class="text-neon-green">✓ DECRYPTED! Welcome, netrunner.</span>';
+                inputEl.classList.add('border-neon-green');
+                cipherEl.classList.add('text-neon-green');
+            } else if(guess.length >= challenge.answer.length) {
+                resultEl.innerHTML = '<span class="text-red-400">✗ Invalid key</span>';
+            } else {
+                resultEl.innerHTML = '';
+            }
+        });
+
+        cipherEl.addEventListener('click', () => {
+            cipherEl.classList.add('animate-pulse');
+            setTimeout(() => cipherEl.classList.remove('animate-pulse'), 500);
+        });
+    })();
+
+    // === LIVE STATS SIMULATION ===
+    (function() {
+        const connEl = document.getElementById('live-connections');
+        const readsEl = document.getElementById('live-reads');
+        const commentEl = document.getElementById('live-comment');
+        if(!connEl) return;
+
+        const comments = ['harika!', 'matrix vibes', 'daha fazla', 'woow', 'cyberpunk <3', 'aksiyon!'];
+        
+        function updateStats() {
+            connEl.textContent = Math.floor(Math.random() * 30 + 5);
+            readsEl.textContent = Math.floor(Math.random() * 200 + 50);
+            commentEl.textContent = comments[Math.floor(Math.random() * comments.length)];
+        }
+        
+        updateStats();
+        setInterval(updateStats, 5000);
+    })();
+
+    // === GLOBAL LIKE FUNCTION (DEBUGGED) ===
+    window.toggleLike = function(event, btn, storyId) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        console.log('[LIKE] Triggered for Story ' + storyId);
+
+        if(!btn) return;
+
+        // Visual Feedback Immediate
+        const countSpan = btn.querySelector('.count');
+        const icon = btn.querySelector('svg');
+        const originalColor = btn.classList.contains('text-neon-pink') ? 'text-neon-pink' : 'text-gray-500';
+        
+        // Optimistic UI update
+        icon.classList.add('animate-ping');
+
+        fetch(`/story/${storyId}/react`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ type: 'link' })
+        })
+        .then(res => {
+             console.log('[LIKE] Response Status:', res.status);
+             if(!res.ok) {
+                 return res.text().then(text => { throw new Error('HTTP ' + res.status + ': ' + text); });
+             }
+             return res.json();
+        })
+        .then(data => {
+            console.log('[LIKE] Data:', data);
+            icon.classList.remove('animate-ping');
+            if(data.status === 'success') {
+                const newCount = data.counts['link'] || 0;
+                countSpan.innerText = newCount;
+                
+                if(data.action === 'added') {
+                    btn.classList.remove('text-gray-500');
+                    btn.classList.add('text-neon-pink');
+                } else {
+                    btn.classList.remove('text-neon-pink');
+                    btn.classList.add('text-gray-500');
+                }
+            } else {
+                alert('REACTION FAILED: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            console.error('[LIKE] Error:', err);
+            icon.classList.remove('animate-ping');
+            alert('SYSTEM ERROR: ' + err.message);
+        });
+    };
             @endforeach
         </div>
 
