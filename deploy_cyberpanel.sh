@@ -7,6 +7,9 @@ APP_DIR="/home/anxipunk.icu/public_html"
 REPO_URL="https://github.com/losing911/storyfactory.git"
 USER_GROUP="anxip7694:anxip7694" # Assuming this is the user. If root, use www-data or check owner.
 
+# CyberPanel PHP Fix
+export PATH=/usr/local/lsws/lsphp83/bin:$PATH
+
 echo "🚀 Starting CyberPanel Deployment..."
 
 # 1. Cleanup Default Files (index.html etc)
@@ -138,6 +141,10 @@ php artisan migrate --force
 
 # 7. Storage Link
 php artisan storage:link
+
+# 8. Admin Tasks
+echo "🗺️ Generating Sitemap..."
+php artisan sitemap:generate
 
 # 8. Create Admin User (Security)
 echo "👤 Ensuring Admin User Exists..."

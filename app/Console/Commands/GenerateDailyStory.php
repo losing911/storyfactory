@@ -26,7 +26,7 @@ class GenerateDailyStory extends Command
     /**
      * Execute the console command.
      */
-    public function handle(AIService $aiService, SocialPosterService $socialPoster, \App\Services\SunoService $sunoService)
+    public function handle(AIService $aiService, SocialPosterService $socialPoster)
     {
         // Increase time limit to 10 minutes
         set_time_limit(600);
@@ -110,21 +110,9 @@ class GenerateDailyStory extends Command
                 'author_id' => \App\Models\Author::inRandomOrder()->first()->id ?? null,
             ];
 
-            // 3.1 Generate Music (Suno)
-            if (!empty($data['music_prompt'])) {
-                $this->info("Müzik Üretiliyor: " . $data['music_prompt']);
-                try {
-                    $musicUrl = $sunoService->generateMusic($data['music_prompt']);
-                    if ($musicUrl) {
-                        $storyData['music_url'] = $musicUrl;
-                        $this->info("Müzik Başarıyla Oluşturuldu: $musicUrl");
-                    } else {
-                        $this->warn("Müzik oluşturulamadı (URL boş).");
-                    }
-                } catch (\Exception $musicErr) {
-                    $this->error("Müzik Hatası: " . $musicErr->getMessage());
-                }
-            }
+            // 3.1 Generate Music (Suno) - DISABLED
+            // Feature removed by user request (2026-01-24)
+            $storyData['music_url'] = null;
             
             // 3.3 SAVE STORY TO DB (CRITICAL FIX)
             $story = Story::create($storyData);
