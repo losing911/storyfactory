@@ -175,9 +175,22 @@ class AIService
     protected function cleanAndDecodeJson($text)
     {
         $text = str_replace(['```json', '```'], '', $text);
-        // Remove any text before the first '{' and after the last '}'
-        if (preg_match('/\{.*\}/s', $text, $matches)) {
-            $text = $matches[0];
+        
+        // Determine if it starts with [ (Array) or { (Object)
+        $firstBracket = strpos($text, '[');
+        $firstBrace = strpos($text, '{');
+        
+        // If Array is first (or only one existing)
+        if ($firstBracket !== false && ($firstBrace === false || $firstBracket < $firstBrace)) {
+            if (preg_match('/\[.*\]/s', $text, $matches)) {
+                $text = $matches[0];
+            }
+        } 
+        // If Object is first
+        elseif ($firstBrace !== false) {
+            if (preg_match('/\{.*\}/s', $text, $matches)) {
+                $text = $matches[0];
+            }
         }
         
         // Attempt to decode
