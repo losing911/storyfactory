@@ -112,7 +112,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('ai/step/store', [AdminController::class, 'storeStoryStep'])->name('ai.step.store');
 
     // DEBUG ROUTE (Geçici) - Worker Sorununu Çözmek İçin
-    Route::get('/worker-debug', function() {
+    Route::get('worker-check', function() {
         $stories = \App\Models\Story::whereIn('durum', ['pending_visuals', 'taslak', 'draft'])->get();
         
         echo "<h1>🕵️‍♂️ Worker Debug Raporu</h1>";
