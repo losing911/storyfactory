@@ -272,6 +272,11 @@ class AdminController extends Controller
                     ? $scene['img_prompts'] 
                     : (isset($scene['img_prompt']) ? [$scene['img_prompt']] : []);
                 
+                // FALLBACK: If AI returned no prompts, use text as prompt to ensure placeholder generation
+                if (empty($prompts) && !empty($scene['text'])) {
+                     $prompts = ["Scene description: " . substr($scene['text'], 0, 100)];
+                }
+                
                 $text = $scene['text'] ?? '';
                 $sceneImages = [];
                 $scenePanelIndices = []; // Store global indices for this scene's images
