@@ -237,47 +237,81 @@ class AdminController extends Controller
                 throw new \Exception("AI yanıtı beklenen 'scenes' formatında değil.");
             }
 
+
+            // 2. Process Scenes (Comic Format - Multiple Images per Scene)
             $storyHtml = "";
             $coverImageUrl = null;
             $slug = \Illuminate\Support\Str::slug($data['baslik'] ?? 'story');
             $dateFolder = now()->format('Y-m-d');
-
-            // 2. Process Scenes
-            foreach ($data['scenes'] as $index => $scene) {
-                $prompt = $scene['img_prompt'];
-                $text = $scene['text'];
+            
+            foreach ($data['scenes'] as $sceneIndex => $scene) {
+                // Handle both old format (img_prompt) and new format (img_prompts array)
+                $prompts = isset($scene['img_prompts']) && is_array($scene['img_prompts']) 
+                    ? $scene['img_prompts'] 
+                    : (isset($scene['img_prompt']) ? [$scene['img_prompt']] : []);
                 
-                $localUrl = "https://placehold.co/1280x720/050505/00ff00?text=Image+Error"; // Default fallback
+                $text = $scene['text'] ?? '';
+                $sceneImages = [];
                 
-                // Get Visual Constraints from Data if available
+                // Get Visual Constraints
                 $visualConstraints = $data['meta_visual_prompts'] ?? null;
-
-                try {
-                    // Generate Image URL
-                    $remoteUrl = $this->aiService->generateImage($prompt, $visualConstraints);
+                
+                // Generate multiple images per scene
+                foreach ($prompts as $promptIndex => $prompt) {
+                    if (empty($prompt)) continue;
                     
-                    // Download Image Locally
-                    $localPath = "stories/$dateFolder/{$slug}_{$index}.jpg";
-                    $localUrl = $this->aiService->downloadImage($remoteUrl, $localPath);
-                } catch (\Exception $e) {
-                    // Log error but continue story generation
-                    \Illuminate\Support\Facades\Log::error("Scene $index Image Failed: " . $e->getMessage());
+                    $fallbackUrl = "https://placehold.co/1280x720/050505/00ff00?text=Panel+" . ($promptIndex + 1);
+                    
+                    try {
+                        $remoteUrl = $this->aiService->generateImage($prompt, $visualConstraints);
+                        $localPath = "stories/$dateFolder/{$slug}_s{$sceneIndex}_p{$promptIndex}.jpg";
+                        $localUrl = $this->aiService->downloadImage($remoteUrl, $localPath);
+                        $sceneImages[] = $localUrl;
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error("Scene $sceneIndex Panel $promptIndex failed: " . $e->getMessage());
+                        $sceneImages[] = $fallbackUrl;
+                    }
                 }
-
-                // Determine Layout (Alternating)
-                $layoutClass = ($index % 2 == 0) ? 'flex-row' : 'flex-row-reverse';
-
-                // Append to Story HTML
-                $storyHtml .= "<div class='scene-container mb-12 p-4 bg-gray-900/50 rounded-lg border border-gray-800'>";
-                $storyHtml .= "  <div class='mb-4'><img src='$localUrl' alt='Scene $index' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500'></div>";
-                $storyHtml .= "  <div class='prose prose-invert prose-lg text-gray-300 font-sans leading-relaxed'><p>" . nl2br(e($text)) . "</p></div>";
+                
+                // Build HTML with Comic Panel Layout
+                $imageCount = count($sceneImages);
+                $storyHtml .= "<div class='scene-container mb-16 p-6 bg-gray-900/50 rounded-lg border border-gray-800 hover:border-neon-pink transition duration-300'>";
+                
+                // Panel Grid Layout
+                if ($imageCount >= 3) {
+                    // 3+ panels: Main panel + smaller panels
+                    $storyHtml .= "<div class='grid grid-cols-2 gap-4 mb-6'>";
+                    $storyHtml .= "  <div class='col-span-2'><img src='{$sceneImages[0]}' alt='Panel 1' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500' loading='lazy'></div>";
+                    if (isset($sceneImages[1])) {
+                        $storyHtml .= "  <div><img src='{$sceneImages[1]}' alt='Panel 2' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-cyan-500 transition duration-500' loading='lazy'></div>";
+                    }
+                    if (isset($sceneImages[2])) {
+                        $storyHtml .= "  <div><img src='{$sceneImages[2]}' alt='Panel 3' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-pink-500 transition duration-500' loading='lazy'></div>";
+                    }
+                    $storyHtml .= "</div>";
+                } elseif ($imageCount == 2) {
+                    // 2 panels: Side by side
+                    $storyHtml .= "<div class='grid grid-cols-2 gap-4 mb-6'>";
+                    $storyHtml .= "  <div><img src='{$sceneImages[0]}' alt='Panel 1' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500' loading='lazy'></div>";
+                    $storyHtml .= "  <div><img src='{$sceneImages[1]}' alt='Panel 2' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-cyan-500 transition duration-500' loading='lazy'></div>";
+                    $storyHtml .= "</div>";
+                } elseif ($imageCount == 1) {
+                    // 1 panel: Full width
+                    $storyHtml .= "<div class='mb-6'><img src='{$sceneImages[0]}' alt='Scene Panel' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500' loading='lazy'></div>";
+                }
+                
+                // Text (Comic dialogue/narration)
+                $storyHtml .= "  <div class='prose prose-invert prose-lg text-gray-300 font-sans leading-relaxed'>";
+                $storyHtml .= "    <p>" . nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8')) . "</p>";
+                $storyHtml .= "  </div>";
                 $storyHtml .= "</div>";
-
-                // Use the first image as cover
-                if ($index === 0) {
-                    $coverImageUrl = $localUrl;
+                
+                // First scene's first image = cover
+                if ($sceneIndex === 0 && !empty($sceneImages)) {
+                    $coverImageUrl = $sceneImages[0];
                 }
             }
+
 
             // Merge Data
             $storyData = [
