@@ -108,9 +108,9 @@ class AIService
             $prompt .= "ÖNEMLİ KURAL 5 (GÖRSEL TUTARLILIK): img_prompt alanlarında şu görsel özellikleri KORU: " . implode(", ", $visualConstraints) . "\n";
         }
         $prompt .= "Yapı Gereksinimleri (ÇOK ÖNEMLİ):\n";
-        $prompt .= "1. 'scenes' dizisi içinde EN AZ 6, EN FAZLA 10 sahne oluştur. Hikaye UZUN ve DETAYLI olmalı.\n";
+        $prompt .= "1. 'scenes' dizisi içinde EN AZ 12, EN FAZLA 15 sahne oluştur. Bu bir ÇİZGİ ROMAN, GÖRSEL YOĞUN olmalı.\n";
         $prompt .= "2. Hikaye tam bir sonuca ulaşmalı (Giriş, Gelişme, Sonuç). Asla yarım kalmamalı.\n";
-        $prompt .= "3. Her sahne EN AZ 300 KELİME olmalı. Diyaloglar, iç sesler ve detaylı mekan tasvirleri ile sahneyi uzat. Acele etme.\n";
+        $prompt .= "3. Her sahne EN AZ 150, EN FAZLA 250 KELİME olmalı (kısa ve öz - çizgi roman metni). Diyalogları öne çıkar.\n";
         $prompt .= "4. Ana Başlık (baslik) belirle. (İçinde Neon geçmesin)\n";
         $prompt .= "5. Karakter: Ana karakterin kısa profili.\n";
         $prompt .= "6. Mod (mood): Hikayenin atmosferine uygun tek bir kelime seç: 'action', 'mystery', 'melancholy', 'high-tech', 'corruption'.\n";
@@ -120,11 +120,18 @@ class AIService
         $prompt .= "- Stil belirteçleri ekle: 'sgbl artstyle, anime style, studio ghibli, akira style, ghost in the shell style, cel shaded, highly detailed, 8k, vibrant colors'.\n";
         $prompt .= "- Konuşma balonu veya yazı İÇERMEMELİ ('no text, no speech bubbles').\n";
         $prompt .= "- Asla 'photorealistic' veya 'unreal engine' kullanma. Anime estetiğine sadık kal.\n\n";
-        $prompt .= "JSON Şeması:\n";
+        $prompt .= "JSON Şeması (ÇİZGİ ROMAN - MULTİ IMAGE):\n";
         $prompt .= "{\n";
         $prompt .= "  \"baslik\": \"...\",\n";
         $prompt .= "  \"scenes\": [\n";
-        $prompt .= "    { \"text\": \"Sahne 1 metni (TÜRKÇE)...\", \"img_prompt\": \"Visual prompt (ENGLISH)...\" }\n";
+        $prompt .= "    {\n";
+        $prompt .= "      \"text\": \"Sahne 1 metni (TÜRKÇE, 150-250 kelime)...\",\n";
+        $prompt .= "      \"img_prompts\": [\n";
+        $prompt .= "        \"Wide shot: Character in environment (ENGLISH)...\",\n";
+        $prompt .= "        \"Close-up: Emotional facial expression (ENGLISH)...\",\n";
+        $prompt .= "        \"Action shot: Dynamic movement or object detail (ENGLISH)...\"\n";
+        $prompt .= "      ]\n";
+        $prompt .= "    }\n";
         $prompt .= "  ],\n";
         $prompt .= "  \"karakter\": \"...\",\n";
         $prompt .= "  \"mood\": \"...\",\n";
@@ -137,7 +144,7 @@ class AIService
         $prompt .= "     { \"title\": \"İsim\", \"type\": \"character|faction|location\", \"description\": \"Kısa açıklama\", \"visual_prompt\": \"Görsel tarifi (English)\", \"is_new_invention\": true }\n";
         $prompt .= "  ]\n";
         $prompt .= "}";
-        $prompt .= "\nÖNEMLİ: Eğer hikayede YENİ ve ÖNEMLİ bir karakter, mekan veya çete uydurduysan, 'new_lore' listesine ekle. Yoksa boş dizi bırak.\n";
+        $prompt .= "\nÇOK ÖNEMLİ: Her sahne için img_prompts DİZİSİ olarak 2-3 farklı açıdan görsel prompt yaz. Her prompt farklı bir comic panel gibi düşün (wide shot, close-up, action). Eğer hikayede YENİ ve ÖNEMLİ bir karakter/mekan/çete uydurduysan, 'new_lore' listesine ekle.\n";
         
         try {
             // Priority 1: Google Gemini (Direct)
