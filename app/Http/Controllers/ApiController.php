@@ -23,40 +23,51 @@ class ApiController extends Controller
         $this->checkAuth($request);
 
         // Priority: Stories pending Visuals OR Drafts (Taslak)
-        // Loop through pending stories to find one that ACTUALLY needs work
-        // This prevents "Zombie Stories" (Status: pending, but no placeholders) from blocking the queue
-        // Priority: Stories pending Visuals OR Drafts (Taslak)
-        // Loop through pending stories to find one that ACTUALLY needs work
-        // This prevents "Zombie Stories" (Status: pending, but no placeholders) from blocking the queue
-        // Added Case-Insensitive variants just in case
         $stories = Story::whereIn('durum', ['pending_visuals', 'taslak', 'draft', 'Taslak', 'Draft'])->get();
         // Relaxed Placeholder Sign (Matches any color 1280x720 placeholder)
         $placeholderSign = "https://placehold.co/1280x720";
 
         Log::info("Worker Polling: Found " . $stories->count() . " potential stories.");
+        
+        $debugLog = []; // Collect debug info to return to worker for visibility
 
         foreach ($stories as $story) {
+            $debugLog[] = "Story {$story->id}: Checking...";
             
             // Find ANY placeholder (Panel X or Scene X)
             if (preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"]/', $story->metin)) {
+                
+                $matchFound = false;
+                $index = -1;
+
                 // Try new comic format first (Panel X)
                 preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Panel (\d+)[\'"]/', $story->metin, $matches);
-                
-                // Fallback to old format (Scene X) for backward compatibility
-                if (!isset($matches[1])) {
-                    preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Scene (\d+)[\'"]/', $story->metin, $matches);
-                }
-                
                 if (isset($matches[1])) {
                     $index = intval($matches[1]);
-                    
+                    $matchFound = true;
+                    $debugLog[] = "Story {$story->id}: Found Panel {$index}";
+                }
+                
+                // Fallback to old format (Scene X) for backward compatibility
+                if (!$matchFound) {
+                    preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Scene (\d+)[\'"]/', $story->metin, $matches);
+                     if (isset($matches[1])) {
+                        $index = intval($matches[1]);
+                        $matchFound = true;
+                        $debugLog[] = "Story {$story->id}: Found Scene {$index} (Legacy)";
+                    }
+                }
+                
+                if ($matchFound) {
                     // Try to get prompts from gorsel_prompt (could be old or new format)
                     $prompts = json_decode($story->gorsel_prompt, true);
                     
-                    // New format: gorsel_prompt might be a flat array of all img_prompts
-                    // Old format: gorsel_prompt is array of single prompts per scene
-                    // We need the prompt at index $index
-                    
+                    if (!is_array($prompts)) {
+                        Log::error("Story {$story->id}: gorsel_prompt is not an array!");
+                        $debugLog[] = "Story {$story->id}: ERROR - Prompts not array";
+                        continue;
+                    }
+
                     if (isset($prompts[$index])) {
                         Log::info("Job Dispatched: Story {$story->id} Panel/Scene {$index}");
                         return response()->json([
@@ -68,11 +79,17 @@ class ApiController extends Controller
                         ]);
                     } else {
                         Log::warning("Story {$story->id}: Panel {$index} found but no prompt at that index. Prompts count: " . count($prompts));
+                        $debugLog[] = "Story {$story->id}: ERROR - Index {$index} not in prompts (Count: " . count($prompts) . ")";
                     }
+                } else {
+                    $debugLog[] = "Story {$story->id}: Regex Match Failed for Panel/Scene ID";
                 }
-            } 
+            } else {
+                 $debugLog[] = "Story {$story->id}: No placeholder found in text.";
+            }
+
             // Music Generation Logic (If visuals are done or concurrent)
-            elseif (!empty($story->music_prompt) && empty($story->music_url)) {
+            if (!empty($story->music_prompt) && empty($story->music_url)) {
                  Log::info("Job Dispatched: Story {$story->id} Music Generation");
                  return response()->json([
                      'id' => $story->id,
@@ -81,16 +98,11 @@ class ApiController extends Controller
                      'duration' => 30 // seconds
                  ]);
             }
-            else {
-                // No placeholders found AND Music is done (or not requested)
-                Log::info("Skipping Story {$story->id}: No placeholders found and music is set.");
-                // If it was 'pending_visuals', it's a Zombie -> Auto Publish.
-                if ($story->durum === 'pending_visuals') {
-                     $story->durum = 'published';
-                     $story->save();
-                     Log::info("Auto-Published Zombie Story ID: {$story->id}");
-                }
-            }
+        }
+        
+        // Return debug info if no job found (temporary for debugging)
+        if ($request->has('debug')) {
+             return response()->json(['no_jobs' => true, 'logs' => $debugLog]);
         }
 
         return response()->json(null); // No jobs
