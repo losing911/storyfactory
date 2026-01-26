@@ -355,7 +355,9 @@ class AdminController extends Controller
                 'metin' => $storyHtml, // Now contains HTML with images
                 'gorsel_url' => $coverImageUrl,
                 'yayin_tarihi' => now(),
-                'durum' => 'published',
+                'yayin_tarihi' => now(),
+                // 'durum' => 'published',
+                'durum' => 'pending_visuals', // Sent to Worker Queue
                 'konu' => $topic ?? 'AI Generated',
                 'mood' => $data['mood'] ?? null,
                 'meta' => ($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''),
