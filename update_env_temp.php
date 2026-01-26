@@ -5,9 +5,9 @@ $content = file_get_contents($path);
 // Define replacements
 $replacements = [
     'APP_URL' => 'http://anxipunk.icu',
-    'DB_DATABASE' => 'anxy_story',
-    'DB_USERNAME' => 'anxi_admin',
-    'DB_PASSWORD' => 'J8@^JCFca5pntgmX',
+    'DB_DATABASE' => 'DBDATABASE',
+    'DB_USERNAME' => 'DBUSERNAME',
+    'DB_PASSWORD' => 'DBPASSWORD',
 ];
 
 // Perform replacements
