@@ -297,19 +297,6 @@ class AdminController extends Controller
                     // FORCE WORKER MODE: Do not generate images instantly on server
                     // Use placeholder directly and let Local Worker handle it
                     $sceneImages[] = $fallbackUrl;
-                    
-                    /* DISABLED FOR WORKER QUEUE
-                    try {
-                        $remoteUrl = $this->aiService->generateImage($prompt, $visualConstraints);
-                        // Save with Scene/Prompt index for structure, but Worker uses Global index
-                        $localPath = "stories/$dateFolder/{$slug}_s{$sceneIndex}_p{$promptIndex}_g{$currentGlobalID}.jpg";
-                        $localUrl = $this->aiService->downloadImage($remoteUrl, $localPath);
-                        $sceneImages[] = $localUrl;
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error("Scene $sceneIndex Panel $promptIndex failed: " . $e->getMessage());
-                        $sceneImages[] = $fallbackUrl;
-                    } 
-                    */
                 }
                 
                 // Build HTML with Comic Panel Layout
