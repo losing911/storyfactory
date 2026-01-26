@@ -111,6 +111,84 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('ai/step/image', [AdminController::class, 'generateImageStep'])->name('ai.step.image');
     Route::post('ai/step/store', [AdminController::class, 'storeStoryStep'])->name('ai.step.store');
 
+    // DEBUG ROUTE (Geçici) - Worker Sorununu Çözmek İçin
+    Route::get('/worker-debug', function() {
+        $stories = \App\Models\Story::whereIn('durum', ['pending_visuals', 'taslak', 'draft'])->get();
+        
+        echo "<h1>🕵️‍♂️ Worker Debug Raporu</h1>";
+        echo "<p>Şu anki zaman: " . now() . "</p>";
+        echo "<p>Bulunan Pending Hikaye Sayısı: <strong>" . $stories->count() . "</strong></p>";
+        echo "<hr>";
+        
+        if ($stories->count() === 0) {
+            echo "<h3>❌ HİÇ PENDING HİKAYE YOK!</h3>";
+            echo "<p>Worker haklı, yapacak iş yok. Lütfen yeni bir hikaye oluşturun.</p>";
+            return;
+        }
+
+        $placeholderSign = "https://placehold.co/1280x720";
+        
+        foreach ($stories as $story) {
+            echo "<div style='background:#f4f4f4; padding:20px; margin-bottom:20px; border:1px solid #ccc;'>";
+            echo "<h2>Hikaye ID: {$story->id}</h2>";
+            echo "<p><strong>Başlık:</strong> {$story->baslik}</p>";
+            echo "<p><strong>Durum:</strong> {$story->durum}</p>";
+            
+            // Prompt Kontrolü
+            $prompts = json_decode($story->gorsel_prompt, true);
+            $promptCount = is_array($prompts) ? count($prompts) : 0;
+            echo "<p><strong>Prompt Sayısı:</strong> " . ($promptCount > 0 ? "<span style='color:green'>$promptCount ✅</span>" : "<span style='color:red'>0 ❌ (Promptlar Kaydedilmemiş!)</span>") . "</p>";
+            
+            if ($promptCount > 0) {
+                echo "<div style='background:#fff; padding:10px; border:1px dashed #999; margin:10px 0;'>";
+                echo "<strong>İlk Prompt Örneği:</strong> " . htmlspecialchars(substr($prompts[0], 0, 100)) . "...";
+                echo "</div>";
+            } else {
+                 echo "<div style='background:#ffebee; padding:10px; border:1px solid red; margin:10px 0;'>";
+                 echo "Raw Gorsel Prompt: " . htmlspecialchars($story->gorsel_prompt);
+                 echo "</div>";
+            }
+
+            // Placeholder Kontrolü
+            $hasPlaceholder = strpos($story->metin, 'placehold.co') !== false;
+            echo "<p><strong>Placeholder Var mı?:</strong> " . ($hasPlaceholder ? "<span style='color:green'>EVET ✅</span>" : "<span style='color:red'>HAYIR ❌</span>") . "</p>";
+            
+            if ($hasPlaceholder) {
+                // Regex Testi
+                echo "<h3>Regex Analizi:</h3>";
+                $pattern = '/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Panel (\d+)[\'"]/';
+                preg_match($pattern, $story->metin, $matches);
+                
+                if (isset($matches[1])) {
+                    $index = intval($matches[1]);
+                    echo "<p style='color:green'>✅ MATCH BAŞARILI! (Panel Formatı)</p>";
+                    echo "<ul>";
+                    echo "<li>Bulunan Panel Index: <strong>$index</strong></li>";
+                    echo "<li>Gerekli Prompt Index: <strong>$index</strong></li>";
+                    
+                    if (isset($prompts[$index])) {
+                        echo "<li><strong style='color:green'>SONUÇ: API BU İŞİ VERMELİ! ✅</strong></li>";
+                    } else {
+                        echo "<li><strong style='color:red'>HATA: İstenen index ($index) prompt listesinde yok! ❌</strong></li>";
+                    }
+                    echo "</ul>";
+                } else {
+                     echo "<p style='color:orange'>⚠️ Panel Formatı Bulunamadı. Eski format deneniyor...</p>";
+                     preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Scene (\d+)[\'"]/', $story->metin, $matches2);
+                     if (isset($matches2[1])) {
+                         echo "<p style='color:green'>✅ Eski Format (Scene) Bulundu: Index " . $matches2[1] . "</p>";
+                     } else {
+                         echo "<p style='color:red'>❌ HİÇBİR REGEX EŞLEŞMEDİ!</p>";
+                         echo "<textarea style='width:100%; height:100px;'>" . htmlspecialchars(substr($story->metin, strpos($story->metin, 'src='), 300)) . "</textarea>";
+                         echo "<p>Beklenen URL Prefix: $placeholderSign</p>";
+                     }
+                }
+            }
+            
+            echo "</div>";
+        }
+    });
+
     // E-Book Generator Routes
     Route::get('ebooks/create', [AdminEBookController::class, 'create'])->name('ebooks.create');
     Route::post('ebooks/init', [AdminEBookController::class, 'initGeneration'])->name('ebooks.init');
