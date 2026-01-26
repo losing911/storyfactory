@@ -37,16 +37,27 @@ class ApiController extends Controller
         foreach ($stories as $story) {
             
             if (strpos($story->metin, $placeholderSign) !== false) {
-                // ... (Existing Image Logic) ...
-                // Parse HTML to find the first image with this src
-                preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Scene (\d+)[\'"]/s', $story->metin, $matches);
+                // Comic Format Support: Find ANY placeholder (Panel X or Scene X)
+                // Try new comic format first (Panel X)
+                preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Panel (\d+)[\'"]/', $story->metin, $matches);
+                
+                // Fallback to old format (Scene X) for backward compatibility
+                if (!isset($matches[1])) {
+                    preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Scene (\d+)[\'"]/', $story->metin, $matches);
+                }
                 
                 if (isset($matches[1])) {
                     $index = intval($matches[1]);
+                    
+                    // Try to get prompts from gorsel_prompt (could be old or new format)
                     $prompts = json_decode($story->gorsel_prompt, true);
                     
+                    // New format: gorsel_prompt might be a flat array of all img_prompts
+                    // Old format: gorsel_prompt is array of single prompts per scene
+                    // We need the prompt at index $index
+                    
                     if (isset($prompts[$index])) {
-                        Log::info("Job Dispatched: Story {$story->id} Scene {$index}");
+                        Log::info("Job Dispatched: Story {$story->id} Panel/Scene {$index}");
                         return response()->json([
                             'id' => $story->id,
                             'type' => 'image_generation',
@@ -54,6 +65,8 @@ class ApiController extends Controller
                             'prompt' => $prompts[$index],
                             'style_preset' => 'turbo' 
                         ]);
+                    } else {
+                        Log::warning("Story {$story->id}: Panel {$index} found but no prompt at that index. Prompts count: " . count($prompts));
                     }
                 }
             } 
@@ -113,11 +126,21 @@ class ApiController extends Controller
 
             // 2. Replace the Placeholder in `metin` HTML
             $placeholderSign = "https://placehold.co/1280x720/1f2937/00ff00";
-            $pattern = '/<img[^>]+src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"][^>]+alt=[\'"]Scene ' . $index . '[\'"][^>]*>/i';
             
-            $newImgTag = "<img src='$publicUrl' alt='Scene $index' class='w-full rounded shadow-lg border-2 border-neon-blue/50 transition duration-500'>";
+            // Try new comic format first (Panel X)
+            $pattern = '/\<img[^\>]+src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"][^\>]+alt=[\'"]Panel ' . $index . '[\'"][^\>]*\>/i';
+            $newImgTag = "<img src='$publicUrl' alt='Panel $index' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500' loading='lazy'>";
             
-            $story->metin = preg_replace($pattern, $newImgTag, $story->metin);
+            $updatedHtml = preg_replace($pattern, $newImgTag, $story->metin);
+            
+            // Fallback to old format (Scene X) if no replacement happened
+            if ($updatedHtml === $story->metin) {
+                $pattern = '/\<img[^\>]+src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"][^\>]+alt=[\'"]Scene ' . $index . '[\'"][^\>]*\>/i';
+                $newImgTag = "<img src='$publicUrl' alt='Scene $index' class='w-full rounded shadow-lg border-2 border-neon-blue/50 transition duration-500'>";
+                $updatedHtml = preg_replace($pattern, $newImgTag, $story->metin);
+            }
+            
+            $story->metin = $updatedHtml;
             
             // 3. Check if any placeholders remain
             $isFinished = false;
@@ -129,7 +152,7 @@ class ApiController extends Controller
                 $isFinished = true;
                 Log::info("Story {$story->id} fully visualized and published.");
             } else {
-                Log::info("Story {$story->id} scene $index updated. More pending.");
+                Log::info("Story {$story->id} panel/scene $index updated. More pending.");
             }
             
             $story->save();
