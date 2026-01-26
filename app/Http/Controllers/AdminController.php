@@ -289,6 +289,11 @@ class AdminController extends Controller
                     
                     $fallbackUrl = "https://placehold.co/1280x720/050505/00ff00?text=Panel+" . ($currentGlobalID);
                     
+                    // FORCE WORKER MODE: Do not generate images instantly on server
+                    // Use placeholder directly and let Local Worker handle it
+                    $sceneImages[] = $fallbackUrl;
+                    
+                    /* DISABLED FOR WORKER QUEUE
                     try {
                         $remoteUrl = $this->aiService->generateImage($prompt, $visualConstraints);
                         // Save with Scene/Prompt index for structure, but Worker uses Global index
@@ -298,7 +303,8 @@ class AdminController extends Controller
                     } catch (\Exception $e) {
                         \Illuminate\Support\Facades\Log::error("Scene $sceneIndex Panel $promptIndex failed: " . $e->getMessage());
                         $sceneImages[] = $fallbackUrl;
-                    }
+                    } 
+                    */
                 }
                 
                 // Build HTML with Comic Panel Layout
