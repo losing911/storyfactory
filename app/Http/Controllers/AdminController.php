@@ -345,8 +345,14 @@ class AdminController extends Controller
                 'meta' => ($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''),
                 'etiketler' => $data['etiketler'] ?? [],
                 'sosyal_ozet' => $data['sosyal_ozet'] ?? '',
-                'gorsel_prompt' => json_encode(array_column($data['scenes'], 'img_prompt')), // Store all prompts
-            ];
+                'gorsel_prompt' => json_encode(array_reduce($data['scenes'], function($carry, $scene) {
+                    if (isset($scene['img_prompts']) && is_array($scene['img_prompts'])) {
+                        return array_merge($carry, $scene['img_prompts']);
+                    } elseif (isset($scene['img_prompt'])) {
+                        return array_merge($carry, [$scene['img_prompt']]);
+                    }
+                    return $carry;
+                }, [])), // Flatten all prompts from all scenes
 
             $story = Story::create($storyData);
 
