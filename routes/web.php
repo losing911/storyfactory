@@ -97,6 +97,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::resource('stories', AdminController::class);
     Route::post('stories/{story}/regenerate-images', [AdminController::class, 'regenerateImages'])->name('stories.regenerate');
     Route::post('stories/{story}/regenerate-chunk', [AdminController::class, 'regenerateImageChunk'])->name('stories.regenerate-chunk');
+    
+    // SEO Tools
+    Route::get('seo-tools', [AdminController::class, 'seoTools'])->name('seo.tools');
+    Route::post('seo/generate-sitemap', [AdminController::class, 'generateSitemap'])->name('seo.generate-sitemap');
+    
     Route::get('ai/create', [AdminController::class, 'createAI'])->name('ai.create');
     Route::get('ai/generate', function() { return redirect()->route('admin.ai.create'); });
     Route::post('ai/generate', [AdminController::class, 'generateAI'])->name('ai.generate');

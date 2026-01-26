@@ -212,11 +212,30 @@ class AdminController extends Controller
 
     public function destroy(Story $story)
     {
-        $story->delete();
-        return redirect()->route('admin.stories.index')->with('success', 'Hikaye silindi.');
+        $story->delete();        
+        return redirect()->route('admin.stories.index')->with('error', 'Hikaye bulunamadı.');
     }
-
-
+    
+    /**
+     * SEO Tools Page
+     */
+    public function seoTools()
+    {
+        return view('admin.seo-tools');
+    }
+    
+    /**
+     * Generate Sitemap
+     */
+    public function generateSitemap()
+    {
+        try {
+            \Artisan::call('sitemap:generate');
+            return redirect()->route('admin.seo.tools')->with('success', 'Sitemap başarıyla oluşturuldu!');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.seo.tools')->with('error', 'Sitemap oluşturulamadı: ' . $e->getMessage());
+        }
+    }
 
     public function createAI()
     {
