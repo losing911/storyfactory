@@ -263,6 +263,9 @@ class AdminController extends Controller
             $slug = \Illuminate\Support\Str::slug($data['baslik'] ?? 'story');
             $dateFolder = now()->format('Y-m-d');
             
+            // GLOBAL PROMPT INDEXING (Fix for Worker Mismatch)
+            $globalImageCounter = 0;
+            
             foreach ($data['scenes'] as $sceneIndex => $scene) {
                 // Handle both old format (img_prompt) and new format (img_prompts array)
                 $prompts = isset($scene['img_prompts']) && is_array($scene['img_prompts']) 
@@ -271,6 +274,7 @@ class AdminController extends Controller
                 
                 $text = $scene['text'] ?? '';
                 $sceneImages = [];
+                $scenePanelIndices = []; // Store global indices for this scene's images
                 
                 // Get Visual Constraints
                 $visualConstraints = $data['meta_visual_prompts'] ?? null;
@@ -279,11 +283,16 @@ class AdminController extends Controller
                 foreach ($prompts as $promptIndex => $prompt) {
                     if (empty($prompt)) continue;
                     
-                    $fallbackUrl = "https://placehold.co/1280x720/050505/00ff00?text=Panel+" . ($promptIndex + 1);
+                    // Assign Global ID immediately
+                    $currentGlobalID = $globalImageCounter++; 
+                    $scenePanelIndices[] = $currentGlobalID;
+                    
+                    $fallbackUrl = "https://placehold.co/1280x720/050505/00ff00?text=Panel+" . ($currentGlobalID);
                     
                     try {
                         $remoteUrl = $this->aiService->generateImage($prompt, $visualConstraints);
-                        $localPath = "stories/$dateFolder/{$slug}_s{$sceneIndex}_p{$promptIndex}.jpg";
+                        // Save with Scene/Prompt index for structure, but Worker uses Global index
+                        $localPath = "stories/$dateFolder/{$slug}_s{$sceneIndex}_p{$promptIndex}_g{$currentGlobalID}.jpg";
                         $localUrl = $this->aiService->downloadImage($remoteUrl, $localPath);
                         $sceneImages[] = $localUrl;
                     } catch (\Exception $e) {
@@ -300,23 +309,24 @@ class AdminController extends Controller
                 if ($imageCount >= 3) {
                     // 3+ panels: Main panel + smaller panels
                     $storyHtml .= "<div class='grid grid-cols-2 gap-4 mb-6'>";
-                    $storyHtml .= "  <div class='col-span-2'><img src='{$sceneImages[0]}' alt='Panel 1' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500' loading='lazy'></div>";
+                    // Use GLOBAL PANEL ID for alt text so Worker regex finds the correct prompt index
+                    $storyHtml .= "  <div class='col-span-2'><img src='{$sceneImages[0]}' alt='Panel {$scenePanelIndices[0]}' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500' loading='lazy'></div>";
                     if (isset($sceneImages[1])) {
-                        $storyHtml .= "  <div><img src='{$sceneImages[1]}' alt='Panel 2' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-cyan-500 transition duration-500' loading='lazy'></div>";
+                        $storyHtml .= "  <div><img src='{$sceneImages[1]}' alt='Panel {$scenePanelIndices[1]}' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-cyan-500 transition duration-500' loading='lazy'></div>";
                     }
                     if (isset($sceneImages[2])) {
-                        $storyHtml .= "  <div><img src='{$sceneImages[2]}' alt='Panel 3' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-pink-500 transition duration-500' loading='lazy'></div>";
+                        $storyHtml .= "  <div><img src='{$sceneImages[2]}' alt='Panel {$scenePanelIndices[2]}' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-pink-500 transition duration-500' loading='lazy'></div>";
                     }
                     $storyHtml .= "</div>";
                 } elseif ($imageCount == 2) {
                     // 2 panels: Side by side
                     $storyHtml .= "<div class='grid grid-cols-2 gap-4 mb-6'>";
-                    $storyHtml .= "  <div><img src='{$sceneImages[0]}' alt='Panel 1' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500' loading='lazy'></div>";
-                    $storyHtml .= "  <div><img src='{$sceneImages[1]}' alt='Panel 2' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-cyan-500 transition duration-500' loading='lazy'></div>";
+                    $storyHtml .= "  <div><img src='{$sceneImages[0]}' alt='Panel {$scenePanelIndices[0]}' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500' loading='lazy'></div>";
+                    $storyHtml .= "  <div><img src='{$sceneImages[1]}' alt='Panel {$scenePanelIndices[1]}' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-cyan-500 transition duration-500' loading='lazy'></div>";
                     $storyHtml .= "</div>";
                 } elseif ($imageCount == 1) {
                     // 1 panel: Full width
-                    $storyHtml .= "<div class='mb-6'><img src='{$sceneImages[0]}' alt='Scene Panel' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500' loading='lazy'></div>";
+                    $storyHtml .= "<div class='mb-6'><img src='{$sceneImages[0]}' alt='Panel {$scenePanelIndices[0]}' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500' loading='lazy'></div>";
                 }
                 
                 // Text (Comic dialogue/narration)
