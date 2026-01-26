@@ -64,7 +64,7 @@ class ApiController extends Controller
                     
                     if (!is_array($prompts)) {
                         Log::error("Story {$story->id}: gorsel_prompt is not an array!");
-                        // $debugLog[] = "Story {$story->id}: ERROR - Prompts not array"; // Removed as per diff
+                        $debugLog[] = "Story {$story->id}: ERROR - Prompts not array (" . substr($story->gorsel_prompt, 0, 50) . "...)"; 
                         continue;
                     }
 
@@ -79,9 +79,10 @@ class ApiController extends Controller
                         ]);
                     } else {
                         Log::warning("Story {$story->id}: Panel {$index} found but no prompt.");
-                        // Important: If prompt is missing, we must NOT stuck here.
-                        // But for now, just logging.
-                        // $debugLog[] = "Story {$story->id}: ERROR - Index {$index} not in prompts (Count: " . count($prompts) . ")"; // Removed as per diff
+                        $debugLog[] = "Story {$story->id}: ERROR - Index {$index} not in prompts. Total Prompts: " . count($prompts);
+                        // Dump prompts keys for debugging
+                        $keys = implode(', ', array_keys($prompts));
+                        $debugLog[] = "Available Keys: [{$keys}]";
                     }
                 } else {
                     $debugLog[] = "Story {$story->id}: Regex Match Failed for Panel/Scene ID";
