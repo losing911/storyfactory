@@ -24,8 +24,8 @@ class ApiController extends Controller
 
         // Priority: Stories pending Visuals OR Drafts (Taslak)
         $stories = Story::whereIn('durum', ['pending_visuals', 'taslak', 'draft', 'Taslak', 'Draft'])->get();
-        // Relaxed Placeholder Sign (Matches any color 1280x720 placeholder)
-        $placeholderSign = "https://placehold.co/1280x720";
+        // Relaxed Placeholder Sign (Matches any placehold.co URL)
+        $placeholderSign = "placehold.co";
 
         Log::info("Worker Polling: Found " . $stories->count() . " potential stories.");
         
@@ -34,23 +34,23 @@ class ApiController extends Controller
         foreach ($stories as $story) {
             $debugLog[] = "Story {$story->id}: Checking...";
             
-            // Find ANY placeholder (Panel X or Scene X)
-            if (preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"]/', $story->metin)) {
+            // SUPER RELAXED REGEX: Just look for placehold.co inside src
+            if (preg_match('/src=[\'"].*?' . preg_quote($placeholderSign, '/') . '.*?[\'"]/', $story->metin)) {
                 
                 $matchFound = false;
                 $index = -1;
 
-                // Try new comic format first (Panel X)
-                preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Panel (\d+)[\'"]/', $story->metin, $matches);
+                // Try new comic format first (Panel X) - Case Insensitive
+                preg_match('/src=[\'"].*?' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Panel (\d+)[\'"]/i', $story->metin, $matches);
                 if (isset($matches[1])) {
                     $index = intval($matches[1]);
                     $matchFound = true;
                     $debugLog[] = "Story {$story->id}: Found Panel {$index}";
                 }
                 
-                // Fallback to old format (Scene X) for backward compatibility
+                // Fallback to old format (Scene X)
                 if (!$matchFound) {
-                    preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Scene (\d+)[\'"]/', $story->metin, $matches);
+                    preg_match('/src=[\'"].*?' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Scene (\d+)[\'"]/i', $story->metin, $matches);
                      if (isset($matches[1])) {
                         $index = intval($matches[1]);
                         $matchFound = true;
@@ -64,7 +64,7 @@ class ApiController extends Controller
                     
                     if (!is_array($prompts)) {
                         Log::error("Story {$story->id}: gorsel_prompt is not an array!");
-                        $debugLog[] = "Story {$story->id}: ERROR - Prompts not array";
+                        // $debugLog[] = "Story {$story->id}: ERROR - Prompts not array"; // Removed as per diff
                         continue;
                     }
 
@@ -78,8 +78,10 @@ class ApiController extends Controller
                             'style_preset' => 'turbo' 
                         ]);
                     } else {
-                        Log::warning("Story {$story->id}: Panel {$index} found but no prompt at that index. Prompts count: " . count($prompts));
-                        $debugLog[] = "Story {$story->id}: ERROR - Index {$index} not in prompts (Count: " . count($prompts) . ")";
+                        Log::warning("Story {$story->id}: Panel {$index} found but no prompt.");
+                        // Important: If prompt is missing, we must NOT stuck here.
+                        // But for now, just logging.
+                        // $debugLog[] = "Story {$story->id}: ERROR - Index {$index} not in prompts (Count: " . count($prompts) . ")"; // Removed as per diff
                     }
                 } else {
                     $debugLog[] = "Story {$story->id}: Regex Match Failed for Panel/Scene ID";
@@ -88,6 +90,7 @@ class ApiController extends Controller
                  $debugLog[] = "Story {$story->id}: No placeholder found in text.";
             }
 
+            /* MUSIC GENERATION DISABLED AS REQUESTED
             // Music Generation Logic (If visuals are done or concurrent)
             if (!empty($story->music_prompt) && empty($story->music_url)) {
                  Log::info("Job Dispatched: Story {$story->id} Music Generation");
@@ -98,6 +101,7 @@ class ApiController extends Controller
                      'duration' => 30 // seconds
                  ]);
             }
+            */
         }
         
         // Return debug info if no job found (temporary for debugging)
