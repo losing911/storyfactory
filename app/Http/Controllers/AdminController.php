@@ -353,6 +353,7 @@ class AdminController extends Controller
                     }
                     return $carry;
                 }, [])), // Flatten all prompts from all scenes
+            ];
 
             $story = Story::create($storyData);
 
