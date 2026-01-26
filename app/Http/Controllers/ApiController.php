@@ -30,14 +30,15 @@ class ApiController extends Controller
         // This prevents "Zombie Stories" (Status: pending, but no placeholders) from blocking the queue
         // Added Case-Insensitive variants just in case
         $stories = Story::whereIn('durum', ['pending_visuals', 'taslak', 'draft', 'Taslak', 'Draft'])->get();
-        $placeholderSign = "https://placehold.co/1280x720/1f2937/00ff00";
+        // Relaxed Placeholder Sign (Matches any color 1280x720 placeholder)
+        $placeholderSign = "https://placehold.co/1280x720";
 
         Log::info("Worker Polling: Found " . $stories->count() . " potential stories.");
 
         foreach ($stories as $story) {
             
-            if (strpos($story->metin, $placeholderSign) !== false) {
-                // Comic Format Support: Find ANY placeholder (Panel X or Scene X)
+            // Find ANY placeholder (Panel X or Scene X)
+            if (preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"]/', $story->metin)) {
                 // Try new comic format first (Panel X)
                 preg_match('/src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"].*?alt=[\'"]Panel (\d+)[\'"]/', $story->metin, $matches);
                 
@@ -125,9 +126,10 @@ class ApiController extends Controller
             }
 
             // 2. Replace the Placeholder in `metin` HTML
-            $placeholderSign = "https://placehold.co/1280x720/1f2937/00ff00";
+            $placeholderSign = "https://placehold.co/1280x720";
             
             // Try new comic format first (Panel X)
+            // Match any src starting with placeholderSign
             $pattern = '/\<img[^\>]+src=[\'"]' . preg_quote($placeholderSign, '/') . '.*?[\'"][^\>]+alt=[\'"]Panel ' . $index . '[\'"][^\>]*\>/i';
             $newImgTag = "<img src='$publicUrl' alt='Panel $index' class='w-full rounded shadow-lg border-2 border-gray-800 hover:border-purple-500 transition duration-500' loading='lazy'>";
             
