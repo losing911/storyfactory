@@ -346,12 +346,19 @@ class AdminController extends Controller
                 'etiketler' => $data['etiketler'] ?? [],
                 'sosyal_ozet' => $data['sosyal_ozet'] ?? '',
                 'gorsel_prompt' => json_encode(array_reduce($data['scenes'], function($carry, $scene) {
+                    $prompts = [];
                     if (isset($scene['img_prompts']) && is_array($scene['img_prompts'])) {
-                        return array_merge($carry, $scene['img_prompts']);
+                        $prompts = $scene['img_prompts'];
                     } elseif (isset($scene['img_prompt'])) {
-                        return array_merge($carry, [$scene['img_prompt']]);
+                        $prompts = [$scene['img_prompt']];
                     }
-                    return $carry;
+                    
+                    // Fallback: If no prompt found, use text as prompt (Better than nothing)
+                    if (empty($prompts) && !empty($scene['text'])) {
+                         $prompts = ["Scene description: " . substr($scene['text'], 0, 100)];
+                    }
+                    
+                    return array_merge($carry, $prompts);
                 }, [])), // Flatten all prompts from all scenes
             ];
 
