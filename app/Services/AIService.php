@@ -57,7 +57,8 @@ class AIService
         ];
         $selectedMood = $moods[array_rand($moods)];
 
-        $prompt = "Aşağıdaki özelliklere sahip bir 'ANXIPUNK' (Anxiety + Cyberpunk) türünde, KARAKTER ODAKLI ve EDEBİ derinliği olan bir hikaye oluştur. Çıktı SADECE JSON formatında olmalı ve dil KESİNLİKLE TÜRKÇE olmalı:\n\n";
+        $prompt = "### ROL TANIMI:\nSen 'Neo-Pera' evreninin baş arşivcisisin. Görevin rastgele hikayeler yazmak değil, birbirine sıkı sıkıya bağlı, tutarlı, derinlikli ve Google SEO standartlarına uygun 'Lore Girişleri' oluşturmaktır.\n\n";
+        $prompt .= "Aşağıdaki özelliklere sahip bir 'ANXIPUNK' (Anxiety + Cyberpunk) türünde hikaye oluştur. Çıktı SADECE JSON formatında olmalı ve dil KESİNLİKLE TÜRKÇE olmalı:\n\n";
         $prompt .= "Konu: " . ($topic ?? "Odaklanılacak Tema: $selectedMood") . "\n";
         $prompt .= "--- EVREN BİLGİSİ (LORE) ---\n" . $loreContext . "--------------------------------------------------------\n";
         $prompt .= "ATMOSFER & STİL (ANXIPUNK): Cyberpunk 2077'nin arka sokakları. Ancak SADECE depresif değil; seçilen temaya ($selectedMood) uygun bir atmosfer yarat. 'High Tech, Low Life' prensibini koru.\n";
@@ -71,7 +72,8 @@ class AIService
         $prompt .= "  ✅ Bunlar yerine: spesifik detaylar ver (örn: 'Tabela cızırtıyla yanıp sönen pembe fosforun altında...')\n";
         $prompt .= "  ❌ 'yapay zeka' -> ✅ 'sentetik zihin', 'veri ruhu'\n";
         $prompt .= "  ❌ 'matrix' -> ✅ 'veri ağı', 'nöral kafes'\n";
-        $prompt .= "  ❌ 'hacker' -> ✅ 'netrunner', 'veri kazıyıcı'\n\n";
+        $prompt .= "  ❌ 'hacker' -> ✅ 'netrunner', 'veri kazıyıcı'\n";
+        $prompt .= "  ❌ 'Sonuç olarak', 'Özetle' gibi makale bitiriş cümleleri ASLA kullanma. Hikaye bir SAHNE ile bitmeli.\n\n";
         
         $prompt .= "KURAL NEO-2 - DUYUSAL DERİNLİK (ZORUNLU):\n";
         $prompt .= "  Her hikayede EN AZ 2 FARKLI DUYU kullan:\n";
@@ -84,10 +86,17 @@ class AIService
         $prompt .= "  - Kekelesinler, unutsunlar, cihazları bozulsun, yorgun olsunlar\n";
         $prompt .= "  - Örnekler: 'titreyen elleriyle', 'unutkan hafızası', 'arızalı nöral implantı', 'yorgunluktan gözleri kızarmış'\n\n";
         
-        $prompt .= "KURAL NEO-4 - SEO & FORMATLAMA:\n";
+        $prompt .= "KURAL NEO-4 - LORE BAĞLANTISI VE TUTARLILIK (ÇOK ÖNEMLİ):\n";
+        $prompt .= "  - Veritabanındaki diğer karakterlere/mekanlara MUTLAKA atıfta bulun\n";
+        $prompt .= "  - Metin içinde önceki hikayelere veya terimlere link verilecek formatta yaz:\n";
+        $prompt .= "    Örnek: [[Karakter:Elmas-Göz Silva]], [[Mekan:Supreme Tower]], [[Teknoloji:Nöral Kafes]]\n";
+        $prompt .= "  - Eğer bir karakter 'Bölge 7'de yaşıyorsa, o bölgenin kurallarına (susuzluk, çete savaşları) sadık kal\n\n";
+        
+        $prompt .= "KURAL NEO-5 - SEO & FORMATLAMA:\n";
         $prompt .= "  - Önemli terimleri (karakter isimleri, faksiyonlar, teknoloji) **kalın** yaz\n";
         $prompt .= "  - Kısa paragraflar kullan (3-4 cümle maks)\n";
         $prompt .= "  - Dümdüz metin bloğu değil, okumayı kolaylaştıracak yapı\n";
+        $prompt .= "  - Başlıklar 'Merak Uyandırıcı' olmalı (Kötü: 'Ahmet'in Macerası' | İyi: 'Veri Mezarlığında Son Nefes: Protokol 19')\n";
         $prompt .= "================================================\n\n";
         
         $prompt .= "ÖNEMLİ KURAL 4 (GÖRSEL DİNAMİZM): Karakterleri asla 'sabit dururken' tarif etme. Sahneye göre şu varyasyonlardan birini MUTLAKA kullan:\n";
