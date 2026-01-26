@@ -494,7 +494,9 @@ class AdminController extends Controller
                 'metin' => $storyHtml,
                 'gorsel_url' => $coverImageUrl,
                 'yayin_tarihi' => now(),
-                'durum' => 'published',
+                'yayin_tarihi' => now(),
+                // 'durum' => 'published',
+                'durum' => 'pending_visuals', // All stories go to Worker Queue now
                 'konu' => $data['konu'] ?? 'AI Generated',
                 'mood' => $data['mood'] ?? null,
                 'meta' => \Illuminate\Support\Str::limit(($data['meta_baslik'] ?? '') . ' | ' . ($data['meta_aciklama'] ?? ''), 250),
