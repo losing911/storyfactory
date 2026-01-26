@@ -65,6 +65,31 @@ class AIService
         $prompt .= "ÖNEMLİ KURAL 2 (KLİŞELERİ YIK): 'Neon ışıkları altında', 'yağmur yağıyordu' gibi klasik girişleri yasakla. Okuyucuyu karakterin zihnine, o anki spesifik sorununa (açlık, borç, yalnızlık, glitch nöbeti vb.) odakla.\n";
         $prompt .= "ÖNEMLİ KURAL 3 (KARAKTER DERİNLİĞİ): Karakter sadece bir 'sınıf' (Hacker, Solo vb.) değildir. Onun korkuları, takıntıları, küçük zevkleri olmalı. Diyaloglar doğal ve sokak ağzına uygun olsun.\n";
         
+        $prompt .= "\n=== NEO-PERA LORE KURALLARI (ÇOK ÖNEMLİ) ===\n";
+        $prompt .= "KURAL NEO-1 - YASAKLI KLİŞELER (ASLA KULLANMA):\n";
+        $prompt .= "  ❌ 'neon ışıklar', 'metal yığını', 'siberuzayda süzülmek', 'robot kollar'\n";
+        $prompt .= "  ✅ Bunlar yerine: spesifik detaylar ver (örn: 'Tabela cızırtıyla yanıp sönen pembe fosforun altında...')\n";
+        $prompt .= "  ❌ 'yapay zeka' -> ✅ 'sentetik zihin', 'veri ruhu'\n";
+        $prompt .= "  ❌ 'matrix' -> ✅ 'veri ağı', 'nöral kafes'\n";
+        $prompt .= "  ❌ 'hacker' -> ✅ 'netrunner', 'veri kazıyıcı'\n\n";
+        
+        $prompt .= "KURAL NEO-2 - DUYUSAL DERİNLİK (ZORUNLU):\n";
+        $prompt .= "  Her hikayede EN AZ 2 FARKLI DUYU kullan:\n";
+        $prompt .= "  🫁 KOKU: (Örn: yanık devre kartı, ucuz sentetik noodle, asit yağmuru sonrası toprak kokusu)\n";
+        $prompt .= "  👂 SES: (Örn: fanların uğultusu, uzaktan gelen siren, mekanik öksürük)\n";
+        $prompt .= "  👅 TAT/HİS: (Örn: ağızdaki metalik tat, ensedeki çip girişinin kaşınması)\n\n";
+        
+        $prompt .= "KURAL NEO-3 - İNSAN KUSURLARI (ZORUNLU):\n";
+        $prompt .= "  Karakterler MÜKEMMM EL OLMAMALI:\n";
+        $prompt .= "  - Kekelesinler, unutsunlar, cihazları bozulsun, yorgun olsunlar\n";
+        $prompt .= "  - Örnekler: 'titreyen elleriyle', 'unutkan hafızası', 'arızalı nöral implantı', 'yorgunluktan gözleri kızarmış'\n\n";
+        
+        $prompt .= "KURAL NEO-4 - SEO & FORMATLAMA:\n";
+        $prompt .= "  - Önemli terimleri (karakter isimleri, faksiyonlar, teknoloji) **kalın** yaz\n";
+        $prompt .= "  - Kısa paragraflar kullan (3-4 cümle maks)\n";
+        $prompt .= "  - Dümdüz metin bloğu değil, okumayı kolaylaştıracak yapı\n";
+        $prompt .= "================================================\n\n";
+        
         $prompt .= "ÖNEMLİ KURAL 4 (GÖRSEL DİNAMİZM): Karakterleri asla 'sabit dururken' tarif etme. Sahneye göre şu varyasyonlardan birini MUTLAKA kullan:\n";
         $prompt .= "  - 'Candid Shot': Karakter habersizce yakalanmış, doğal bir anın içinde (yemek yerken, tamir yaparken, düşünürken).\n";
         $prompt .= "  - 'Emotional Close-up': Yüz ifadesine ve gözlerdeki duyguya odaklan.\n";

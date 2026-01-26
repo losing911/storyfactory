@@ -11,6 +11,21 @@
     <meta name="robots" content="index, follow">
     <meta name="description" content="@yield('meta_description', 'Daily Cyberpunk Stories, Lore & Digital Art. Anxipunk.icu is an autonomous creative network.')">
     
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="@yield('og_title', 'Anxipunk Art | Cyberpunk Stories')">
+    <meta property="og:description" content="@yield('meta_description', 'Daily Cyberpunk Stories, Lore & Digital Art. Neo-Pera evreninde distopik gelecek hikayeleri.')">
+    <meta property="og:image" content="@yield('og_image', asset('apple-touch-icon.png'))">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ url()->current() }}">
+    <meta name="twitter:title" content="@yield('og_title', 'Anxipunk Art | Cyberpunk Stories')">
+    <meta name="twitter:description" content="@yield('meta_description', 'Daily Cyberpunk Stories, Lore & Digital Art.')">
+    <meta name="twitter:image" content="@yield('og_image', asset('apple-touch-icon.png'))">
+    <meta name="twitter:site" content="@AnxlPunk">
+    
     <!-- Ezoic Privacy/Consent Scripts (Must load first) -->
     <script data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js"></script>
     <script data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js"></script>

@@ -19,8 +19,9 @@
     <div class="absolute inset-0 bg-gradient-to-t from-[#050505] via-black/50 to-transparent"></div>
     <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
         <span class="inline-block border border-neon-pink text-neon-pink px-2 py-1 text-xs font-mono mb-4 tracking-widest bg-black/50 backdrop-blur">{{ __('ui.latest_transmission') }}</span>
-        <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6 glitch-effect uppercase leading-tight" data-text="{{ $latestStory->getTitle(app()->getLocale()) }}">{{ $latestStory->getTitle(app()->getLocale()) }}</h1>
-        <p class="text-gray-300 text-lg md:text-xl font-light mb-8 line-clamp-2 max-w-2xl mx-auto">{{ Str::limit(strip_tags($latestStory->getText(app()->getLocale())), 300) }}</p>
+        <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6 glitch-effect uppercase leading-tight" data-text="Neo-Pera Evreninde Cyberpunk Hikayeler">Neo-Pera Evreninde Cyberpunk Hikayeler</h1>
+        <p class="text-gray-300 text-lg md:text-xl font-light mb-4 max-w-2xl mx-auto"><strong class="text-neon-pink">{{ $latestStory->getTitle(app()->getLocale()) }}</strong></p>
+        <p class="text-gray-400 text-base mb-8 line-clamp-2 max-w-2xl mx-auto">{{ Str::limit(strip_tags($latestStory->getText(app()->getLocale())), 200) }}</p>
         <a href="{{ route('story.show', $latestStory) }}" class="inline-block bg-neon-blue text-black font-display font-bold text-lg px-8 py-4 hover:bg-white hover:scale-105 transition duration-300 shadow-[0_0_20px_rgba(0,255,255,0.4)] clip-path-polygon">
             {{ __('ui.read_stream') }}
         </a>
