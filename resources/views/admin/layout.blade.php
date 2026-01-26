@@ -30,6 +30,7 @@
                 <a href="{{ route('admin.stories.create') }}" class="block py-2 px-4 rounded hover:bg-gray-800 {{ request()->routeIs('admin.stories.create') ? 'bg-gray-800 text-cyber' : '' }}">Yeni Ekle</a>
                 <a href="{{ route('admin.lore.index') }}" class="block py-2 px-4 rounded hover:bg-gray-800 {{ request()->routeIs('admin.lore.*') ? 'bg-gray-800 text-cyber' : '' }}">Lore Veritabanı</a>
                 <a href="{{ route('admin.authors.index') }}" class="block py-2 px-4 rounded hover:bg-gray-800 {{ request()->routeIs('admin.authors.*') ? 'bg-gray-800 text-cyber' : '' }}">Yazarlar</a>
+                <a href="{{ route('admin.seo.tools') }}" class="block py-2 px-4 rounded hover:bg-gray-800 {{ request()->routeIs('admin.seo.*') ? 'bg-gray-800 text-cyber' : '' }}">🔍 SEO Tools</a>
                 <a href="{{ route('admin.profile.edit') }}" class="block py-2 px-4 rounded hover:bg-gray-800 {{ request()->routeIs('admin.profile.edit') ? 'bg-gray-800 text-cyber' : '' }}">Profil Ayarları</a>
                 <a href="/" target="_blank" class="block py-2 px-4 rounded hover:bg-gray-800 text-gray-500">Siteyi Görüntüle</a>
             </nav>
